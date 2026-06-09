@@ -28,6 +28,10 @@ AI にコード監査をやらせたい——脆弱性もバグも保守性も�
 
 ## 使い方
 
+<p align="center">
+  <img src="assets/how_it_works.png" alt="使い方の流れ" width="100%">
+</p>
+
 ### 1. このリポジトリを clone する
 
 ```

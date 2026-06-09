@@ -17,6 +17,10 @@ A collection of paste-ready prompts for getting AI agents (Claude Code / Codex C
 
 ## How to use
 
+<p align="center">
+  <img src="assets/how_it_works.png" alt="How it works" width="100%">
+</p>
+
 ### 1. Clone this repository
 
 ```
