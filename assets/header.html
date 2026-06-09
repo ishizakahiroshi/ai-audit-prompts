@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html,body { width:1280px; height:670px; overflow:hidden; }
+  body {
+    font-family: "Yu Gothic UI","Segoe UI","Meiryo",sans-serif;
+    background:
+      radial-gradient(1100px 700px at 18% -10%, #1c2535 0%, rgba(28,37,53,0) 60%),
+      radial-gradient(900px 600px at 100% 120%, #221a2e 0%, rgba(34,26,46,0) 55%),
+      linear-gradient(135deg,#0b0f17 0%, #0d1117 55%, #0b0e15 100%);
+    color:#e6edf3;
+    position:relative;
+  }
+  /* subtle grid */
+  body::before{
+    content:""; position:absolute; inset:0;
+    background-image:
+      linear-gradient(rgba(255,255,255,.028) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.028) 1px, transparent 1px);
+    background-size:42px 42px;
+    mask-image:radial-gradient(800px 520px at 30% 40%, #000 0%, transparent 75%);
+  }
+  .wrap{ position:relative; z-index:2; display:flex; height:100%; padding:74px 70px; }
+  .left{ width:660px; display:flex; flex-direction:column; justify-content:center; }
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:10px;
+    font-size:17px; letter-spacing:.22em; font-weight:600;
+    color:#9aa7b8; text-transform:uppercase; margin-bottom:26px;
+  }
+  .eyebrow .dot{ width:9px; height:9px; border-radius:50%; background:#d97757; box-shadow:0 0 14px #d97757; }
+  h1{
+    font-size:84px; line-height:1.08; font-weight:800; letter-spacing:.01em;
+    background:linear-gradient(180deg,#ffffff 0%, #c7d2e0 100%);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  h1 .accent{
+    background:linear-gradient(90deg,#e08a63 0%, #d97757 55%, #b56cf0 110%);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .sub{ margin-top:30px; font-size:30px; font-weight:600; color:#aeb9c7; letter-spacing:.02em; }
+  .tags{ margin-top:40px; display:flex; gap:14px; }
+  .tag{
+    font-size:19px; font-weight:600; color:#cdd7e3;
+    padding:11px 20px; border:1px solid rgba(255,255,255,.14);
+    border-radius:999px; background:rgba(255,255,255,.04);
+  }
+  .tag b{ color:#e08a63; font-weight:700; }
+  .tag.c b{ color:#7ee2a8; }
+
+  .right{ flex:1; display:flex; align-items:center; justify-content:center; }
+  .term{
+    width:430px; border-radius:16px; overflow:hidden;
+    background:#0a0d14; border:1px solid rgba(255,255,255,.10);
+    box-shadow:0 30px 70px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.02) inset;
+  }
+  .bar{ height:44px; display:flex; align-items:center; gap:9px; padding:0 16px;
+        background:linear-gradient(180deg,#161b24,#11151c); border-bottom:1px solid rgba(255,255,255,.06); }
+  .bar i{ width:13px; height:13px; border-radius:50%; display:inline-block; }
+  .bar .r{ background:#ff5f57; } .bar .y{ background:#febc2e; } .bar .g{ background:#28c840; }
+  .bar span{ margin-left:10px; font:600 14px "Consolas",monospace; color:#7d8794; }
+  .code{ padding:24px 22px; font:15px/1.95 "Consolas","SFMono-Regular",monospace; }
+  .code .p{ color:#7ee2a8; } .code .c{ color:#5b6675; }
+  .code .k{ color:#e08a63; } .code .s{ color:#9db4d0; } .code .w{ color:#e6edf3; }
+  .code .ok{ color:#7ee2a8; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="left">
+      <div class="eyebrow"><span class="dot"></span>Claude Code / Codex CLI</div>
+      <h1>AIコード<br><span class="accent">監査プロンプト</span>集</h1>
+      <div class="sub">貼り付けて、走らせるだけ。</div>
+      <div class="tags">
+        <div class="tag">セキュリティ × <b>脆弱性</b></div>
+        <div class="tag c">バグ × <b>保守性</b></div>
+      </div>
+    </div>
+    <div class="right">
+      <div class="term">
+        <div class="bar"><i class="r"></i><i class="y"></i><i class="g"></i><span>audit</span></div>
+        <div class="code">
+          <div><span class="c"># 監査したいリポジトリで</span></div>
+          <div><span class="p">&gt;</span> <span class="w">read</span> <span class="s">README_activation.md</span></div>
+          <div><span class="p">&gt;</span> <span class="w">run audit</span> <span class="k">--ultracode</span></div>
+          <div>&nbsp;</div>
+          <div><span class="c">▸ scanning ...</span></div>
+          <div><span class="ok">✓</span> <span class="w">security</span></div>
+          <div><span class="ok">✓</span> <span class="w">vulnerability</span></div>
+          <div><span class="ok">✓</span> <span class="w">bug / maintainability</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

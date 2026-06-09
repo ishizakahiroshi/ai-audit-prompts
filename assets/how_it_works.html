@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{width:1280px;height:860px;overflow:hidden;}
+  body{
+    font-family:"Yu Gothic UI","Segoe UI","Meiryo",sans-serif;
+    background:
+      radial-gradient(1100px 700px at 12% -12%, #1c2535 0%, rgba(28,37,53,0) 60%),
+      radial-gradient(950px 650px at 102% 118%, #221a2e 0%, rgba(34,26,46,0) 55%),
+      linear-gradient(135deg,#0b0f17 0%,#0d1117 55%,#0b0e15 100%);
+    color:#e6edf3; position:relative;
+  }
+  body::before{
+    content:"";position:absolute;inset:0;
+    background-image:
+      linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);
+    background-size:44px 44px;
+    mask-image:radial-gradient(900px 600px at 50% 35%,#000 0%,transparent 78%);
+  }
+  .wrap{position:relative;z-index:2;padding:54px 60px 46px;height:100%;display:flex;flex-direction:column;}
+
+  .head{margin-bottom:30px;}
+  .eyebrow{font-size:16px;letter-spacing:.22em;font-weight:600;color:#9aa7b8;text-transform:uppercase;display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+  .eyebrow .dot{width:9px;height:9px;border-radius:50%;background:#d97757;box-shadow:0 0 14px #d97757;}
+  .head h1{font-size:46px;font-weight:800;line-height:1.18;letter-spacing:.01em;}
+  .head h1 .ac{background:linear-gradient(90deg,#e08a63,#d97757 55%,#b56cf0);-webkit-background-clip:text;background-clip:text;color:transparent;}
+
+  .steps{display:flex;align-items:stretch;gap:0;flex:1;}
+  .card{
+    flex:1;background:linear-gradient(180deg,#10151f,#0c111a);
+    border:1px solid rgba(255,255,255,.09);border-radius:18px;
+    padding:26px 24px;display:flex;flex-direction:column;position:relative;
+    box-shadow:0 22px 50px rgba(0,0,0,.45);
+  }
+  .arrow{width:62px;display:flex;align-items:center;justify-content:center;font-size:40px;color:#d97757;flex:0 0 auto;}
+  .num{
+    width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;
+    font:800 24px/1 "Segoe UI";color:#0b0e15;
+    background:linear-gradient(135deg,#e08a63,#b56cf0);margin-bottom:18px;
+    box-shadow:0 8px 20px rgba(176,108,240,.35);
+  }
+  .ctitle{font-size:26px;font-weight:800;margin-bottom:8px;}
+  .cdesc{font-size:15.5px;line-height:1.7;color:#aab4c2;margin-bottom:18px;min-height:80px;}
+  .cdesc b{color:#e6edf3;}
+
+  .mini{margin-top:auto;border-radius:11px;overflow:hidden;border:1px solid rgba(255,255,255,.08);background:#070a10;}
+  .mbar{height:30px;display:flex;align-items:center;gap:6px;padding:0 12px;background:#121821;border-bottom:1px solid rgba(255,255,255,.06);}
+  .mbar i{width:9px;height:9px;border-radius:50%;display:inline-block;}
+  .mbar .r{background:#ff5f57;}.mbar .y{background:#febc2e;}.mbar .g{background:#28c840;}
+  .mbar span{margin-left:6px;font:600 11px "Consolas",monospace;color:#7d8794;}
+  .mbody{padding:13px 14px;font:12.5px/1.7 "Consolas",monospace;}
+  .mbody .c{color:#5b6675;}.mbody .p{color:#7ee2a8;}.mbody .k{color:#e08a63;}.mbody .w{color:#dfe7f0;}
+
+  /* step2 parallel bars */
+  .par{display:flex;flex-direction:column;gap:9px;}
+  .agent{display:flex;align-items:center;gap:9px;font:11.5px "Consolas",monospace;color:#aab4c2;}
+  .agent .lbl{width:62px;flex:0 0 auto;color:#8a94a3;}
+  .track{flex:1;height:8px;border-radius:6px;background:#1b2230;overflow:hidden;}
+  .fill{height:100%;border-radius:6px;background:linear-gradient(90deg,#e08a63,#b56cf0);}
+
+  /* step3 result list */
+  .res{display:flex;flex-direction:column;gap:8px;font:12.5px "Consolas",monospace;}
+  .res div{display:flex;align-items:center;gap:8px;}
+  .res .warn{color:#febc2e;}.res .ok{color:#7ee2a8;}.res .w{color:#dfe7f0;}
+
+  .why{
+    margin-top:28px;display:flex;gap:16px;
+  }
+  .pill{
+    flex:1;display:flex;align-items:center;gap:13px;
+    background:rgba(224,138,99,.08);border:1px solid rgba(224,138,99,.22);
+    border-radius:14px;padding:16px 20px;
+  }
+  .pill .ic{font-size:24px;}
+  .pill .t{font-size:16.5px;font-weight:700;color:#f0e6df;line-height:1.4;}
+  .pill .t small{display:block;font-size:13px;font-weight:500;color:#9aa7b8;margin-top:2px;}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="head">
+      <div class="eyebrow"><span class="dot"></span>How it works</div>
+      <h1>貼って、待つだけ。<span class="ac">AIがコードを監査して、安全に直す</span>まで。</h1>
+    </div>
+
+    <div class="steps">
+      <!-- step 1 -->
+      <div class="card">
+        <div class="num">1</div>
+        <div class="ctitle">貼る</div>
+        <div class="cdesc">監査したいプロジェクトで、<b>合言葉かプロンプトを1回投げるだけ</b>。毎回プロンプトを書く必要はありません。</div>
+        <div class="mini">
+          <div class="mbar"><i class="r"></i><i class="y"></i><i class="g"></i><span>your-project</span></div>
+          <div class="mbody">
+            <div><span class="c"># プロジェクト直下で</span></div>
+            <div><span class="p">&gt;</span> <span class="w">run audit</span> <span class="k">--ultracode</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="arrow">&rarr;</div>
+
+      <!-- step 2 -->
+      <div class="card">
+        <div class="num">2</div>
+        <div class="ctitle">走る</div>
+        <div class="cdesc">AIが最適なプロンプトを<b>自動で選択</b>。ultracode なら<b>複数エージェントが並列</b>で観点ごとに監査します。</div>
+        <div class="mini">
+          <div class="mbar"><i class="r"></i><i class="y"></i><i class="g"></i><span>auditing...</span></div>
+          <div class="mbody">
+            <div class="par">
+              <div class="agent"><span class="lbl">security</span><span class="track"><span class="fill" style="width:88%"></span></span></div>
+              <div class="agent"><span class="lbl">vuln</span><span class="track"><span class="fill" style="width:72%"></span></span></div>
+              <div class="agent"><span class="lbl">bug</span><span class="track"><span class="fill" style="width:95%"></span></span></div>
+              <div class="agent"><span class="lbl">maintain</span><span class="track"><span class="fill" style="width:64%"></span></span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="arrow">&rarr;</div>
+
+      <!-- step 3 -->
+      <div class="card">
+        <div class="num">3</div>
+        <div class="ctitle">こうなる</div>
+        <div class="cdesc">指摘が観点ごとに整理され、<b>現行機能を壊さない範囲で修正</b>まで。ビルドもコミットも勝手にやりません。</div>
+        <div class="mini">
+          <div class="mbar"><i class="r"></i><i class="y"></i><i class="g"></i><span>report</span></div>
+          <div class="mbody">
+            <div class="res">
+              <div><span class="warn">&#9888;</span><span class="w">SQLi: users.go:42</span></div>
+              <div><span class="warn">&#9888;</span><span class="w">XSS: render.ts:18</span></div>
+              <div><span class="ok">&#10003;</span><span class="w">安全に修正 / 要判断は記録</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="why">
+      <div class="pill"><span class="ic">&#128221;</span><span class="t">毎回プロンプトを書かない<small>型を1度作れば貼るだけ</small></span></div>
+      <div class="pill"><span class="ic">&#127919;</span><span class="t">指示がブレない<small>不変条件を正本で固定</small></span></div>
+      <div class="pill"><span class="ic">&#9889;</span><span class="t">止まらず最後まで走る<small>要判断は記録してパス</small></span></div>
+    </div>
+  </div>
+</body>
+</html>

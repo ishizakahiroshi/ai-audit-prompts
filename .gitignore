@@ -1,3 +1,36 @@
 # === 機密・ローカル専用ファイルは絶対にコミットしない ===
 # このリポジトリは汎用テンプレートのみ。secrets / 案件固有情報は置かない。
-assets
+
+# --- 認証情報・secrets・鍵 ---
+*.pem
+*.key
+*.p12
+*.pfx
+*.ppk
+id_rsa
+id_dsa
+id_ecdsa
+id_ed25519
+.env
+.env.*
+*.env
+secrets.*
+*secret*
+*credential*
+*token*
+.netrc
+.npmrc
+.pypirc
+
+# --- ローカル専用ファイル ---
+*.local
+*.local.*
+*.secret.*
+
+# --- OS / エディタ ---
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/
+*.swp
