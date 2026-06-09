@@ -1,7 +1,7 @@
 <!-- Language: 日本語 | [English](README.en.md) -->
 
 <p align="center">
-  <img src="note_assets/note_header.png" alt="AI コード監査プロンプト集" width="100%">
+  <img src="assets/header.png" alt="AI コード監査プロンプト集" width="100%">
 </p>
 
 # AI コード監査プロンプト集

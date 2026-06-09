@@ -1,7 +1,7 @@
 <!-- Language: [日本語](README.md) | English -->
 
 <p align="center">
-  <img src="note_assets/note_header.png" alt="AI Code Audit Prompts" width="100%">
+  <img src="assets/header.png" alt="AI Code Audit Prompts" width="100%">
 </p>
 
 # AI Code Audit Prompts
