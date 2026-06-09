@@ -1,0 +1,80 @@
+<!-- Language: 日本語 | [English](README.en.md) -->
+
+<p align="center">
+  <img src="note_assets/note_header.png" alt="AI コード監査プロンプト集" width="100%">
+</p>
+
+# AI コード監査プロンプト集
+
+AI エージェント（Claude Code / Codex CLI 等）に「セキュリティ・脆弱性・バグ・保守性の監査と、現行機能を壊さない範囲の修正」をやらせるための、貼り付け用プロンプト集です。プロジェクトに依存しない汎用テンプレートだけを置きます。
+
+## これは何か
+
+- 重いコード監査を、ツール（Claude / Codex）と DB 区分（DB あり / なし）に応じて使い分けるためのプロンプトを `docs/` にまとめたもの。
+- 各プロンプトは「ビルド・コミット・本番DB操作・抜本改修は禁止」「止まらず最後まで走り切る」「判断待ちは記録してパス」を共通の前提にしています。
+- 全プロンプトが守るべき不変条件は [docs/README_invariants.md](docs/README_invariants.md) を正本とします。
+- 本プロンプト集は無保証です。AI による監査は誤検出・検出漏れがあり得ます。確定 finding も含め、本番反映前に必ず人間がレビューしてください。利用は自己責任で。
+
+## 使い方
+
+### 1. このリポジトリを clone する
+
+```
+git clone <このリポジトリのURL> ai-audit-prompts
+```
+
+置き場所はどこでも構いません（特定のローカルパスに依存しません）。
+
+### 2. 監査したいプロジェクトで、AI に次のプロンプトを投げる
+
+clone した先のパスを `<repo>` に読み替えてください。
+
+Claude Code 用（このリポジトリの起動ルールを読ませて自動選択させる）:
+
+```
+<repo>/docs/README_activation.md を読んで、その自動選択ルールに従い、
+このリポジトリに最適な claude_ultracode 版の監査プロンプトを選んで、
+その中身どおりに実行して。DB区分は自動判定でいい。ultracode で。
+```
+
+Codex CLI 用:
+
+```
+<repo>/docs/README_activation.md を読んで、その自動選択ルールに従い、
+このリポジトリに最適な codex 版の監査プロンプト（codex_audit_*.md）を選び、
+その中身どおりに実行して。DB区分は自動判定でいい。
+```
+
+- ファイル名を直接指定しなくても、起動ルールがツール×DB区分を自動選択します。
+- DB を自分で指定したい時は末尾を「DB区分は あり で」または「なし で」に変える。
+- Claude 版末尾の `ultracode` は多エージェント並列のスイッチ。軽く済ませたい時は外す。
+- 監査結果は、あなたが話しかけた言語で返ります（英語で頼めば英語、日本語なら日本語）。翻訳の手間はありません。
+
+### 3.（任意）プロジェクトに合言葉を仕込む
+
+毎回パスを書くのが面倒なら、対象プロジェクトの `CLAUDE.md`（Codex 用は `AGENTS.md`）に下記を入れておくと、「run audit」と言うだけで起動します。詳細は [docs/README_activation.md](docs/README_activation.md) の「各プロジェクトに書く指示」を参照。
+
+## ディレクトリ構成
+
+```
+docs/
+  README_activation.md        ← どのプロンプトを使うかの自動選択ルール（最初に読む）
+  README_naming.md            ← ファイル命名スキーム
+  README_invariants.md        ← 全プロンプトで揃える不変条件（正本）
+  claude_ultracode_audit_db_app.md       ← Claude / DBあり
+  claude_ultracode_audit_db_less_app.md  ← Claude / DBなし
+  codex_audit_db_app.md                  ← Codex / DBあり
+  codex_audit_db_less_app.md             ← Codex / DBなし
+```
+
+codex 版は詳細列挙型、claude_ultracode 版は凝縮型で粒度が異なりますが、守る不変条件（禁止操作・現行機能維持・秘密情報マスク・人間レビュー前提など）は同じで、[docs/README_invariants.md](docs/README_invariants.md) で正本管理しています。
+
+## このリポジトリに置かないもの（重要）
+
+汎用テンプレート専用です。次は**絶対にコミットしない**（`.gitignore` で予防していますが、運用でも徹底）:
+
+- 認証情報・secrets・APIキー・トークン・秘密鍵・パスワード
+- サーバー構成・IP・ホスト名・顧客名などの社内/案件固有情報
+- 特定プロジェクトの調査メモ・ログ・plan / 結果報告 md
+
+監査の「進め方（メソッド）」だけを置く、というのが本リポジトリの線引きです。
