@@ -49,6 +49,36 @@ For Claude Fable 5 (deep single-agent reasoning):
 
 Switch to Fable 5, then open `claude_fable5_audit_db_app.md` (with DB) or `claude_fable5_audit_db_less_app.md` (without DB) from `<repo>/docs/`, fill in the arguments, and paste.
 
+**Quick version (all arguments omitted — full defaults):**
+
+```
+Audit this repository using Fable 5's deep reasoning.
+
+Intensity:
+Scope:
+Perspective:
+Target:
+Exclude:
+
+(paste prompt body here)
+```
+
+**Detailed version (narrowing arguments):**
+
+```
+Audit this repository using Fable 5's deep reasoning.
+
+Intensity: mid
+Scope: investigate only
+Perspective: security & vulnerabilities
+Target: src/api/
+Exclude: src/api/tests/
+
+(paste prompt body here)
+```
+
+Omitting all arguments runs with defaults (intensity: high / full loop / all perspectives / entire repo). Use the quick version for a full sweep, and the detailed version when you want to focus — e.g. "just look at auth logic" or "report findings only, no fixes today."
+
 For Codex CLI:
 
 ```
