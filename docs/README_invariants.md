@@ -1,6 +1,6 @@
 # 監査プロンプト 共通不変条件（正本）
 
-このディレクトリの監査プロンプト 4 ファイル（`codex_audit_db_app.md` / `codex_audit_db_less_app.md` / `claude_ultracode_audit_db_app.md` / `claude_ultracode_audit_db_less_app.md`）は、コピペ用の自己完結テキストとして**それぞれ独立に**維持する。差分が文中に散在しているため 1 ファイルへの統合・自動生成はしない（検討の結果、可読性・保守性がかえって下がると判断）。
+このディレクトリの監査プロンプト 6 ファイル（`codex_audit_db_app.md` / `codex_audit_db_less_app.md` / `claude_ultracode_audit_db_app.md` / `claude_ultracode_audit_db_less_app.md` / `claude_fable5_audit_db_app.md` / `claude_fable5_audit_db_less_app.md`）は、コピペ用の自己完結テキストとして**それぞれ独立に**維持する。差分が文中に散在しているため 1 ファイルへの統合・自動生成はしない（検討の結果、可読性・保守性がかえって下がると判断）。
 
 そのかわり、4 ファイルで**絶対に表現がズレてはいけない不変条件**をこのファイルで正本化する。いずれかのファイルを編集したら、ここと突き合わせて 4 ファイル全部に反映する。
 
@@ -90,11 +90,12 @@ goal 冒頭に以下の引数ブロックを配置する。省略時はデフォ
 
 以下は軸によって正しく変わる部分。ここを無理に統一しない。
 
-### ツール軸（codex_* ↔ claude_ultracode_*）
+### ツール軸（codex_* ↔ claude_ultracode_* ↔ claude_fable5_*）
 
-- 起動方法・前置き（Codex: `作業ゴール:` 形式／Claude: 先頭 `ultracode` キーワード + workflow 並列指示）
-- 文体・粒度（Codex は箇条書きで冗長、Claude は `■` 区切りで簡潔）
-- 並列実行の表現（workflow / subagent のファンアウト指示は Claude 側で強め）
+- 起動方法・前置き（Codex: `作業ゴール:` 形式／ultracode: 先頭 `ultracode` キーワード + workflow 並列指示／Fable 5: プレフィックスなし、単一エージェント直列）
+- 文体・粒度（Codex は箇条書きで冗長、ultracode は `■` 区切りで簡潔、Fable 5 は Codex に近い直列構造）
+- 並列実行の表現（workflow / subagent のファンアウト指示は ultracode 側のみ。Fable 5 は「拡張思考を活かした深い単一エージェント」として設計）
+- 強度の定義（ultracode: エージェント並列数で制御／Codex・Fable 5: 調査深度・対象範囲で制御）
 
 ### DB 軸（*_db_app ↔ *_db_less_app）
 

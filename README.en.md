@@ -1,7 +1,7 @@
 <!-- Language: [日本語](README.md) | English -->
 
 <p align="center">
-  <img src="assets/header.png" alt="AI Code Audit Prompts" width="100%">
+  <img src="assets/20260609/header.png" alt="AI Code Audit Prompts" width="100%">
 </p>
 
 # AI Code Audit Prompts
@@ -18,7 +18,7 @@ A collection of paste-ready prompts for getting AI agents (Claude Code / Codex C
 ## How to use
 
 <p align="center">
-  <img src="assets/how_it_works.png" alt="How it works" width="100%">
+  <img src="assets/20260609/how_it_works.png" alt="How it works" width="100%">
 </p>
 
 ### 1. Clone this repository
@@ -33,13 +33,21 @@ You can put it anywhere (it doesn't depend on any specific local path).
 
 Replace `<repo>` with the path where you cloned this repo.
 
-For Claude Code (have it read this repo's activation rules and auto-select):
+For Claude Code (ultracode — multi-agent parallel):
 
 ```
 Read <repo>/docs/README_activation.md, follow its auto-selection rules,
 pick the claude_ultracode audit prompt best suited to this repository,
 and execute exactly as written. Auto-detect the DB category. Use ultracode.
 ```
+
+For Claude Fable 5 (deep single-agent reasoning):
+
+```
+/model claude-fable-5
+```
+
+Switch to Fable 5, then open `claude_fable5_audit_db_app.md` (with DB) or `claude_fable5_audit_db_less_app.md` (without DB) from `<repo>/docs/`, fill in the arguments, and paste.
 
 For Codex CLI:
 
@@ -65,13 +73,15 @@ docs/
   README_activation.md        ← auto-selection rules for which prompt to use (read first)
   README_naming.md            ← file naming scheme
   README_invariants.md        ← invariants kept consistent across all prompts (canonical)
-  claude_ultracode_audit_db_app.md       ← Claude / with DB
-  claude_ultracode_audit_db_less_app.md  ← Claude / without DB
+  claude_ultracode_audit_db_app.md       ← Claude ultracode / with DB
+  claude_ultracode_audit_db_less_app.md  ← Claude ultracode / without DB
+  claude_fable5_audit_db_app.md          ← Claude Fable 5 / with DB
+  claude_fable5_audit_db_less_app.md     ← Claude Fable 5 / without DB
   codex_audit_db_app.md                  ← Codex / with DB
   codex_audit_db_less_app.md             ← Codex / without DB
 ```
 
-The codex versions are detailed/enumerated while the claude_ultracode versions are condensed — the granularity differs, but the invariants they enforce (forbidden operations, preserving current behavior, masking secrets, human-review-before-applying, etc.) are identical and canonicalized in [docs/README_invariants.md](docs/README_invariants.md).
+The codex versions are detailed/enumerated, claude_ultracode versions are condensed (parallel fan-out), and claude_fable5 versions use deep single-agent reasoning — the granularity differs, but the invariants they enforce (forbidden operations, preserving current behavior, masking secrets, human-review-before-applying, etc.) are identical and canonicalized in [docs/README_invariants.md](docs/README_invariants.md).
 
 ## What does NOT belong here (important)
 

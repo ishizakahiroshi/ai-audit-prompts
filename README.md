@@ -1,7 +1,7 @@
 <!-- Language: 日本語 | [English](README.en.md) -->
 
 <p align="center">
-  <img src="assets/header.png" alt="AI コード監査プロンプト集" width="100%">
+  <img src="assets/20260609/header.png" alt="AI コード監査プロンプト集" width="100%">
 </p>
 
 # AI コード監査プロンプト集
@@ -29,7 +29,7 @@ AI にコード監査をやらせたい——脆弱性もバグも保守性も�
 ## 使い方
 
 <p align="center">
-  <img src="assets/how_it_works.png" alt="使い方の流れ" width="100%">
+  <img src="assets/20260609/how_it_works.png" alt="使い方の流れ" width="100%">
 </p>
 
 ### 1. このリポジトリを clone する
@@ -44,13 +44,21 @@ git clone <このリポジトリのURL> ai-audit-prompts
 
 clone した先のパスを `<repo>` に読み替えてください。
 
-Claude Code 用（このリポジトリの起動ルールを読ませて自動選択させる）:
+Claude Code 用（ultracode・多エージェント並列）:
 
 ```
 <repo>/docs/README_activation.md を読んで、その自動選択ルールに従い、
 このリポジトリに最適な claude_ultracode 版の監査プロンプトを選んで、
 その中身どおりに実行して。DB区分は自動判定でいい。ultracode で。
 ```
+
+Claude Fable 5 用（深い推論・単一エージェント）:
+
+```
+/model claude-fable-5
+```
+
+モデルを切り替えてから、`<repo>/docs/` の `claude_fable5_audit_db_app.md`（DB あり）または `claude_fable5_audit_db_less_app.md`（DB なし）を開き、引数を埋めて貼り付けてください。
 
 Codex CLI 用:
 
@@ -76,13 +84,15 @@ docs/
   README_activation.md        ← どのプロンプトを使うかの自動選択ルール（最初に読む）
   README_naming.md            ← ファイル命名スキーム
   README_invariants.md        ← 全プロンプトで揃える不変条件（正本）
-  claude_ultracode_audit_db_app.md       ← Claude / DBあり
-  claude_ultracode_audit_db_less_app.md  ← Claude / DBなし
+  claude_ultracode_audit_db_app.md       ← Claude ultracode / DBあり
+  claude_ultracode_audit_db_less_app.md  ← Claude ultracode / DBなし
+  claude_fable5_audit_db_app.md          ← Claude Fable 5 / DBあり
+  claude_fable5_audit_db_less_app.md     ← Claude Fable 5 / DBなし
   codex_audit_db_app.md                  ← Codex / DBあり
   codex_audit_db_less_app.md             ← Codex / DBなし
 ```
 
-codex 版は詳細列挙型、claude_ultracode 版は凝縮型で粒度が異なりますが、守る不変条件（禁止操作・現行機能維持・秘密情報マスク・人間レビュー前提など）は同じで、[docs/README_invariants.md](docs/README_invariants.md) で正本管理しています。
+codex 版は詳細列挙型、claude_ultracode 版は凝縮型（並列ファンアウト）、claude_fable5 版は単一エージェント深い推論型で粒度が異なりますが、守る不変条件（禁止操作・現行機能維持・秘密情報マスク・人間レビュー前提など）は同じで、[docs/README_invariants.md](docs/README_invariants.md) で正本管理しています。
 
 ## このリポジトリに置かないもの（重要）
 

@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{width:1280px;height:720px;overflow:hidden;}
+  body{
+    font-family:"Yu Gothic UI","Segoe UI","Meiryo",sans-serif;
+    background:
+      radial-gradient(1100px 700px at 12% -12%, #1c2535 0%, rgba(28,37,53,0) 60%),
+      radial-gradient(950px 650px at 102% 118%, #1e1530 0%, rgba(30,21,48,0) 55%),
+      linear-gradient(135deg,#0b0f17 0%,#0d1117 55%,#0b0e15 100%);
+    color:#e6edf3; position:relative;
+  }
+  body::before{
+    content:"";position:absolute;inset:0;
+    background-image:
+      linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);
+    background-size:44px 44px;
+    mask-image:radial-gradient(900px 600px at 50% 40%,#000 0%,transparent 78%);
+  }
+  .wrap{position:relative;z-index:2;padding:54px 60px;height:100%;display:flex;flex-direction:column;}
+
+  .head{margin-bottom:36px;text-align:center;}
+  .eyebrow{font-size:15px;letter-spacing:.22em;font-weight:600;color:#9aa7b8;text-transform:uppercase;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:14px;}
+  .eyebrow .dot{width:9px;height:9px;border-radius:50%;background:#d97757;box-shadow:0 0 14px #d97757;}
+  .head h1{font-size:38px;font-weight:800;line-height:1.2;}
+  .head h1 .ac{background:linear-gradient(90deg,#e08a63,#d97757 40%,#b56cf0);-webkit-background-clip:text;background-clip:text;color:transparent;}
+
+  .cols{display:flex;gap:32px;flex:1;align-items:stretch;}
+
+  .card{
+    flex:1;
+    background:linear-gradient(180deg,#10151f,#0c111a);
+    border:1px solid rgba(255,255,255,.09);border-radius:20px;
+    padding:32px 28px;display:flex;flex-direction:column;
+    box-shadow:0 22px 50px rgba(0,0,0,.45);
+    position:relative;overflow:hidden;
+  }
+  .card.left::before{
+    content:"";position:absolute;inset:0;border-radius:20px;
+    background:radial-gradient(400px 300px at 30% 0%,rgba(224,138,99,.07) 0%,transparent 70%);
+    pointer-events:none;
+  }
+  .card.right::before{
+    content:"";position:absolute;inset:0;border-radius:20px;
+    background:radial-gradient(400px 300px at 70% 0%,rgba(181,108,240,.09) 0%,transparent 70%);
+    pointer-events:none;
+  }
+  .card-badge{
+    display:inline-flex;align-items:center;gap:8px;
+    font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+    padding:6px 14px;border-radius:999px;margin-bottom:20px;width:fit-content;
+  }
+  .badge-orange{background:rgba(224,138,99,.15);border:1px solid rgba(224,138,99,.3);color:#e08a63;}
+  .badge-purple{background:rgba(181,108,240,.15);border:1px solid rgba(181,108,240,.3);color:#b56cf0;}
+  .badge-dot{width:7px;height:7px;border-radius:50%;}
+  .badge-dot.o{background:#e08a63;box-shadow:0 0 10px #e08a63;}
+  .badge-dot.p{background:#b56cf0;box-shadow:0 0 10px #b56cf0;}
+
+  .card-title{font-size:28px;font-weight:800;margin-bottom:8px;}
+  .card-desc{font-size:15px;line-height:1.75;color:#aab4c2;margin-bottom:24px;}
+  .card-desc b{color:#e6edf3;}
+
+  /* ultracode: fan diagram */
+  .fan{display:flex;flex-direction:column;gap:0;margin-top:auto;}
+  .fan-root{
+    display:flex;align-items:center;justify-content:center;
+    width:100%;margin-bottom:8px;
+  }
+  .node{
+    padding:7px 16px;border-radius:8px;font:600 13px "Consolas",monospace;
+    display:inline-flex;align-items:center;gap:6px;
+  }
+  .node.root{background:rgba(224,138,99,.18);border:1px solid rgba(224,138,99,.35);color:#f0c4a8;}
+  .node.leaf{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:#aab4c2;font-size:12px;}
+  .fan-leaves{display:flex;justify-content:space-between;gap:10px;padding:0 4px;}
+  .fan-connector{display:flex;align-items:stretch;justify-content:center;height:32px;position:relative;}
+  .fan-connector::before{
+    content:"";position:absolute;top:0;left:50%;width:2px;height:12px;
+    background:rgba(224,138,99,.4);transform:translateX(-50%);
+  }
+  .fan-connector::after{
+    content:"";position:absolute;top:12px;left:10%;right:10%;height:2px;
+    background:rgba(224,138,99,.4);
+  }
+  .fan-stems{display:flex;justify-content:space-between;padding:0 18px;}
+  .stem{width:2px;height:20px;background:rgba(224,138,99,.3);margin:0 auto;}
+  .fan-tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px;}
+  .fan-tag{font-size:12px;color:#9aa7b8;padding:4px 10px;border:1px solid rgba(255,255,255,.1);border-radius:999px;}
+
+  /* fable5: pipeline diagram */
+  .pipe{display:flex;flex-direction:column;gap:0;margin-top:auto;}
+  .pipe-step{display:flex;align-items:center;gap:12px;padding:9px 14px;border-radius:10px;background:rgba(181,108,240,.08);border:1px solid rgba(181,108,240,.2);margin-bottom:2px;}
+  .pipe-icon{font-size:16px;width:24px;text-align:center;flex:0 0 auto;}
+  .pipe-label{font:600 13px "Consolas",monospace;color:#d4b8f8;}
+  .pipe-desc{font-size:11.5px;color:#8a94a3;margin-left:auto;}
+  .pipe-arrow{display:flex;justify-content:center;align-items:center;height:20px;color:#b56cf0;font-size:16px;}
+  .pipe-tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px;}
+  .pipe-tag{font-size:12px;color:#9aa7b8;padding:4px 10px;border:1px solid rgba(255,255,255,.1);border-radius:999px;}
+
+  .vs{
+    display:flex;align-items:center;justify-content:center;
+    width:54px;flex:0 0 54px;
+    font:800 22px "Segoe UI";color:#5b6675;
+    letter-spacing:.05em;
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="head">
+      <div class="eyebrow"><span class="dot"></span>どう違うのか</div>
+      <h1>「<span class="ac">広く並列</span>」か、「<span class="ac">深く直列</span>」か。</h1>
+    </div>
+
+    <div class="cols">
+
+      <!-- LEFT: ultracode -->
+      <div class="card left">
+        <div class="card-badge badge-orange"><span class="badge-dot o"></span>ultracode</div>
+        <div class="card-title">並列ファンアウト</div>
+        <div class="card-desc">観点ごとに<b>別エージェントを並列展開</b>。<br>広くカバー、速く走る。</div>
+
+        <div class="fan">
+          <div class="fan-root">
+            <div class="node root">orchestrator</div>
+          </div>
+          <div class="fan-connector"></div>
+          <div class="fan-leaves">
+            <div class="node leaf">security</div>
+            <div class="node leaf">bug</div>
+            <div class="node leaf">vuln</div>
+            <div class="node leaf">deps</div>
+          </div>
+          <div class="fan-tags">
+            <span class="fan-tag">複数エージェント並列</span>
+            <span class="fan-tag">観点ごとに分担</span>
+            <span class="fan-tag">強度＝エージェント数</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="vs">vs</div>
+
+      <!-- RIGHT: Fable 5 -->
+      <div class="card right">
+        <div class="card-badge badge-purple"><span class="badge-dot p"></span>Claude Fable 5</div>
+        <div class="card-title">深い単一推論</div>
+        <div class="card-desc"><b>1エージェントが拡張思考で深く掘る</b>。<br>根拠まで詰めて、確信度を上げる。</div>
+
+        <div class="pipe">
+          <div class="pipe-step">
+            <span class="pipe-icon">🔍</span>
+            <span class="pipe-label">調査</span>
+            <span class="pipe-desc">処理経路を追う</span>
+          </div>
+          <div class="pipe-arrow">↓</div>
+          <div class="pipe-step">
+            <span class="pipe-icon">⚔️</span>
+            <span class="pipe-label">敵対的検証</span>
+            <span class="pipe-desc">到達可能か確認</span>
+          </div>
+          <div class="pipe-arrow">↓</div>
+          <div class="pipe-step">
+            <span class="pipe-icon">🔧</span>
+            <span class="pipe-label">修正</span>
+            <span class="pipe-desc">最小差分で直す</span>
+          </div>
+          <div class="pipe-arrow">↓</div>
+          <div class="pipe-step">
+            <span class="pipe-icon">✓</span>
+            <span class="pipe-label">再調査</span>
+            <span class="pipe-desc">新たな問題がないか</span>
+          </div>
+          <div class="pipe-tags">
+            <span class="pipe-tag">単一エージェント</span>
+            <span class="pipe-tag">拡張思考（常時オン）</span>
+            <span class="pipe-tag">強度＝推論の深さ</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</body>
+</html>

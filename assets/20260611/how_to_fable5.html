@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{width:1280px;height:860px;overflow:hidden;}
+  body{
+    font-family:"Yu Gothic UI","Segoe UI","Meiryo",sans-serif;
+    background:
+      radial-gradient(1100px 700px at 12% -12%, #1a1f35 0%, rgba(26,31,53,0) 60%),
+      radial-gradient(950px 650px at 102% 118%, #1e1530 0%, rgba(30,21,48,0) 55%),
+      linear-gradient(135deg,#0b0f17 0%,#0d1117 55%,#0b0e15 100%);
+    color:#e6edf3; position:relative;
+  }
+  body::before{
+    content:"";position:absolute;inset:0;
+    background-image:
+      linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);
+    background-size:44px 44px;
+    mask-image:radial-gradient(900px 600px at 50% 35%,#000 0%,transparent 78%);
+  }
+  .wrap{position:relative;z-index:2;padding:54px 60px 46px;height:100%;display:flex;flex-direction:column;}
+
+  .head{margin-bottom:30px;}
+  .eyebrow{font-size:16px;letter-spacing:.22em;font-weight:600;color:#9aa7b8;text-transform:uppercase;display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+  .eyebrow .dot{width:9px;height:9px;border-radius:50%;background:#b56cf0;box-shadow:0 0 16px #b56cf0;}
+  .head h1{font-size:44px;font-weight:800;line-height:1.2;letter-spacing:.01em;}
+  .head h1 .ac{background:linear-gradient(90deg,#b56cf0,#9b4fe8 50%,#e08a63);-webkit-background-clip:text;background-clip:text;color:transparent;}
+
+  .steps{display:flex;align-items:stretch;gap:0;flex:1;}
+  .card{
+    flex:1;background:linear-gradient(180deg,#10151f,#0c111a);
+    border:1px solid rgba(255,255,255,.09);border-radius:18px;
+    padding:26px 24px;display:flex;flex-direction:column;position:relative;
+    box-shadow:0 22px 50px rgba(0,0,0,.45);
+  }
+  .arrow{width:62px;display:flex;align-items:center;justify-content:center;font-size:40px;color:#b56cf0;flex:0 0 auto;}
+  .num{
+    width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;
+    font:800 24px/1 "Segoe UI";color:#0b0e15;
+    background:linear-gradient(135deg,#b56cf0,#9b4fe8);margin-bottom:18px;
+    box-shadow:0 8px 20px rgba(181,108,240,.4);
+  }
+  .ctitle{font-size:26px;font-weight:800;margin-bottom:8px;}
+  .cdesc{font-size:15.5px;line-height:1.7;color:#aab4c2;margin-bottom:18px;min-height:80px;}
+  .cdesc b{color:#e6edf3;}
+
+  .mini{margin-top:auto;border-radius:11px;overflow:hidden;border:1px solid rgba(255,255,255,.08);background:#070a10;}
+  .mbar{height:30px;display:flex;align-items:center;gap:6px;padding:0 12px;background:#121821;border-bottom:1px solid rgba(255,255,255,.06);}
+  .mbar i{width:9px;height:9px;border-radius:50%;display:inline-block;}
+  .mbar .r{background:#ff5f57;}.mbar .y{background:#febc2e;}.mbar .g{background:#28c840;}
+  .mbar span{margin-left:6px;font:600 11px "Consolas",monospace;color:#7d8794;}
+  .mbody{padding:14px 14px;font:13px/1.8 "Consolas",monospace;}
+  .mbody .c{color:#5b6675;}
+  .mbody .p{color:#7ee2a8;}
+  .mbody .k{color:#b56cf0;}
+  .mbody .w{color:#dfe7f0;}
+  .mbody .s{color:#9db4d0;}
+  .mbody .think{color:#b56cf0;font-style:italic;}
+  .mbody .ok{color:#7ee2a8;}
+  .mbody .warn{color:#febc2e;}
+
+  /* step2: args block */
+  .args{display:flex;flex-direction:column;gap:2px;}
+  .arg{display:flex;gap:6px;font:12.5px "Consolas",monospace;}
+  .arg .lbl{color:#8a94a3;width:52px;flex:0 0 52px;}
+  .arg .val{color:#d4b8f8;font-weight:600;}
+
+  /* step3: thinking flow */
+  .flow{display:flex;flex-direction:column;gap:2px;}
+  .flow-item{display:flex;align-items:center;gap:8px;font:12px "Consolas",monospace;color:#aab4c2;}
+  .flow-arrow{color:#b56cf0;font-size:11px;}
+
+  .why{
+    margin-top:28px;display:flex;gap:16px;
+  }
+  .pill{
+    flex:1;display:flex;align-items:center;gap:13px;
+    background:rgba(181,108,240,.07);border:1px solid rgba(181,108,240,.2);
+    border-radius:14px;padding:16px 20px;
+  }
+  .pill .ic{font-size:24px;}
+  .pill .t{font-size:16px;font-weight:700;color:#f0e6ff;line-height:1.4;}
+  .pill .t small{display:block;font-size:13px;font-weight:500;color:#9aa7b8;margin-top:2px;}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="head">
+      <div class="eyebrow"><span class="dot"></span>How to use — Claude Fable 5</div>
+      <h1>モデルを切り替えて、貼るだけ。<br><span class="ac">Fable 5 の深い推論</span>が走り切る。</h1>
+    </div>
+
+    <div class="steps">
+      <!-- step 1 -->
+      <div class="card">
+        <div class="num">1</div>
+        <div class="ctitle">切り替える</div>
+        <div class="cdesc">Claude Code で <b>/model コマンド</b>を1行打つだけ。サブスクで Fable 5 が使える間はすぐ試せます。</div>
+        <div class="mini">
+          <div class="mbar"><i class="r"></i><i class="y"></i><i class="g"></i><span>claude code</span></div>
+          <div class="mbody">
+            <div><span class="c"># モデルを切り替える</span></div>
+            <div><span class="p">&gt;</span> <span class="k">/model</span> <span class="s">claude-fable-5</span></div>
+            <div>&nbsp;</div>
+            <div><span class="c">✓ Switched to claude-fable-5</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="arrow">&rarr;</div>
+
+      <!-- step 2 -->
+      <div class="card">
+        <div class="num">2</div>
+        <div class="ctitle">貼る</div>
+        <div class="cdesc">プロンプトの引数を埋めて貼り付ける。<b>強度・スコープ・観点</b>の3つだけ。省略するとすべてデフォルトで動きます。</div>
+        <div class="mini">
+          <div class="mbar"><i class="r"></i><i class="y"></i><i class="g"></i><span>prompt</span></div>
+          <div class="mbody">
+            <div class="args">
+              <div class="arg"><span class="lbl">強度:</span><span class="val">ハイ</span></div>
+              <div class="arg"><span class="lbl">スコープ:</span><span class="val">フルループ</span></div>
+              <div class="arg"><span class="lbl">観点:</span><span class="val">全部</span></div>
+              <div class="arg"><span class="lbl">対象:</span><span class="c">（省略 → リポジトリ全体）</span></div>
+              <div class="arg"><span class="lbl">除外:</span><span class="c">（省略 → 除外なし）</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="arrow">&rarr;</div>
+
+      <!-- step 3 -->
+      <div class="card">
+        <div class="num">3</div>
+        <div class="ctitle">深く走る</div>
+        <div class="cdesc">拡張思考が<b>観点を順に深掘り</b>して、敵対的検証まで自分で行います。止まらず最後まで走り切ります。</div>
+        <div class="mini">
+          <div class="mbar"><i class="r"></i><i class="y"></i><i class="g"></i><span>thinking...</span></div>
+          <div class="mbody">
+            <div class="flow">
+              <div class="flow-item"><span class="think">▸ thinking...</span></div>
+              <div class="flow-item"><span class="flow-arrow">↓</span><span class="warn">⚠ SQLi: auth.go:42 確定</span></div>
+              <div class="flow-item"><span class="flow-arrow">↓</span><span class="warn">⚠ 認可漏れ: api.go:118 確定</span></div>
+              <div class="flow-item"><span class="flow-arrow">↓</span><span class="ok">✓ 修正完了 / 再調査クリア</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="why">
+      <div class="pill"><span class="ic">🧠</span><span class="t">拡張思考で根拠まで詰める<small>確信度が低い finding は修正せず記録</small></span></div>
+      <div class="pill"><span class="ic">📋</span><span class="t">止まらず走り切る<small>判断待ちは記録してパス、自動継続</small></span></div>
+      <div class="pill"><span class="ic">🔒</span><span class="t">ビルド・コミットは絶対しない<small>現行機能を壊さない最小修正のみ</small></span></div>
+    </div>
+  </div>
+</body>
+</html>
