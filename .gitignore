@@ -27,6 +27,9 @@ secrets.*
 *.local.*
 *.secret.*
 
+# --- assets（コミット済みファイルは追跡継続。新規ファイルは無視）---
+assets/
+
 # --- OS / エディタ ---
 .DS_Store
 Thumbs.db

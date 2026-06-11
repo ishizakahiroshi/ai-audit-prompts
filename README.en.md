@@ -49,16 +49,10 @@ For Claude Fable 5 (deep single-agent reasoning):
 
 Switch to Fable 5, then open `claude_fable5_audit_db_app.md` (with DB) or `claude_fable5_audit_db_less_app.md` (without DB) from `<repo>/docs/`, fill in the arguments, and paste.
 
-**Quick version (all arguments omitted — full defaults):**
+**Quick version (drop the argument block entirely — full defaults):**
 
 ```
 Audit this repository using Fable 5's deep reasoning.
-
-Intensity:
-Scope:
-Perspective:
-Target:
-Exclude:
 
 (paste prompt body here)
 ```
