@@ -36,9 +36,19 @@ Replace `<repo>` with the path where you cloned this repo.
 For Claude Code (ultracode — multi-agent parallel):
 
 ```
-Read <repo>/docs/README_activation.md, follow its auto-selection rules,
-pick the claude_ultracode audit prompt best suited to this repository,
-and execute exactly as written. Auto-detect the DB category. Use ultracode.
+Read <repo>/docs/README_activation.md, pick the claude_ultracode audit prompt, and run it. Use ultracode.
+```
+
+With arguments:
+
+```
+Read <repo>/docs/README_activation.md, pick the claude_ultracode audit prompt, and run it. Use ultracode.
+DB category: with DB
+Intensity: mid
+Scope: investigate only
+Perspective: security & vulnerabilities
+Target: src/api/
+Exclude: src/api/tests/
 ```
 
 For Claude Fable 5 (deep single-agent reasoning):
@@ -47,42 +57,44 @@ For Claude Fable 5 (deep single-agent reasoning):
 /model claude-fable-5
 ```
 
-Switch to Fable 5, then open `claude_fable5_audit_db_app.md` (with DB) or `claude_fable5_audit_db_less_app.md` (without DB) from `<repo>/docs/`, fill in the arguments, and paste.
-
-**Quick version (drop the argument block entirely — full defaults):**
+**Quick version (full defaults):**
 
 ```
-Audit this repository using Fable 5's deep reasoning.
-
-(paste prompt body here)
+Read <repo>/docs/README_activation.md, pick the claude_fable5 audit prompt, and run it.
 ```
 
 **Detailed version (narrowing arguments):**
 
 ```
-Audit this repository using Fable 5's deep reasoning.
-
+Read <repo>/docs/README_activation.md, pick the claude_fable5 audit prompt, and run it.
+DB category: with DB
 Intensity: mid
 Scope: investigate only
 Perspective: security & vulnerabilities
 Target: src/api/
 Exclude: src/api/tests/
-
-(paste prompt body here)
 ```
-
-Omitting all arguments runs with defaults (intensity: high / full loop / all perspectives / entire repo). Use the quick version for a full sweep, and the detailed version when you want to focus — e.g. "just look at auth logic" or "report findings only, no fixes today."
 
 For Codex CLI:
 
 ```
-Read <repo>/docs/README_activation.md, follow its auto-selection rules,
-pick the codex audit prompt (codex_audit_*.md) best suited to this repository,
-and execute exactly as written. Auto-detect the DB category.
+Read <repo>/docs/README_activation.md, pick the codex audit prompt, and run it.
+```
+
+With arguments:
+
+```
+Read <repo>/docs/README_activation.md, pick the codex audit prompt, and run it.
+DB category: with DB
+Intensity: mid
+Scope: investigate only
+Perspective: security & vulnerabilities
+Target: src/api/
+Exclude: src/api/tests/
 ```
 
 - You don't need to name the file directly; the activation rules auto-select by tool × DB category.
-- To set the DB category yourself, change the tail to "use DB category: with DB" or "without DB."
+- Omit `DB category` to auto-detect from the repo. Omit any other argument to use its default value.
 - The trailing `ultracode` in the Claude version is a switch for multi-agent parallelism. Drop it when you want a lighter run.
 - Reports come back in the language you use — ask in English and you get English, ask in Japanese and you get Japanese. No translation needed.
 

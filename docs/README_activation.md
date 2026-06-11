@@ -46,6 +46,8 @@
 | Codex CLI / Codex / `/goal` 用、DBなし | `codex_audit_db_less_app.md` |
 | Claude / ultracode 用、DBあり | `claude_ultracode_audit_db_app.md` |
 | Claude / ultracode 用、DBなし | `claude_ultracode_audit_db_less_app.md` |
+| Claude Fable 5 用、DBあり | `claude_fable5_audit_db_app.md` |
+| Claude Fable 5 用、DBなし | `claude_fable5_audit_db_less_app.md` |
 
 ## DB区分の判定
 
@@ -92,7 +94,24 @@
 
 - Codex が作業する場合は `codex_*.md`
 - Claude Code / ultracode が作業する場合は `claude_ultracode_*.md`
+- Claude Fable 5 が作業する場合（`/model claude-fable-5` 指定・モデルが fable5）は `claude_fable5_*.md`
 - ユーザーが明示したツール名があればそれを優先する
+
+## 引数の扱い（Fable 5 / ultracode / Codex 共通）
+
+起動コマンドに以下の引数が含まれている場合は、その値を優先する。省略された引数はデフォルト値または自動判定を適用する。
+
+| 引数 | 値の例 | 省略時 |
+|---|---|---|
+| DB区分 | あり / なし | 自動判定（「DB区分の判定」ルールに従う） |
+| 強度 | ロー / ミッド / ハイ | ハイ |
+| スコープ | 調査まで / 調査・修正まで / フルループ | フルループ |
+| 観点 | バグ / セキュリティ・脆弱性 / 依存関係 / 全部 | 全部 |
+| 対象 | パスを指定 | リポジトリ全体 |
+| 除外 | パスを指定 | 除外なし |
+
+DB区分が明示されている場合は自動判定をスキップし、その値でファイルを選択する。
+強度・スコープ・観点・対象・除外が明示されている場合は、選択したプロンプトの `＿＿＿` をその値に置き換えて実行する。
 
 ## 起動時の動作
 
