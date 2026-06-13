@@ -42,12 +42,12 @@
 
 | 条件 | 使用ファイル |
 |---|---|
-| Codex CLI / Codex / `/goal` 用、DBあり | `codex_audit_db_app.md` |
-| Codex CLI / Codex / `/goal` 用、DBなし | `codex_audit_db_less_app.md` |
+| Codex CLI / Codex 用、DBあり | `codex_audit_db_app.md` |
+| Codex CLI / Codex 用、DBなし | `codex_audit_db_less_app.md` |
 | Claude / ultracode 用、DBあり | `claude_ultracode_audit_db_app.md` |
 | Claude / ultracode 用、DBなし | `claude_ultracode_audit_db_less_app.md` |
-| Claude Fable 5 用、DBあり | `claude_fable5_audit_db_app.md` |
-| Claude Fable 5 用、DBなし | `claude_fable5_audit_db_less_app.md` |
+| Claude Fable 用、DBあり | `claude_fable_audit_db_app.md` |
+| Claude Fable 用、DBなし | `claude_fable_audit_db_less_app.md` |
 
 ## DB区分の判定
 
@@ -94,10 +94,10 @@
 
 - Codex が作業する場合は `codex_*.md`
 - Claude Code / ultracode が作業する場合は `claude_ultracode_*.md`
-- Claude Fable 5 が作業する場合（`/model claude-fable-5` 指定・モデルが fable5）は `claude_fable5_*.md`
+- Claude Fable 系モデルが作業する場合（`/model claude-fable-5` 等の指定・モデルが Fable 系）は `claude_fable_*.md`
 - ユーザーが明示したツール名があればそれを優先する
 
-## 引数の扱い（Fable 5 / ultracode / Codex 共通）
+## 引数の扱い（Fable / ultracode / Codex 共通）
 
 起動コマンドに以下の引数が含まれている場合は、その値を優先する。省略された引数はデフォルト値または自動判定を適用する。
 

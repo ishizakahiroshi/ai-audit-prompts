@@ -26,6 +26,7 @@ secrets.*
 *.local
 *.local.*
 *.secret.*
+docs/local/
 
 # --- assets（コミット済みファイルは追跡継続。新規ファイルは無視）---
 assets/

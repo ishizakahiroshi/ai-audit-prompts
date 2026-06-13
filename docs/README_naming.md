@@ -15,9 +15,9 @@
 
 | 値 | 対象 |
 |---|---|
-| `codex` | Codex CLI の `/goal` に貼る用 |
+| `codex` | Codex CLI に作業ゴールとして貼る用 |
 | `claude_ultracode` | Claude Code の ultracode（多エージェント並列ワークフロー）で実行する用 |
-| `claude_fable5` | Claude Code で Fable 5 モデル（`/model claude-fable-5`）を使って実行する用。単一エージェントの深い推論で監査する |
+| `claude_fable` | Claude Code で Fable 系モデル（例: `/model claude-fable-5`。以降のバージョンも対象）を使って実行する用。調査・修正は単一エージェントの深い推論、敵対的検証・rubric 採点は独立コンテキストの verifier サブエージェントへ委託する |
 
 新しいツールを足す場合もこの位置にツール識別子を置く（例: `gemini_audit_db_app.md`）。
 
@@ -34,7 +34,7 @@
 |---|---|---|
 | Codex | `codex_audit_db_less_app.md` | `codex_audit_db_app.md` |
 | Claude (ultracode) | `claude_ultracode_audit_db_less_app.md` | `claude_ultracode_audit_db_app.md` |
-| Claude (Fable 5) | `claude_fable5_audit_db_less_app.md` | `claude_fable5_audit_db_app.md` |
+| Claude (Fable) | `claude_fable_audit_db_less_app.md` | `claude_fable_audit_db_app.md` |
 
 ## ファイル内部の書式
 

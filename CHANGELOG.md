@@ -3,6 +3,30 @@
 このプロジェクトの主な変更点を記録します。
 書式は [Keep a Changelog](https://keepachangelog.com/ja/1.1.0/) に従い、[セマンティックバージョニング](https://semver.org/lang/ja/) を採用します。
 
+## [0.3.0] - 2026-06-13
+
+Anthropic「Designing loops with Fable 5」の知見を反映し、全監査プロンプトをループ設計（独立 verifier・rubric 化・メモリ運用）で刷新。あわせて Fable 版の識別子からバージョン番号を外し、将来のモデルでも使い続けられるよう汎用化。
+
+### Changed
+
+- ツール軸の識別子をバージョンレス化: `claude_fable5_*` → `claude_fable_*`（Fable 6/7 以降でもそのまま使える。モデル ID は本文に `例: claude-fable-5` として残す）
+- Fable 版（`claude_fable_audit_db_app.md` / `claude_fable_audit_db_less_app.md`）をループ設計に刷新
+  - 敵対的検証を同一コンテキストの self-critique から独立コンテキストの verifier サブエージェントへ委託（不可環境では新しい視点での自己検証にフォールバック）
+  - 完了条件を番号付き rubric 化（全基準が充足と判定されるまで終了しない採点ループ）
+  - plan md をメモリとして運用（fail→investigate→verify→distill→consult）
+  - 過剰に規定的な手順を削ぎ落とし、ゴール・禁止事項・rubric を渡して進め方はモデルに委ねる
+- ultracode 版・Codex 版（4ファイル）にも rubric 化完了条件・plan md メモリ運用を展開（de-prescribe は各ツールの設計を尊重して非適用）
+- 全6プロンプト＋正本に grounded progress claims（進捗報告を実行結果と突き合わせ、裏付けのない項目は「未検証」と明記）を統一
+- `docs/README_invariants.md`（正本）を 6 ファイル基準に更新し、verifier / rubric / メモリ運用 / grounded progress を不変条件として追加
+- `docs/README_naming.md` / `docs/README_activation.md` / `README.md` / `README.en.md` を `claude_fable` 命名へ更新、`/goal` の帰属表現を修正
+
+### Renamed
+
+- `docs/claude_fable5_audit_db_app.md` → `docs/claude_fable_audit_db_app.md`
+- `docs/claude_fable5_audit_db_less_app.md` → `docs/claude_fable_audit_db_less_app.md`
+
+[0.3.0]: https://github.com/ishizakahiroshi/ai-audit-prompts/compare/v0.2.0...v0.3.0
+
 ## [0.2.0] - 2026-06-11
 
 Claude Fable 5 対応版を追加。深い推論（拡張思考）を活かした単一エージェント監査プロンプト2ファイル、および note 記事・アセット一式。

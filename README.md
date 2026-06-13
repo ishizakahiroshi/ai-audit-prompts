@@ -62,7 +62,7 @@ DB区分: あり
 除外: src/api/tests/
 ```
 
-Claude Fable 5 用（深い推論・単一エージェント）:
+Claude Fable 用（深い推論・単一エージェント）:
 
 ```
 /model claude-fable-5
@@ -73,13 +73,13 @@ Claude Fable 5 用（深い推論・単一エージェント）:
 **簡易版（全デフォルト）:**
 
 ```
-<repo>/docs/README_activation.md を読んで、claude_fable5 版の監査プロンプトを選んで実行して。DB区分は自動判定でいい。
+<repo>/docs/README_activation.md を読んで、claude_fable 版の監査プロンプトを選んで実行して。DB区分は自動判定でいい。
 ```
 
 **詳細版（引数を絞る場合の例）:**
 
 ```
-<repo>/docs/README_activation.md を読んで、claude_fable5 版の監査プロンプトを選んで実行して。
+<repo>/docs/README_activation.md を読んで、claude_fable 版の監査プロンプトを選んで実行して。
 DB区分: あり
 強度: ミッド
 スコープ: 調査まで
@@ -126,13 +126,13 @@ docs/
   README_invariants.md        ← 全プロンプトで揃える不変条件（正本）
   claude_ultracode_audit_db_app.md       ← Claude ultracode / DBあり
   claude_ultracode_audit_db_less_app.md  ← Claude ultracode / DBなし
-  claude_fable5_audit_db_app.md          ← Claude Fable 5 / DBあり
-  claude_fable5_audit_db_less_app.md     ← Claude Fable 5 / DBなし
+  claude_fable_audit_db_app.md          ← Claude Fable / DBあり
+  claude_fable_audit_db_less_app.md     ← Claude Fable / DBなし
   codex_audit_db_app.md                  ← Codex / DBあり
   codex_audit_db_less_app.md             ← Codex / DBなし
 ```
 
-codex 版は詳細列挙型、claude_ultracode 版は凝縮型（並列ファンアウト）、claude_fable5 版は単一エージェント深い推論型で粒度が異なりますが、守る不変条件（禁止操作・現行機能維持・秘密情報マスク・人間レビュー前提など）は同じで、[docs/README_invariants.md](docs/README_invariants.md) で正本管理しています。
+codex 版は詳細列挙型、claude_ultracode 版は凝縮型（並列ファンアウト）、claude_fable 版は単一エージェント深い推論型で粒度が異なりますが、守る不変条件（禁止操作・現行機能維持・秘密情報マスク・人間レビュー前提など）は同じで、[docs/README_invariants.md](docs/README_invariants.md) で正本管理しています。
 
 ## このリポジトリに置かないもの（重要）
 

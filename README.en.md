@@ -51,7 +51,7 @@ Target: src/api/
 Exclude: src/api/tests/
 ```
 
-For Claude Fable 5 (deep single-agent reasoning):
+For Claude Fable (deep single-agent reasoning):
 
 ```
 /model claude-fable-5
@@ -60,13 +60,13 @@ For Claude Fable 5 (deep single-agent reasoning):
 **Quick version (full defaults):**
 
 ```
-Read <repo>/docs/README_activation.md, pick the claude_fable5 audit prompt, and run it.
+Read <repo>/docs/README_activation.md, pick the claude_fable audit prompt, and run it.
 ```
 
 **Detailed version (narrowing arguments):**
 
 ```
-Read <repo>/docs/README_activation.md, pick the claude_fable5 audit prompt, and run it.
+Read <repo>/docs/README_activation.md, pick the claude_fable audit prompt, and run it.
 DB category: with DB
 Intensity: mid
 Scope: investigate only
@@ -111,13 +111,13 @@ docs/
   README_invariants.md        ← invariants kept consistent across all prompts (canonical)
   claude_ultracode_audit_db_app.md       ← Claude ultracode / with DB
   claude_ultracode_audit_db_less_app.md  ← Claude ultracode / without DB
-  claude_fable5_audit_db_app.md          ← Claude Fable 5 / with DB
-  claude_fable5_audit_db_less_app.md     ← Claude Fable 5 / without DB
+  claude_fable_audit_db_app.md          ← Claude Fable / with DB
+  claude_fable_audit_db_less_app.md     ← Claude Fable / without DB
   codex_audit_db_app.md                  ← Codex / with DB
   codex_audit_db_less_app.md             ← Codex / without DB
 ```
 
-The codex versions are detailed/enumerated, claude_ultracode versions are condensed (parallel fan-out), and claude_fable5 versions use deep single-agent reasoning — the granularity differs, but the invariants they enforce (forbidden operations, preserving current behavior, masking secrets, human-review-before-applying, etc.) are identical and canonicalized in [docs/README_invariants.md](docs/README_invariants.md).
+The codex versions are detailed/enumerated, claude_ultracode versions are condensed (parallel fan-out), and claude_fable versions use deep single-agent reasoning — the granularity differs, but the invariants they enforce (forbidden operations, preserving current behavior, masking secrets, human-review-before-applying, etc.) are identical and canonicalized in [docs/README_invariants.md](docs/README_invariants.md).
 
 ## What does NOT belong here (important)
 
