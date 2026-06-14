@@ -30,7 +30,7 @@ Fable の深い推論（拡張思考・1M コンテキスト）を活かし、�
   ロー: 外部到達面（SSH・公開ポート・ファイアウォール・認証）を中心に最小限。
 
 観点（複数選択可。省略時は全部）:
-  全部 / ホスト・OS / SSH設定 / OS・パッケージ脆弱性 / ネットワーク・公開サービス / ファイアウォール / ユーザー・権限 / ファイル権限・SUID / サービス・TLS / ログ・侵害痕跡 / cron・timer / secrets露出 / コンテナ / カーネル・ハードニング
+  全部 / ホスト・OS / SSH設定 / OS・パッケージ脆弱性 / ネットワーク・公開サービス / ファイアウォール / ユーザー・権限 / ファイル権限・SUID / サービス・TLS / ログ・侵害痕跡 / cron・timer / secrets露出 / コンテナ / カーネル・ハードニング / MAC（SELinux/AppArmor） / 時刻同期 / データ保護
 
 除外: 指定したサービス・パスは診断対象から除外する。
 
@@ -60,17 +60,20 @@ SSH でアクセスできる稼働中サーバーを対象に、脆弱性・設�
 許可される操作（read-only 情報収集のみ。対話的にブロックしうるものは非対話・ページャ無効 --no-pager / -n で実行）:
 
 - ホスト/OS: uname -a / cat /etc/os-release / hostnamectl / uptime
-- SSH: sudo sshd -T / cat /etc/ssh/sshd_config / ls -l ~/.ssh / systemctl status fail2ban --no-pager / fail2ban-client status
-- 更新/CVE: apt list --upgradable / dpkg -l / rpm -qa / dnf check-update（終了コード参照のみ）/ ls /etc/apt/apt.conf.d
+- SSH: sudo sshd -T / cat /etc/ssh/sshd_config / ls -l ~/.ssh / ssh-keygen -lf <pub|authorized_keys>（種別・bit のみ）/ systemctl status fail2ban --no-pager / fail2ban-client status
+- 更新/CVE: apt list --upgradable / dpkg -l / rpm -qa / dnf check-update（終了コード参照のみ）/ ls /etc/apt/apt.conf.d / needrestart -b（報告のみ）/ debsums -s / rpm -Va（検証のみ）
 - ネットワーク: ss -tlnp / ss -ulnp / ss -tnp state established / ip -br a / ip route
-- ファイアウォール: ufw status verbose / sudo iptables -S / sudo nft list ruleset / firewall-cmd --list-all
+- ファイアウォール: ufw status verbose / sudo iptables -S / sudo ip6tables -S / sudo nft list ruleset / firewall-cmd --list-all / firewall-cmd --get-active-zones / firewall-cmd --direct --get-all-rules
 - ユーザー/権限: cat /etc/passwd / cat /etc/group / awk -F: '($3==0)' /etc/passwd / sudo cat /etc/sudoers / sudo ls /etc/sudoers.d / cat /etc/login.defs / last / lastb
-- 権限/SUID: find / -perm -4000 -type f 2>/dev/null / find / -perm -2000 -type f 2>/dev/null / find / -xdev -perm -0002 -type f 2>/dev/null / ls -l /etc/shadow
+- 権限/SUID: find / -perm -4000 -type f 2>/dev/null / find / -perm -2000 -type f 2>/dev/null / find / -xdev -perm -0002 -type f 2>/dev/null / ls -l /etc/shadow / findmnt / getcap -r /
 - サービス/TLS: systemctl list-unit-files --state=enabled --no-pager / systemctl list-units --type=service --state=running --no-pager / openssl x509 -noout -dates -in <cert>
-- ログ/痕跡: journalctl -u ssh --no-pager（参照）/ ps aux / ss -tnp / ls -la /tmp /dev/shm
+- ログ/痕跡: journalctl -u ssh --no-pager（参照）/ ps aux / ss -tnp / ls -la /tmp /dev/shm / sudo auditctl -s / sudo auditctl -l（照会のみ）/ journalctl --verify
 - cron/timer: crontab -l / ls -la /etc/cron* / systemctl list-timers --no-pager
 - コンテナ: docker ps / docker info / docker inspect（参照）
 - カーネル: sysctl -a（参照）
+- MAC: sestatus / getenforce / aa-status
+- 時刻同期: timedatectl status / chronyc tracking / chronyc sources / ntpq -pn
+- データ保護: lsblk / swapon --show / dmsetup ls --target crypt / mokutil --sb-state
 ※ find は探索のみ（-delete / -exec の変更系は付けない）。実行できない検査は理由を明記（read-only 制約 / 権限不足 等）。
 
 進め方:
@@ -97,19 +100,22 @@ SSH でアクセスできる稼働中サーバーを対象に、脆弱性・設�
 
 以下の観点を順に、Fable の拡張思考を活かして深く診断してください。各観点で「許可される操作」のコマンドを使い、観測した状態とその含意を根拠として記録します。
 
-- ホスト・OS: ディストリ/バージョン/EOL 状況、カーネル版数、稼働時間、役割推定
-- SSH設定: PermitRootLogin / PasswordAuthentication / PermitEmptyPasswords / PubkeyAuthentication / Port / MaxAuthTries / AllowUsers・AllowGroups / X11Forwarding、鍵・~/.ssh の権限、fail2ban 等のブルートフォース対策
-- OS・パッケージ脆弱性: 未適用更新、EOL パッケージ、既知 CVE に該当する版数、自動更新（unattended-upgrades 等）の有無
-- ネットワーク・公開サービス: リッスンポート（0.0.0.0 公開 vs 127.0.0.1 束縛）、各ポートのサービス対応、不要な公開
-- ファイアウォール: ufw / iptables / nftables / firewalld の状態と既定ポリシー（クラウド SG はサーバーからは見えない旨を注記）
-- ユーザー・権限: UID 0 重複、不要/無効アカウント、空パスワード、sudoers の過剰権限・NOPASSWD、パスワードポリシー、ログイン履歴・失敗履歴
-- ファイル権限・SUID/SGID: 想定外の SUID/SGID バイナリ、world-writable ファイル/ディレクトリ（sticky なし）、機密ファイル（/etc/shadow・ssh 鍵・証明書秘密鍵）の権限
-- サービス・TLS: 有効/稼働サービス、認証なしで公開された DB（postgres/mysql/redis/mongo 等）、Web サーバの TLS 設定（プロトコル・暗号・セキュリティヘッダ）、証明書の有効期限
-- ログ・侵害痕跡（軽量）: 認証失敗/ブルートフォース、不審ログイン、不審プロセス・確立済み接続、/tmp 等の実行ファイル、不審な cron/timer（完全なフォレンジックではない旨を明記）
+- ホスト・OS: ディストリ/バージョン/EOL 状況、カーネル版数、稼働時間、役割推定。認証前バナー（/etc/issue・/etc/issue.net・/etc/motd・sshd Banner）の過剰な版数・ホスト・連絡先の情報開示（偵察材料の低減）
+- SSH設定: PermitRootLogin / PasswordAuthentication / PermitEmptyPasswords / PubkeyAuthentication / Port / MaxAuthTries / AllowUsers・AllowGroups / X11Forwarding、鍵・~/.ssh の権限、fail2ban 等のブルートフォース対策。判定は必ず実効値（sudo sshd -T）で行い sshd_config.d/*.conf と Match/Include の条件付き緩和まで突き合わせる（ファイル直読のみで安全判定しない）。暗号スイート（Ciphers/MACs/KexAlgorithms/HostKeyAlgorithms/PubkeyAcceptedAlgorithms に CBC・arcfour・3des・hmac-md5/sha1・non-etm・group1/14-sha1・ssh-rsa(SHA-1)・ssh-dss 等の弱アルゴリズムが受理されていないか）、ホスト鍵・authorized_keys の鍵種別/鍵長（DSA・1024bit 以下 RSA 等の弱鍵。種別・bit・フィンガープリントのみで鍵本体は出さない）、セッション制御（LoginGraceTime・ClientAliveInterval/CountMax・MaxStartups・MaxSessions）、フォワーディング（AllowTcpForwarding・AllowAgentForwarding・GatewayPorts・PermitTunnel。踏み台でなければリスク）、多段認証（AuthenticationMethods・PAM の MFA モジュール有無）、PermitRootLogin 許可時の root authorized_keys の制限オプション（from=/command=/restrict）と件数、sftp 限定ユーザーの ChrootDirectory/ForceCommand internal-sftp
+- OS・パッケージ脆弱性: 未適用更新、EOL パッケージ、既知 CVE に該当する版数、自動更新（unattended-upgrades 等）の有無。加えて、適用済みでも未反映（patched-but-not-active＝カーネル更新後の未再起動：/var/run/reboot-required・needrestart -b・稼働カーネルと最新インストール版の差）、更新の停滞（apt-mark hold/dnf versionlock/phased/依存破損での滞留。upgradable 0 件でも安全とは限らない）、リポジトリ・署名鍵の素性（HTTP 取得・[trusted=yes]・gpgcheck=0 等の検証無効化）、パッケージ整合性検証（debsums/rpm -Va のハッシュ不一致＝改ざん兆候。管理者変更による設定ファイル差分は除外）、ライブパッチ・CPU マイクロコード・投機実行緩和（/sys/devices/system/cpu/vulnerabilities/ の Mitigation 状態）
+- ネットワーク・公開サービス: リッスンポート（0.0.0.0 公開 vs 127.0.0.1 束縛）、各ポートのサービス対応、不要な公開。IPv4・IPv6 を独立に判定し、IPv4 はループバック束縛でも IPv6（[::]）だけ全公開になっているデュアルスタックの抜けを検出
+- ファイアウォール: ufw / iptables / nftables / firewalld の状態と既定ポリシー（クラウド SG はサーバーからは見えない旨を注記）。IPv4/IPv6 のルール対称性（IPv4 を DROP で固めても ip6tables が ACCEPT 全開のまま放置されていないか。nftables は inet で両系を含む）、firewalld は全アクティブゾーン・インターフェース割当（trusted ゾーン割当は --list-all に出ず全許可になる）・direct ルールまで確認
+- ユーザー・権限: UID 0 重複、不要/無効アカウント、空パスワード、sudoers の過剰権限・NOPASSWD、パスワードポリシー、ログイン履歴・失敗履歴。加えて、パスワード品質ポリシーの実効層は PAM で確認（pwquality.conf・pam_pwquality/pam_cracklib。login.defs の値だけでは強制されない）、sudoers の Defaults 深掘り（secure_path 欠如＝PATH ハイジャック余地・timestamp_timeout 過長・!authenticate・use_pty・I/O ログ有無）、su 経路制限（pam_wheel）、既定 umask（CIS 推奨 027）
+- ファイル権限・SUID/SGID: 想定外の SUID/SGID バイナリ、world-writable ファイル/ディレクトリ（sticky なし）、機密ファイル（/etc/shadow・ssh 鍵・証明書秘密鍵）の権限。加えて、書き込み可能領域のマウントオプション（/tmp・/dev/shm・/var/tmp 等の noexec/nosuid/nodev）、ファイル capabilities（getcap -r / の cap_setuid/cap_dac_override/cap_sys_admin 等＝SUID 走査で検出できない昇格面）と GTFOBins 既知バイナリの抽出、孤児ファイル（nouser/nogroup）、認証ログ（auth.log/secure）の world-readable
+- サービス・TLS: 有効/稼働サービス、認証なしで公開された DB（postgres/mysql/redis/mongo 等）、Web サーバの TLS 設定（プロトコル・暗号・セキュリティヘッダ）、証明書の有効期限。加えて、既定/弱認証情報の疑い（Grafana・Redis requirepass 未設定・MySQL anonymous・pg_hba の trust/md5 等。総当りはせず設定観測のみ、疑いは判断待ち・値はマスク）、証明書の自己署名・チェーン不完全・SAN/CN 不一致・RSA1024/SHA-1署名、DB の非 TLS 通信、公開面の濫用対策（レート制限・WAF・認証ゲートの有無。クラウド前段で吸収されうるため確信度は下げる）
+- ログ・侵害痕跡（軽量）: 認証失敗/ブルートフォース、不審ログイン、不審プロセス・確立済み接続、/tmp 等の実行ファイル、不審な cron/timer。加えて、監査・ログ基盤の有無と耐久性（auditd 稼働と主要ルール・改ざん不能モード〔auditctl は -s/-l の照会のみ〕、journald の Storage=persistent・rsyslog の auth 経路・外部転送の有無＝非永続/転送なしは侵害後のログ消去で追跡不能）、完全性監視（AIDE/Tripwire の導入・基準DB の有無、rkhunter/chkrootkit の導入有無。フルスキャン・DB 書込はしない）、ログ改ざん痕跡（journalctl --verify・空ログ・wtmp/btmp の断絶）。完全なフォレンジックではない旨を明記
 - cron・timer: ユーザー/システムの定期ジョブに不審なものがないか
 - secrets露出: world-readable な認証情報・.env・履歴ファイル中の資格情報・権限の緩い秘密鍵（値はマスク、場所と種別のみ）
-- コンテナ（Docker 等が稼働していれば）: 特権コンテナ、0.0.0.0 への公開ポート、docker socket の露出、docker グループ所属（= root 相当）、古いイメージ
-- カーネル・ハードニング: 関連 sysctl（IP 転送・redirect 受理・ASLR=kernel.randomize_va_space 等）の参照（変更しない）
+- コンテナ（Docker 等が稼働していれば）: 特権コンテナ、0.0.0.0 への公開ポート、docker socket の露出、docker グループ所属（= root 相当）、古いイメージ。加えて、稼働全コンテナを docker inspect で網羅し、実質特権化（CapAdd の SYS_ADMIN 等・SecurityOpt の seccomp/apparmor=unconfined・no-new-privileges 欠如・User=root）、ホスト機微パスの bind（/・/etc・/var/run/docker.sock の RW）・NetworkMode=host・PortBindings の HostIp、daemon.json/docker info（userns-remap・無認証 Docker API tcp://0.0.0.0:2375・Docker の iptables 挿入による FW すり抜け）、イメージの出所（:latest/digest 非固定）と Env/compose の平文 secrets（値はマスク）
+- カーネル・ハードニング: 関連 sysctl（IP 転送・redirect 受理・ASLR=kernel.randomize_va_space 等）の参照（変更しない）。加えて、権限昇格・情報漏えい系 sysctl（kernel.unprivileged_bpf_disabled・kernel.unprivileged_userns_clone/user.max_user_namespaces・fs.suid_dumpable・kernel.kptr_restrict・dmesg_restrict・yama.ptrace_scope 等）、コアダンプ抑制（coredump.conf・limits の core）、実効値と永続設定（/etc/sysctl.d 等）の突き合わせ（再起動で失われる値・後勝ち上書き・効いていない値）、ブートチェーン整合性（GRUB パスワード・Secure Boot〔mokutil --sb-state〕・lockdown・モジュール署名。クラウド VM では適用外/取得不能が多く役割で確信度を下げる）
+- MAC（SELinux/AppArmor）: SELinux（sestatus/getenforce：enforcing/permissive/disabled とポリシー種別）または AppArmor（aa-status：enforce/complain プロファイル数・unconfined な重要プロセス）の有効性。両方無効なら DAC 突破後の封じ込めが効かない重大欠落として finding 化
+- 時刻同期: chrony / systemd-timesyncd / ntpd が稼働し実際に同期できているか（オフセット・参照ソース。timedatectl status・chronyc tracking/sources・ntpq -pn 等の照会のみ）。ずれは TLS 検証・トークン/TOTP 期限・ログ相関・ログのバックデートに直結
+- データ保護: ルート/データボリュームの LUKS 暗号化・スワップの暗号化/平文（種別のみ。復号・マウントはしない、swapon --show）、バックアップ機構（restic/borg/duplicity 等のユニット・timer・痕跡）の存在推定。read-only では存在・痕跡までしか分からず復元可能性・オフサイト性は検証不可のため情報提言（確信度 medium）として扱う
 
 各 finding は以下の形式で plan md に記録してください。
 
@@ -169,14 +175,16 @@ verifier に確認させる観点:
 - 既知の重大 CVE に該当する未更新パッケージ、EOL OS
 - 侵害の明確な兆候（不審プロセス・不審 cron・不審な確立済み接続・改ざんの痕跡）
 - world-writable な機密ファイル、権限の緩い秘密鍵、secrets の露出
-- docker socket の露出・特権コンテナ・docker グループの不用意な付与
+- docker socket の露出・特権コンテナ・docker グループの不用意な付与・コンテナの実質特権化（unconfined・危険 cap・ホスト機微パスの RW bind・無認証 Docker API）
+- IPv6（[::]）だけ全公開のデュアルスタックの抜け、IPv4 を固めても ip6tables が全開のままのファイアウォール非対称
 
 次点:
 - 不要な公開ポート/サービス、ファイアウォール未設定・緩いポリシー
 - 想定外の SUID/SGID、world-writable ディレクトリ（sticky なし）
 - TLS 設定不備（古いプロトコル/暗号、証明書期限切れ間近）、セキュリティヘッダ欠如
-- 自動更新無効、ログ/監査の不足、ブルートフォース対策の弱さ
-- カーネルハードニング（sysctl）の緩さ
+- 自動更新無効、ログ/監査の不足（auditd 不在・ログ非永続）、ブルートフォース対策の弱さ
+- カーネルハードニング（sysctl）の緩さ、MAC（SELinux/AppArmor）無効
+- 適用済みでも未反映（patched-but-not-active＝カーネル更新後の未再起動）
 
 判断待ち・提言（情報提供）:
 - 役割依存で断定できないもの（意図的な公開かもしれないポート等）
@@ -222,6 +230,7 @@ verifier に確認させる観点:
 - SSH・FW の提言は必ずロックアウト回避手順とセットにする
 - secrets・秘密鍵・ハッシュの値は出さない（場所と種別のみ）
 - 完全 read-only を厳守し、対策はレポートに書くだけでサーバーへ適用しない
+- dual-mode ツールは read-only 形に限定する。ip6tables/nft/firewall-cmd は照会（-S/-L/list/--get*/--list*）のみで変更系（-A/-D/-I/-F/add/delete/--add*/--reload）は禁止、auditctl は -s/-l のみ（-w/-e/-D/-a/-A 禁止）、needrestart は -b（報告のみ）固定（-r a/-r i 禁止）、debsums/rpm -V/AIDE は検証のみで基準DB 書込（--init/--propupd）やフルスキャンはしない、swapon は --show 必須で bare swapon（＝有効化）は使わない。SSH の最終判断は sudo sshd -T の実効値で行い、ファイル直読のみで安全判定しない
 - 敵対的検証と完了 rubric の採点は独立コンテキストの verifier サブエージェントで行う（使えない場合のみ新しい視点での自己検証で代替）
 - finding には重大度（critical / high / medium / low）と確信度（high / medium / low）を付け、確信度 low は断定せず判断待ちに回す
 - この診断は自動検出であり完全ではない。確定 finding も含め適用前に人間のレビューを前提とし、検出漏れ・誤検出があり得ることを最終報告に明記する
