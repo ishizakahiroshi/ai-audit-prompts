@@ -28,6 +28,18 @@ secrets.*
 *.secret.*
 docs/local/
 
+# --- AI ツールのローカル設定（コミットしない）---
+# CLAUDE.md / AGENTS.md 本体は追跡。private 上書きの *.local.md は *.local.* で無視済み。
+.claude/
+.codex-tmp/
+
+# --- 作業・一時・バックアップ生成物 ---
+*.bak
+*.orig
+*.rej
+*.tmp
+*.log
+
 # --- assets（コミット済みファイルは追跡継続。新規ファイルは無視）---
 assets/
 
