@@ -3,6 +3,26 @@
 このプロジェクトの主な変更点を記録します。
 書式は [Keep a Changelog](https://keepachangelog.com/ja/1.1.0/) に従い、[セマンティックバージョニング](https://semver.org/lang/ja/) を採用します。
 
+## [Unreleased]
+
+新たな監査系統として「サーバー診断」を追加。SSH でアクセスできる稼働中サーバーを完全 read-only で診断し、脆弱性・設定不備・侵害痕跡に対する対策を提言する（修正は適用しない）。コード監査とは安全境界が異なり、サーバー状態を一切変更しない・対策の適用は人間が行うことを最上位の不変条件とする。
+
+### Added
+
+- サーバー診断プロンプト 3 ファイルを追加（完全 read-only・対策は提言のみ）
+  - `docs/codex_audit_server.md`（Codex / 詳細列挙型）
+  - `docs/claude_ultracode_audit_server.md`（Claude ultracode / 並列ファンアウト型）
+  - `docs/claude_fable_audit_server.md`（Claude Fable / 単一エージェント深い推論型）
+- `docs/README_invariants_server.md`（サーバー診断専用の不変条件・正本）を追加
+  - 完全 read-only（状態変更全面禁止）/ 禁止操作・許可される read-only コマンド / 接続方法（AI接続・サーバー上の選択、既定は AI接続）/ SSH ロックアウト回避・サーバー役割考慮 / 対策提言フォーマット / プロンプトインジェクション対策 / 人間レビュー・人間適用前提
+- 診断観点（SSH 設定・OS/パッケージ脆弱性・公開ポート・ファイアウォール・ユーザー権限・SUID/権限・TLS・侵害痕跡・cron・secrets 露出・コンテナ・カーネルハードニング）を 3 ファイル共通で整備
+
+### Changed
+
+- `docs/README_activation.md` に「監査対象区分（コード / サーバー）」の判定と、サーバー診断のファイル自動選択・接続方法引数を追加
+- `docs/README_naming.md` のスキームを `{ツール}_audit_{監査対象}` に一般化し、`server` 区分と現在のファイル表を追加
+- `README.md` / `README.en.md` にサーバー診断の使い方・ディレクトリ構成・安全上の注意を追記
+
 ## [0.3.0] - 2026-06-13
 
 Anthropic「Designing loops with Fable 5」の知見を反映し、全監査プロンプトをループ設計（独立 verifier・rubric 化・メモリ運用）で刷新。あわせて Fable 版の識別子からバージョン番号を外し、将来のモデルでも使い続けられるよう汎用化。

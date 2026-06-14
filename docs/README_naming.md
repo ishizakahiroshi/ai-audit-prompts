@@ -5,11 +5,12 @@
 ## スキーム
 
 ```
-{ツール}_audit_{DB区分}.md
+{ツール}_audit_{監査対象}.md
 ```
 
-- 軸の順序は固定: `ツール名` → `audit` → `DB区分`
+- 軸の順序は固定: `ツール名` → `audit` → `監査対象`
 - すべて小文字・アンダースコア区切り（kebab-case ではなく snake_case）
+- `{監査対象}` は「コード監査（DB区分）」と「サーバー診断（server）」の 2 系統。コード監査では DB区分（`db_app` / `db_less_app`）が、サーバー診断では `server` が入る。
 
 ### {ツール}
 
@@ -21,20 +22,31 @@
 
 新しいツールを足す場合もこの位置にツール識別子を置く（例: `gemini_audit_db_app.md`）。
 
-### {DB区分}
+### {監査対象}
 
 | 値 | 対象 |
 |---|---|
-| `db_less_app` | DB を使わないアプリ。永続化はファイル/設定/JSON/YAML/TOML/ブラウザ保存領域/Cookie/キャッシュ/メモリ/外部API |
-| `db_app` | DB を使うアプリ。DBアクセス層（SQL/ORM/トランザクション）も監査対象 |
+| `db_less_app` | コード監査。DB を使わないアプリ。永続化はファイル/設定/JSON/YAML/TOML/ブラウザ保存領域/Cookie/キャッシュ/メモリ/外部API |
+| `db_app` | コード監査。DB を使うアプリ。DBアクセス層（SQL/ORM/トランザクション）も監査対象 |
+| `server` | サーバー診断。SSH でアクセスできる稼働中サーバーを完全 read-only で診断し、対策を提言する（修正は適用しない）。DB区分の軸は持たない |
 
 ## 現在のファイル
+
+コード監査:
 
 | ツール | DBなし | DBあり |
 |---|---|---|
 | Codex | `codex_audit_db_less_app.md` | `codex_audit_db_app.md` |
 | Claude (ultracode) | `claude_ultracode_audit_db_less_app.md` | `claude_ultracode_audit_db_app.md` |
 | Claude (Fable) | `claude_fable_audit_db_less_app.md` | `claude_fable_audit_db_app.md` |
+
+サーバー診断（完全 read-only）:
+
+| ツール | ファイル |
+|---|---|
+| Codex | `codex_audit_server.md` |
+| Claude (ultracode) | `claude_ultracode_audit_server.md` |
+| Claude (Fable) | `claude_fable_audit_server.md` |
 
 ## ファイル内部の書式
 
