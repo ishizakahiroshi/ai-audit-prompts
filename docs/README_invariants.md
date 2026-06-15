@@ -14,6 +14,7 @@
 - ビルド・コンパイル・バンドル・パッケージ生成・publish・deploy・install を伴うコマンド
   - 例: `go build` / `go install` / `cargo build` / `npm|pnpm|yarn build` / `tsc --build` / webpack・vite・rollup・esbuild の bundle / `make build` / `docker build` / `docker compose build` / artifact・dist・release・binary・package 生成
 - `git reset --hard` / `git checkout --` / 未依頼の revert（他者の未コミット変更を勝手に戻さない）
+- ブランチの作成・切り替え・マージ（`git branch` / `git switch -c` / `git switch` / `git checkout <branch>` / `git merge` 等）。**実行者が事前に専用ブランチを用意している前提**で、現在チェックアウト中のブランチ上でのみ修正する。ブランチが未用意でもブランチ操作はせず、現行ブランチで進めて plan md / 結果報告 md にその旨を記録する
 - 機密ファイル・secrets・認証情報・秘密鍵・APIキー・トークンの出力（発見した秘密情報も値を plan md・結果報告・最終報告に転記せず、場所と種別のみ記録してマスクし、「秘密情報の混入」finding として最優先で報告する）
 - アーキテクチャの抜本改修・仕様変更・大規模リファクタ・全面書き換え・新フレームワーク導入・新ライブラリ大量導入
 - プロジェクト指示ファイルにビルド実行が書かれていても、この goal ではビルド禁止を優先する
