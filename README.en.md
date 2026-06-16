@@ -12,6 +12,7 @@ A collection of paste-ready prompts for getting AI agents (Claude Code / Codex C
 
 - A set of prompts in `docs/`, picked by tool (Claude / Codex) and DB category (with DB / without DB), for running heavy code audits.
 - Every prompt shares the same premises: "no builds, commits, production DB operations, or sweeping rewrites," "run all the way through without stopping," and "record anything that needs a human decision and move on."
+- **Every audit report opens with an overall score header**: a total out of 100, plus 5-category scores with sub-item breakdowns and a "deduction reason → how to clear it" column. At a glance you can see overall health, which category is weak, and what to fix to raise the score.
 - The invariants that all prompts must uphold are canonicalized in [docs/README_invariants.md](docs/README_invariants.md).
 - This prompt collection comes with no warranty. AI audits can produce false positives and misses. Always have a human review the results — including confirmed findings — before applying them to production. Use at your own risk.
 
