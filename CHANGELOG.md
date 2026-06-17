@@ -16,6 +16,7 @@
   - アプリ側 LLM/AI 利用: プロンプトインジェクション・LLM 出力を信頼しての二次被害・LLM/外部 AI の API キー・tool/function calling 濫用
   - サプライチェーン能動的ベクタ（依存関係観点）: postinstall / ライフサイクルスクリプト・dependency confusion / typosquatting・lockfile 整合 / 依存ピン未固定
 - サーバー診断 3 プロンプト + 正本（`docs/README_invariants_server.md`）へ、クラウドメタデータ（169.254.169.254 / IMDSv2 強制状況、観点 4）と secrets 管理基盤（Vault / SSM / sops 等の利用有無、観点 11）の点検を追加
+- `docs/README_activation.md` に「対象外・誤適用に注意」節を追加（URL だけの外部サイトは対象外で能動スキャン=DAST は別物・許可必須、共用サーバーはサーバー診断の対象外、共用サーバー上の WordPress 等 CMS はコード監査 `*_audit_db_app.md` で扱う旨を明記）
 
 ### Changed
 
