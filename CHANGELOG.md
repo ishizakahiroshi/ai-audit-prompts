@@ -5,6 +5,26 @@
 
 ## [Unreleased]
 
+### Added
+
+- 現代スタックで欠けていた**セキュリティ観点**をコード監査 6 プロンプトへ名指し追加（スコア配点は変更せず、既存サブ項目内の列挙を拡充）
+  - API 認可: オブジェクトレベル認可（IDOR / BOLA）・mass assignment（over-posting）
+  - 認証トークン: JWT / OAuth / OIDC の不備（alg=none・署名検証欠如・弱い署名鍵・PKCE/state 欠如・redirect_uri 緩和・トークン失効/保管）
+  - インジェクション拡張: SSTI・安全でないデシリアライズ（pickle / unserialize / YAML unsafe load）・XXE
+  - JS/TS 特有: プロトタイプ汚染・ReDoS
+  - 周辺: セキュリティヘッダ / CSP / HSTS・レート制限 / アカウント列挙 / 総当り耐性・GraphQL（introspection / 深さ・複雑度 / batching）・Webhook 署名・リプレイ検証・クラウドメタデータ SSRF（169.254.169.254 / IMDSv2）
+  - アプリ側 LLM/AI 利用: プロンプトインジェクション・LLM 出力を信頼しての二次被害・LLM/外部 AI の API キー・tool/function calling 濫用
+  - サプライチェーン能動的ベクタ（依存関係観点）: postinstall / ライフサイクルスクリプト・dependency confusion / typosquatting・lockfile 整合 / 依存ピン未固定
+- サーバー診断 3 プロンプト + 正本（`docs/README_invariants_server.md`）へ、クラウドメタデータ（169.254.169.254 / IMDSv2 強制状況、観点 4）と secrets 管理基盤（Vault / SSM / sops 等の利用有無、観点 11）の点検を追加
+
+### Changed
+
+- サーバー診断 3 ファイル + 正本（`docs/README_invariants_server.md` 観点 16「データ保護」）のバックアップ点検を、機構の**存在推定**から「**DB のバックアップが実際に取れているか**を read-only の範囲で推定」まで拡張
+  - DB ダンプ系ジョブの痕跡（`mysqldump` / `pg_dump` / `pg_basebackup`・WAL アーカイブ・レプリカ・managed DB の自動スナップショット）の有無を確認
+  - 最新の成立性を `systemctl list-timers` の last-run・バックアップ用ユニットの `journalctl` 直近成否・ダンプ出力先の最終更新時刻/サイズ/世代数（`find` / `ls` / `stat` 参照のみ、中身は開かず値も出さない）で推定
+  - managed DB（RDS / Cloud SQL 等）の自動スナップショットはサーバー内から制御プレーンが見えないため判断待ちに回す
+  - 復元可能性・オフサイト性・復元テスト成否は read-only では検証不可のため従来どおり情報提言（確信度 medium）として扱う
+
 ## [0.5.0] - 2026-06-16
 
 監査レポートの冒頭に「総合 100 点満点 + 5 カテゴリスコア + サブ項目内訳 + 減点理由→クリア条件」をまとめた**総合評価ヘッダー**を必ず出すスコアリング規約を追加。レポートを開いた瞬間に「全体としてどうか」「どこが弱いか」「何をすれば点が上がるか」が一目で分かるようにする。

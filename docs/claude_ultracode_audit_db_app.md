@@ -62,9 +62,9 @@ ultracode
    - I/O・パース: 文字コード、改行、部分読み込み、JSON/YAML/TOML の欠損キー、想定外フォーマットでの破綻
    - 時刻・タイムゾーン・ロケール・浮動小数の扱い、null 安全でない比較
    - 入力検証不足に起因する誤動作（バリデーション漏れで後段やクエリが壊れる経路）、外部API応答の信頼しすぎ
-   ◆ セキュリティ: 認証bypass・認可漏れ・権限境界・tenant/org/user/role 境界破壊・セッション・Cookie属性・CSRF・CORS・機密値の扱い・ログへの秘密情報出力
-   ◆ 脆弱性: SQLインジェクション（文字列連結クエリ・動的 ORDER BY/LIKE・未パラメータ化）・コマンドインジェクション・パストラバーサル・SSRF・XSS・任意ファイル読み書き・アップロード/ダウンロード・redirect/URL handling・情報漏洩
-   ◆ 依存関係: 依存マニフェスト・lock file・既知CVE・脆弱性スキャン観点・古い依存
+   ◆ セキュリティ: 認証bypass・認可漏れ・権限境界・tenant/org/user/role 境界破壊・IDOR/BOLA（オブジェクトレベル認可）・mass assignment（over-posting）・セッション・Cookie属性・CSRF・CORS・JWT/OAuth/OIDC 不備（alg=none・署名検証欠如・PKCE/state 欠如・redirect_uri 緩和・トークン失効）・セキュリティヘッダ/CSP/HSTS・レート制限/アカウント列挙/総当り耐性・機密値の扱い・ログへの秘密情報出力
+   ◆ 脆弱性: SQLインジェクション（文字列連結クエリ・動的 ORDER BY/LIKE・未パラメータ化）・コマンドインジェクション・パストラバーサル・SSRF・XSS・任意ファイル読み書き・アップロード/ダウンロード・redirect/URL handling・情報漏洩・SSTI・安全でないデシリアライズ（pickle/unserialize/YAML unsafe load）・XXE・プロトタイプ汚染・ReDoS・GraphQL（introspection 公開/深さ・複雑度/batching 濫用）・Webhook 署名・リプレイ検証・クラウドメタデータSSRF（169.254.169.254/IMDSv2）・アプリの LLM 利用（プロンプトインジェクション・出力信頼での二次被害・APIキー・tool/function calling 濫用）
+   ◆ 依存関係: 依存マニフェスト・lock file・既知CVE・脆弱性スキャン観点・古い依存・postinstall/ライフサイクルスクリプト・dependency confusion/typosquatting・lockfile 整合/依存ピン未固定
    ◆ 保守性: 実害につながる範囲に限定（命名だけ・整形だけは後回し）
 
    検索の足がかり（rg 推奨）:

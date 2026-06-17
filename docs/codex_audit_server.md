@@ -149,7 +149,7 @@ AI接続モードで「接続先」を受け取ったら、診断観点の本格
   - リポジトリ・署名鍵の素性: HTTP 取得・[trusted=yes]・gpgcheck=0 等の検証無効化
   - パッケージ整合性検証: debsums / rpm -Va のハッシュ不一致（＝改ざん兆候。管理者変更で出る設定ファイル差分は除外）
   - microcode・投機実行緩和: ライブパッチ・CPU マイクロコード・/sys/devices/system/cpu/vulnerabilities/ の Mitigation 状態
-- ネットワーク・公開サービス: リッスンポート（0.0.0.0 公開 vs 127.0.0.1 束縛）、各ポートのサービス対応、不要な公開。IPv4・IPv6 を独立に判定し、IPv4 はループバック束縛でも IPv6（[::]）だけ全公開になっているデュアルスタックの抜けを検出
+- ネットワーク・公開サービス: リッスンポート（0.0.0.0 公開 vs 127.0.0.1 束縛）、各ポートのサービス対応、不要な公開。IPv4・IPv6 を独立に判定し、IPv4 はループバック束縛でも IPv6（[::]）だけ全公開になっているデュアルスタックの抜けを検出。クラウド VM の場合はインスタンスメタデータ（169.254.169.254）への到達可否と IMDSv2 強制状況（IMDSv1 のままだと SSRF 踏み台で一時認証情報の窃取に直結。取得できる範囲で確認し情報提言）
 - ファイアウォール: ufw / iptables / nftables / firewalld の状態と既定ポリシー（クラウド SG はサーバーからは見えない旨を注記）。IPv4/IPv6 のルール対称性（IPv4 を DROP で固めても ip6tables が ACCEPT 全開のまま放置されていないか。nftables は inet で両系を含む）、firewalld は全アクティブゾーン・インターフェース割当（trusted ゾーン割当は --list-all に出ず全許可になる）・direct ルールまで確認
 - ユーザー・権限: UID 0 重複、不要/無効アカウント、空パスワード、sudoers の過剰権限・NOPASSWD、パスワードポリシー、ログイン履歴・失敗履歴。加えて以下を確認:
   - パスワード品質ポリシーの実効層は PAM で確認（pwquality.conf・pam_pwquality / pam_cracklib。login.defs の値だけでは強制されない）
@@ -168,7 +168,7 @@ AI接続モードで「接続先」を受け取ったら、診断観点の本格
   - 完全性監視（FIM: AIDE / Tripwire の導入・基準DB の有無、rkhunter / chkrootkit の導入有無。フルスキャン・DB 書込はしない）
   - ログ改ざん痕跡（journalctl --verify・空ログ・wtmp/btmp の断絶）
 - cron・timer: ユーザー/システムの定期ジョブに不審なものがないか
-- secrets露出: world-readable な認証情報・.env・履歴ファイル中の資格情報・権限の緩い秘密鍵（値はマスク、場所と種別のみ）
+- secrets露出: world-readable な認証情報・.env・履歴ファイル中の資格情報・権限の緩い秘密鍵（値はマスク、場所と種別のみ）。加えて secrets 管理基盤（Vault / AWS SSM / sops / 環境変数注入 等）の利用有無と平文ファイル直書きへの依存度（情報提言）
 - コンテナ（Docker 等が稼働していれば）: 特権コンテナ、0.0.0.0 への公開ポート、docker socket の露出、docker グループ所属（= root 相当）、古いイメージ。加えて稼働全コンテナを docker inspect で網羅し以下を確認:
   - 実質特権化（CapAdd の SYS_ADMIN 等・SecurityOpt の seccomp/apparmor=unconfined・no-new-privileges 欠如・User=root）
   - ホスト機微パスの bind（/ ・/etc・/var/run/docker.sock の RW）・NetworkMode=host・PortBindings の HostIp
@@ -180,7 +180,7 @@ AI接続モードで「接続先」を受け取ったら、診断観点の本格
   - ブートチェーン整合性（GRUB パスワード・Secure Boot〔mokutil --sb-state〕・lockdown・モジュール署名。クラウド VM では適用外/取得不能が多く役割で確信度を下げる）
 - MAC（SELinux/AppArmor）: SELinux（sestatus / getenforce: enforcing / permissive / disabled とポリシー種別）または AppArmor（aa-status: enforce / complain プロファイル数・unconfined な重要プロセス）の有効性。両方無効なら DAC 突破後の封じ込めが効かない重大欠落として finding 化
 - 時刻同期: chrony / systemd-timesyncd / ntpd が稼働し実際に同期できているか（オフセット・参照ソース。timedatectl status・chronyc tracking / sources・ntpq -pn 等の照会のみ）。ずれは TLS 検証・トークン/TOTP 期限・ログ相関・ログのバックデートに直結
-- データ保護（at-rest 暗号化 / バックアップ）: ルート/データボリュームの LUKS 暗号化（lsblk・dmsetup ls --target crypt）・スワップの暗号化/平文（種別のみ。復号・マウントはしない、swapon --show）、バックアップ機構（restic / borg / duplicity 等のユニット・timer・痕跡）の存在推定。read-only では存在・痕跡までしか分からず復元可能性・オフサイト性は検証不可のため情報提言（確信度 medium）として扱う
+- データ保護（at-rest 暗号化 / バックアップ）: ルート/データボリュームの LUKS 暗号化（lsblk・dmsetup ls --target crypt）・スワップの暗号化/平文（種別のみ。復号・マウントはしない、swapon --show）、バックアップ機構（restic / borg / duplicity 等のユニット・timer・痕跡）の存在推定。加えて、DB のバックアップが実際に取れているかを read-only の範囲で可能な限り推定する: DB ダンプ系ジョブの痕跡（mysqldump / pg_dump / pg_basebackup・WAL アーカイブ・レプリカ・managed DB の自動スナップショット）の有無、最新の成立性（systemctl list-timers --no-pager の last-run、バックアップ用ユニットの journalctl --no-pager 直近の成否、ダンプ出力先の最終更新時刻・サイズ・世代数を find / ls / stat の参照のみで確認。ダンプの中身は開かず値も出さない）。managed DB（RDS / Cloud SQL 等）の自動スナップショットはサーバー内から制御プレーン情報が見えないため判断待ちに回す。read-only では存在・痕跡と最終実行の成否までしか分からず、復元可能性・オフサイト性・復元テスト成否は検証不可のため情報提言（確信度 medium）として扱う
 
 各 finding は以下の形式で plan md に記録してください。
 

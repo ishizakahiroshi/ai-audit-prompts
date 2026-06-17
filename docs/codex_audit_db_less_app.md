@@ -101,6 +101,19 @@ git commit / git push / git tag は絶対に行わないでください。
   - アーカイブ展開
   - 外部API呼び出し
   - redirect / URL handling
+  - オブジェクトレベル認可（IDOR / BOLA）/ mass assignment（over-posting）
+  - JWT / OAuth / OIDC の不備（alg=none・署名検証欠如・弱い署名鍵・PKCE/state 欠如・redirect_uri 緩和・トークン失効/保管）
+  - SSTI（テンプレートインジェクション）
+  - 安全でないデシリアライズ（pickle / Java / PHP unserialize / YAML unsafe load）
+  - XXE（XML 外部実体）
+  - プロトタイプ汚染（JS / TS）
+  - ReDoS（正規表現 DoS）
+  - セキュリティヘッダ / CSP / HSTS
+  - レート制限 / アカウント列挙 / 総当り耐性
+  - GraphQL（introspection 公開・query 深さ/複雑度・batching 濫用）
+  - Webhook 署名・リプレイ検証
+  - クラウドメタデータ SSRF（169.254.169.254 / IMDSv2）
+  - アプリが呼ぶ LLM へのプロンプトインジェクション / LLM 出力を信頼しての二次被害（XSS・コマンド・SQL）/ LLM・外部 AI の API キーの扱い / tool・function calling の濫用・過剰権限
   - 機密値の扱い
   - ログへの秘密情報出力
   - ブラウザ保存領域への秘密情報保存
@@ -111,6 +124,9 @@ git commit / git push / git tag は絶対に行わないでください。
   - 既知 CVE
   - audit / vulnerability scan
   - 古い依存関係
+  - postinstall / ライフサイクルスクリプトの実行
+  - dependency confusion / typosquatting
+  - lockfile の整合・依存ピン未固定
   - 依存更新が現行機能へ与える影響
 
 - バグ:
