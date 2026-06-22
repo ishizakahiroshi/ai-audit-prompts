@@ -173,8 +173,10 @@ function getStructuralPatterns() {
       suggestion: 'ホームパスを ~/ などにマスク / Mask home path with `~/`',
     },
     {
-      name: 'Private IPv4 (RFC1918 / loopback)',
-      regex: /\b(?:10\.\d{1,3}\.\d{1,3}\.\d{1,3}|172\.(?:1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3}|192\.168\.\d{1,3}\.\d{1,3}|127\.0\.0\.1)\b/g,
+      // loopback (127.0.0.1) は共有定数で個人情報ではなく、技術文書での例示にも頻出するため対象外。
+      // RFC1918 (10/8, 172.16/12, 192.168/16) のみを内部 LAN トポロジー漏洩として検知する。
+      name: 'Private IPv4 (RFC1918)',
+      regex: /\b(?:10\.\d{1,3}\.\d{1,3}\.\d{1,3}|172\.(?:1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3}|192\.168\.\d{1,3}\.\d{1,3})\b/g,
       suggestion: '内部 IP を一般化または削除 / Generalize or remove internal IP',
     },
   ];
