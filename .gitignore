@@ -18,6 +18,7 @@ secrets.*
 *secret*
 *credential*
 *token*
+!scripts/secrets-scan.mjs
 .netrc
 .npmrc
 .pypirc
