@@ -161,8 +161,10 @@ function loadFamilyWatchlist(familyRoot) {
 function getStructuralPatterns() {
   return [
     {
+      // `Program Files` / `Windows` は共有システムパスで個人情報ではないため対象外。
+      // `Users` / `dev` のみ personal-path として検知する。
       name: 'Windows absolute path',
-      regex: /[A-Za-z]:[\\/](?:Users|dev|Program Files|Windows)[\\/]/g,
+      regex: /[A-Za-z]:[\\/](?:Users|dev)[\\/]/g,
       suggestion: '個人パスを削除またはプレースホルダ化 / Remove personal absolute path or use a placeholder',
     },
     {
