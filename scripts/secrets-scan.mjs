@@ -38,6 +38,26 @@ const EXEMPT_PATHS = [
 const MIN_NEEDLE_LEN = 2;
 const MAX_FILE_SIZE = 1024 * 1024;
 
+// === Public-email allowlist ===
+// メールアドレスは構造 regex で全件検知し、「公開する前提のアドレス」だけをここで通す。
+// 非公開アドレスそのものは絶対にここへ書かない（allowlist 方式なら書かずに防げる）。
+const ALLOWED_EMAILS = [
+  'ishizakahiroshi.dev@gmail.com', // 公開コミット名義・package manifest 用
+];
+const ALLOWED_EMAIL_DOMAINS = [
+  'users.noreply.github.com',  // GitHub の noreply
+  'anthropic.com',             // AI コミット footer（Co-Authored-By）
+  'example.com',               // ドキュメントの例示用
+  // ここに各プロジェクトの公開窓口ドメインを追記する（例: 'manabi-map.app'）
+];
+
+function isAllowedEmail(matched) {
+  const email = matched.toLowerCase();
+  if (ALLOWED_EMAILS.includes(email)) return true;
+  const domain = email.split('@')[1] || '';
+  return ALLOWED_EMAIL_DOMAINS.some(d => domain === d || domain.endsWith('.' + d));
+}
+
 const BINARY_EXTS = new Set([
   '.png', '.jpg', '.jpeg', '.gif', '.bmp', '.webp', '.ico',
   '.pdf', '.zip', '.tar', '.gz', '.bz2', '.xz', '.7z', '.rar',
@@ -179,6 +199,14 @@ function getStructuralPatterns() {
       regex: /\b(?:10\.\d{1,3}\.\d{1,3}\.\d{1,3}|172\.(?:1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3}|192\.168\.\d{1,3}\.\d{1,3})\b/g,
       suggestion: '内部 IP を一般化または削除 / Generalize or remove internal IP',
     },
+    {
+      // allowlist（ALLOWED_EMAILS / ALLOWED_EMAIL_DOMAINS）に無いメールアドレスは全件ブロック。
+      // 個人アドレスを watchlist に書かずに検知するための allowlist 方式。
+      name: 'Email address (not on public allowlist)',
+      regex: /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9][A-Za-z0-9.-]*\.[A-Za-z]{2,}\b/g,
+      allow: isAllowedEmail,
+      suggestion: '非公開メールを削除 / 公開前提のアドレスなら ALLOWED_EMAILS(_DOMAINS) へ追加',
+    },
   ];
 }
 
@@ -284,11 +312,11 @@ function scanFile(path, needleMap, structuralPatterns) {
     }
 
     // structural patterns
-    for (const { name, regex, suggestion } of structuralPatterns) {
+    for (const { name, regex, suggestion, allow } of structuralPatterns) {
       regex.lastIndex = 0;
       let m;
       while ((m = regex.exec(line)) !== null) {
-        if (!isAllowedByDirective(line, m[0])) {
+        if (!(allow && allow(m[0])) && !isAllowedByDirective(line, m[0])) {
           hits.push({
             file: path,
             lineNumber: i + 1,
