@@ -5,6 +5,8 @@
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-07-12
+
 ### Added
 
 - 全 9 プロンプト + 正本 2 ファイル（`docs/README_invariants.md` / `docs/README_invariants_server.md`）に「**結果報告 md の逐次ドラフト運用**」を不変条件として追加。途中でセッションが切れた場合に「plan md だけ残って結果報告 md は空」となる事故を防ぐための fail-safe。
