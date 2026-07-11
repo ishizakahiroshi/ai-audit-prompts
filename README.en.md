@@ -6,12 +6,13 @@
 
 # AI Code Audit Prompts
 
-A collection of paste-ready prompts for getting AI agents (Claude Code / Codex CLI, etc.) to perform "security, vulnerability, bug, and maintainability audits, plus fixes that don't break existing behavior." Only project-agnostic, reusable templates live here.
+A collection of paste-ready prompts for getting AI agents (Claude Code / Codex CLI, etc.) to perform security, vulnerability, bug, and maintainability audits. By default they do not modify your source: they produce a report plus an applicable fix proposal (diff / before-after code) for each finding. Only when you explicitly set the scope do they apply fixes, within the bounds of not breaking existing behavior. Only project-agnostic, reusable templates live here.
 
 ## What this is
 
 - A set of prompts in `docs/`, picked by tool (Claude / Codex) and DB category (with DB / without DB), for running heavy code audits.
 - Every prompt shares the same premises: "no builds, commits, production DB operations, or sweeping rewrites," "run all the way through without stopping," and "record anything that needs a human decision and move on."
+- **By default, no source files are modified** (default scope = "investigate only"). You get a report and per-finding fix proposals (diff / before-after code); specify `Scope: full loop` (or "investigate & fix") only when you want fixes applied.
 - **Every audit report opens with an overall score header**: a total out of 100, plus 5-category scores with sub-item breakdowns and a "deduction reason → how to clear it" column. At a glance you can see overall health, which category is weak, and what to fix to raise the score.
 - The invariants that all prompts must uphold are canonicalized in [docs/README_invariants.md](docs/README_invariants.md).
 - This prompt collection comes with no warranty. AI audits can produce false positives and misses. Always have a human review the results — including confirmed findings — before applying them to production. Use at your own risk.
@@ -46,7 +47,7 @@ With arguments:
 Read <repo>/docs/README_activation.md, pick the claude_ultracode audit prompt, and run it. Use ultracode.
 DB category: with DB
 Intensity: mid
-Scope: investigate only
+Scope: full loop
 Perspective: security & vulnerabilities
 Target: src/api/
 Exclude: src/api/tests/
@@ -70,7 +71,7 @@ Read <repo>/docs/README_activation.md, pick the claude_fable audit prompt, and r
 Read <repo>/docs/README_activation.md, pick the claude_fable audit prompt, and run it.
 DB category: with DB
 Intensity: mid
-Scope: investigate only
+Scope: full loop
 Perspective: security & vulnerabilities
 Target: src/api/
 Exclude: src/api/tests/
@@ -88,7 +89,7 @@ With arguments:
 Read <repo>/docs/README_activation.md, pick the codex audit prompt, and run it.
 DB category: with DB
 Intensity: mid
-Scope: investigate only
+Scope: full loop
 Perspective: security & vulnerabilities
 Target: src/api/
 Exclude: src/api/tests/
@@ -96,6 +97,8 @@ Exclude: src/api/tests/
 
 - You don't need to name the file directly; the activation rules auto-select by tool × DB category.
 - Omit `DB category` to auto-detect from the repo. Omit any other argument to use its default value.
+- When `Scope` is omitted, it defaults to "investigate only" (report + fix proposals; no source changes). Specify `Scope: full loop` (or "investigate & fix") to have fixes applied.
+- By default, the prompt asks for your final approval before anything runs — showing the chosen prompt file, the resolved arguments, and whether source files will be modified. This is a conversational gate separate from tool permissions, so it works even in bypass-permissions / YOLO modes. Pass `Confirm: no` for non-interactive / CI runs.
 - The trailing `ultracode` in the Claude version is a switch for multi-agent parallelism. Drop it when you want a lighter run.
 - Reports come back in the language you use — ask in English and you get English, ask in Japanese and you get Japanese. No translation needed.
 
@@ -160,7 +163,7 @@ docs/
   codex_audit_server.md                  ← Codex / server diagnosis (read-only)
 ```
 
-There are two families. **Code audit** (review a repo for security, vulnerabilities, bugs, and maintainability, and fix within the bounds of not breaking existing behavior) and **server diagnosis** (diagnose a live server reachable over SSH, fully read-only, and report remediation advice — never applying changes).
+There are two families. **Code audit** (review a repo for security, vulnerabilities, bugs, and maintainability, producing a report and fix proposals; fixes are applied only when the scope says so, within the bounds of not breaking existing behavior) and **server diagnosis** (diagnose a live server reachable over SSH, fully read-only, and report remediation advice — never applying changes).
 
 The codex versions are detailed/enumerated, claude_ultracode versions are condensed (parallel fan-out), and claude_fable versions use deep single-agent reasoning — the granularity differs, but the invariants within each family are identical: code audit is canonicalized in [docs/README_invariants.md](docs/README_invariants.md), server diagnosis in [docs/README_invariants_server.md](docs/README_invariants_server.md).
 

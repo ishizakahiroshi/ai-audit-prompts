@@ -8,7 +8,7 @@ AI エージェント（Claude Code / Codex CLI 等）に「セキュリティ�
 
 監査は 2 系統:
 
-- **コード監査** — リポジトリのセキュリティ・脆弱性・バグ・保守性を見て、現行機能を壊さない範囲で修正まで行う。
+- **コード監査** — リポジトリのセキュリティ・脆弱性・バグ・保守性を監査し、レポートと修正案を出力する。既定ではソースを書き換えず、スコープ指定時のみ現行機能を壊さない範囲で修正まで行う。
 - **サーバー診断** — SSH でアクセスできる稼働中サーバーを **完全 read-only** で診断し、対策を提言する（適用は人間）。
 
 ## 不変条件（正本 = source of truth）
@@ -46,6 +46,9 @@ docs/
   {ツール}_audit_{対象}.md      ← 各貼り付け用プロンプト
   local/                       ← 非公開メモ（plan_* 等・gitignore 対象）
 assets/                        ← README 用画像（既存追跡分のみ。新規は gitignore）
+scripts/                       ← secrets-scan（secrets-scan.mjs）と pre-commit hook 導入（install-hooks.sh / .ps1）
+.githooks/pre-commit           ← コミット時に secrets-scan を実行する hook（install-hooks で有効化）
+.github/workflows/secrets-scan.yml ← push/PR 時の secrets-scan CI
 README.md / README.en.md       ← 日本語 / 英語の入口
 CHANGELOG.md / LICENSE
 ```
@@ -60,12 +63,15 @@ CHANGELOG.md / LICENSE
 
 「監査の進め方（メソッド）」だけを置く、が本リポジトリの線引き。
 
-## 作業運用ルール（AI 共通）
+## 作業運用ルール（このリポジトリ固有）
 
 - **監査プロンプトの中身を実際に実行しない。** ここはプロンプトを編集・整備するリポジトリであって、監査を走らせる場ではない。ユーザーが明示的に「このプロンプトでこのリポを監査して」と指示した場合のみ実行する。
-- **コミット・プッシュ・タグ付けはユーザーの明示指示があるまで行わない**（提案・確認質問もしない。変更内容の要約だけ伝える）。
 - プロンプトを変更したら、**README.md / README.en.md / CHANGELOG.md / 関連正本との整合** を必ず確認する（ファイルを増減したらディレクトリ構成の記述も更新）。日本語版を変えたら英語版も追随させる。
-- `docs/` 配下に新規 `.md`（`plan_*` / `bugfix_*` / `pending_*` など作業メモ）を作る場合は **`docs/local/` に置く**（公開ツリーを汚さない）。命名・書式は各利用者のグローバル AI 設定に従う。
+- `docs/` 配下に新規 `.md`（`plan_*` / `bugfix_*` / `pending_*` など作業メモ）を作る場合は **`docs/local/` に置く**（公開ツリーを汚さない）。
+
+## AI 作業共通ルール
+
+ビルド・コミット禁止、secrets-scan 責務、plan/bugfix/pending md の作成ルール（命名・書式含む）等の AI 作業共通ルールは、各利用者のグローバル AI 設定に従う（作者環境の例: `~/.claude/CLAUDE.md` および `~/.claude/guides/`）。
 
 ## 参照リンク
 
