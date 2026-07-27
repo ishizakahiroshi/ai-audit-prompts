@@ -176,9 +176,10 @@ docs/
   claude_ultracode_audit_server.md       ← Claude ultracode / サーバー診断（read-only）
   claude_fable_audit_server.md           ← Claude Fable / サーバー診断（read-only）
   codex_audit_server.md                  ← Codex / サーバー診断（read-only）
+  claude_ultracode_audit_doc_vs_impl.md  ← Claude ultracode / 資料突合（read-only）
 ```
 
-監査は 2 系統あります。**コード監査**（リポジトリのセキュリティ・脆弱性・バグ・保守性を監査してレポートと修正案を出力。スコープ指定時のみ現行機能を壊さない範囲で修正まで）と、**サーバー診断**（SSH でアクセスできる稼働中サーバーを完全 read-only で診断し、対策を提言）です。
+監査は 3 系統あります。**コード監査**（リポジトリのセキュリティ・脆弱性・バグ・保守性を監査してレポートと修正案を出力。スコープ指定時のみ現行機能を壊さない範囲で修正まで）と、**サーバー診断**（SSH でアクセスできる稼働中サーバーを完全 read-only で診断し、対策を提言）、**資料突合**（説明会資料・マニュアル・仕様書など外部作成資料の記載と現行実装の差異を完全 read-only で洗い出し。修正は適用しない）です。
 
 codex 版は詳細列挙型、claude_ultracode 版は凝縮型（並列ファンアウト）、claude_fable 版は単一エージェント深い推論型で粒度が異なりますが、各系統で守る不変条件は同じで、コード監査は [docs/README_invariants.md](docs/README_invariants.md)、サーバー診断は [docs/README_invariants_server.md](docs/README_invariants_server.md) で正本管理しています。
 

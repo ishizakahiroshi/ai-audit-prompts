@@ -161,9 +161,10 @@ docs/
   claude_ultracode_audit_server.md       ← Claude ultracode / server diagnosis (read-only)
   claude_fable_audit_server.md           ← Claude Fable / server diagnosis (read-only)
   codex_audit_server.md                  ← Codex / server diagnosis (read-only)
+  claude_ultracode_audit_doc_vs_impl.md  ← Claude ultracode / doc-vs-implementation audit (read-only)
 ```
 
-There are two families. **Code audit** (review a repo for security, vulnerabilities, bugs, and maintainability, producing a report and fix proposals; fixes are applied only when the scope says so, within the bounds of not breaking existing behavior) and **server diagnosis** (diagnose a live server reachable over SSH, fully read-only, and report remediation advice — never applying changes).
+There are three families. **Code audit** (review a repo for security, vulnerabilities, bugs, and maintainability, producing a report and fix proposals; fixes are applied only when the scope says so, within the bounds of not breaking existing behavior), **server diagnosis** (diagnose a live server reachable over SSH, fully read-only, and report remediation advice — never applying changes), and **doc-vs-implementation audit** (compare an externally authored document — briefing decks, manuals, specs — against the current implementation, fully read-only, and report discrepancies with severity — never applying changes).
 
 The codex versions are detailed/enumerated, claude_ultracode versions are condensed (parallel fan-out), and claude_fable versions use deep single-agent reasoning — the granularity differs, but the invariants within each family are identical: code audit is canonicalized in [docs/README_invariants.md](docs/README_invariants.md), server diagnosis in [docs/README_invariants_server.md](docs/README_invariants_server.md).
 

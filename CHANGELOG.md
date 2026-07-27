@@ -5,6 +5,11 @@
 
 ## [Unreleased]
 
+### Added
+
+- 資料突合監査（`doc_vs_impl`）を第 3 系統として追加: `docs/claude_ultracode_audit_doc_vs_impl.md`。外部作成の資料（説明会資料・マニュアル・仕様書・顧客向け文書）の記載と現行実装の差異を完全 read-only で洗い出す（主張のページ番号付き抽出 → テーマ分割並列検証 → 否定結論の二経路裏取り → 差異全件の敵対的検証 → 重要度別報告）。PDF はテキスト抽出とページ画像目視の両輪で読解する。codex / claude_fable 版は未作成
+- `docs/README_naming.md` に監査対象の第 3 系統 `doc_vs_impl` を追記、`docs/README_activation.md` に区分判定・自動選択ルール・引数（資料 / 対象 / 正典 / 強度 / 確認）を追記。README.md / README.en.md のディレクトリ構成・系統説明も追随
+
 ## [0.7.0] - 2026-07-12
 
 ### Added

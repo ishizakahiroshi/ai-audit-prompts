@@ -10,7 +10,7 @@
 
 - 軸の順序は固定: `ツール名` → `audit` → `監査対象`
 - すべて小文字・アンダースコア区切り（kebab-case ではなく snake_case）
-- `{監査対象}` は「コード監査（DB区分）」と「サーバー診断（server）」の 2 系統。コード監査では DB区分（`db_app` / `db_less_app`）が、サーバー診断では `server` が入る。
+- `{監査対象}` は「コード監査（DB区分）」「サーバー診断（server）」「資料突合（doc_vs_impl）」の 3 系統。コード監査では DB区分（`db_app` / `db_less_app`）が、サーバー診断では `server` が、資料突合では `doc_vs_impl` が入る。
 
 ### {ツール}
 
@@ -29,6 +29,7 @@
 | `db_less_app` | コード監査。DB を使わないアプリ。永続化はファイル/設定/JSON/YAML/TOML/ブラウザ保存領域/Cookie/キャッシュ/メモリ/外部API |
 | `db_app` | コード監査。DB を使うアプリ。DBアクセス層（SQL/ORM/トランザクション）も監査対象 |
 | `server` | サーバー診断。SSH でアクセスできる稼働中サーバーを完全 read-only で診断し、対策を提言する（修正は適用しない）。DB区分の軸は持たない |
+| `doc_vs_impl` | 資料突合監査。外部作成の資料（説明会資料・マニュアル・仕様書・顧客向け文書）の記載と現行実装の差異を完全 read-only で洗い出す（修正は適用しない）。DB区分の軸は持たない。資料パスを引数で受ける |
 
 ## 現在のファイル
 
@@ -47,6 +48,14 @@
 | Codex | `codex_audit_server.md` |
 | Claude (ultracode) | `claude_ultracode_audit_server.md` |
 | Claude (Fable) | `claude_fable_audit_server.md` |
+
+資料突合（完全 read-only）:
+
+| ツール | ファイル |
+|---|---|
+| Claude (ultracode) | `claude_ultracode_audit_doc_vs_impl.md` |
+
+> codex / claude_fable 版の資料突合プロンプトは未作成（必要になった時点でこのスキームで追加する）。
 
 ## ファイル内部の書式
 

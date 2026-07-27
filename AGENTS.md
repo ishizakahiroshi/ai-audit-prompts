@@ -7,6 +7,7 @@ This repository's operational guidance is maintained in `CLAUDE.md`.
 - Invariants — source of truth:
   - Code audit: `./docs/README_invariants.md`
   - Server diagnosis: `./docs/README_invariants_server.md`
+  - Doc-vs-implementation audit: self-contained in the prompt (no separate invariants file)
 - Naming scheme: `./docs/README_naming.md`
 - Local/private additions (if present, not committed): `./docs/local/`
 
