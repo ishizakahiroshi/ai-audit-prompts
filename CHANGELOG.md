@@ -10,6 +10,11 @@
 - 資料突合監査（`doc_vs_impl`）を第 3 系統として追加: `docs/claude_ultracode_audit_doc_vs_impl.md`。外部作成の資料（説明会資料・マニュアル・仕様書・顧客向け文書）の記載と現行実装の差異を完全 read-only で洗い出す（主張のページ番号付き抽出 → テーマ分割並列検証 → 否定結論の二経路裏取り → 差異全件の敵対的検証 → 重要度別報告）。PDF はテキスト抽出とページ画像目視の両輪で読解する。codex / claude_fable 版は未作成
 - `docs/README_naming.md` に監査対象の第 3 系統 `doc_vs_impl` を追記、`docs/README_activation.md` に区分判定・自動選択ルール・引数（資料 / 対象 / 正典 / 強度 / 確認）を追記。README.md / README.en.md のディレクトリ構成・系統説明も追随
 
+### Changed
+
+- コード監査の結果報告 md を対応状況のハブとして整理。総合評価の直後に対応状況サマリ、優先順の対応一覧、対応 C の詳細を置き、`plan` / `fix` / `pending` の対応状況と検証状態を分離して追跡する形式を6本のコード監査 prompt と `docs/README_invariants.md` に反映
+- finding ID に `[fix]` 等を付けず、監査判定・対応状況・検証状態・対応 C を表の列で管理。大きな C だけ子 plan へ分割し、audit 用 plan md は調査ログ、結果報告 md は対応状況の正本とする
+
 ## [0.7.0] - 2026-07-12
 
 ### Added
