@@ -1,3 +1,11 @@
+---
+type: "Naming Convention"
+title: "docs 命名規則"
+description: "監査プロンプトのファイル名と tool・target・family metadata の値域を定義する正本。"
+tags: ["audit", "naming", "metadata"]
+status: "stable"
+---
+
 # docs 命名規則
 
 このディレクトリには、各種コード監査を AI エージェントに依頼するための「貼り付け用プロンプト（goal）」を md 形式で置く。用途は共通（セキュリティ・脆弱性・バグ・保守性の監査と現行機能を壊さない範囲での修正）なので、ファイル名を以下のスキームで統一する。
@@ -56,6 +64,35 @@
 | Claude (ultracode) | `claude_ultracode_audit_doc_vs_impl.md` |
 
 > codex / claude_fable 版の資料突合プロンプトは未作成（必要になった時点でこのスキームで追加する）。
+
+## OKF 選択 metadata
+
+`docs/` は OKF v0.2 Bundle であり、各監査プロンプトの `audit.tool`・`audit.target`・`audit.family` はこの節を値域の正本とする。値はファイル名と `README_activation.md` の自動選択表から機械的に導出し、独自の別名を作らない。
+
+| metadata | 許可値 | 対応関係 |
+|---|---|---|
+| `audit.tool` | `codex` / `claude_ultracode` / `claude_fable` | ファイル名の `{ツール}` と一致 |
+| `audit.target` | `db_app` / `db_less_app` / `server` / `doc_vs_impl` | ファイル名の `{監査対象}` と一致 |
+| `audit.family` | `code` / `server` / `doc_vs_impl` | `db_app`・`db_less_app` は `code`、`server` は `server`、`doc_vs_impl` は `doc_vs_impl` |
+
+通常文書の `type` は次の概念語彙に固定する。`status` は OKF の文書 lifecycle であり、監査の実行状態や docsweep の作業状態ではない。
+
+| 文書群 | `type` |
+|---|---|
+| `*_audit_*.md` | `Audit Prompt` |
+| `README_invariants*.md` | `Audit Invariant` |
+| `README_activation.md` | `Audit Routing Policy` |
+| `README_naming.md` | `Naming Convention` |
+
+### 監査成果物の命名
+
+prompt のファイル名は上表の `{tool}_audit_{target}.md` とする。prompt が生成・更新する
+監査証跡の既定保存先は prompt リポジトリではなく、監査対象 repo の
+`docs/ai-audit-prompts/report_audit_<topic>_<YYYY-MM-DD>.md` とする。
+ユーザーが `保存先=<repo 相対パス>` を明示した場合は、その保存先を使う。
+作業計画は監査対象 repo の `docs/local/plan_<audit-topic>.md` に置く。
+report は `type: audit-report`、`status: draft|stable`、`docsweep_policy: never_archive`
+を使い、`docsweep_state` / `due` は使わない。
 
 ## ファイル内部の書式
 

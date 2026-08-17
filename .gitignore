@@ -69,3 +69,6 @@ archive/
 
 # docsweep: backup snapshots (30-day retention, auto-cleanup)
 .docsweep/
+# === obsidian-link: managed ===
+/docs/obsidian/
+# === /obsidian-link: managed ===

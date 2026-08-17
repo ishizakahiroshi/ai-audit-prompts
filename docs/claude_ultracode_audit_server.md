@@ -1,3 +1,15 @@
+---
+type: "Audit Prompt"
+title: "Claude ultracode Goal: 稼働サーバーの脆弱性診断・ハードニング提言（完全 read-only）"
+description: "Claude ultracode の多エージェント並列で稼働中サーバーを完全 read-only 診断し、ハードニング提言を行う貼り付け用プロンプト。"
+tags: ["audit", "claude_ultracode", "server"]
+status: "stable"
+audit:
+  tool: "claude_ultracode"
+  target: "server"
+  family: "server"
+---
+
 # Claude ultracode Goal: 稼働サーバーの脆弱性診断・ハードニング提言（完全 read-only）
 
 Claude Code の ultracode（多エージェント並列ワークフロー）で実行するための汎用プロンプト。
@@ -13,6 +25,8 @@ ultracode
 観点: ＿＿＿（後述の診断観点から複数選択可、省略時は全部）
 対象: ＿＿＿（特定サービス・パスに絞る、省略時はサーバー全体）
 除外: ＿＿＿（省略時は除外なし）
+保存先: ＿＿＿（report owner repo の repo 相対パス、省略時は `docs/ai-audit-prompts`。`docs/obsidian` は明示指定時のみ）
+Git管理: ＿＿＿（通常の保存先フォルダの初回作成時に ignore / track、省略時は作成前の確認で決定）
 
 ※ 引数ブロック全体を省略、または各行の値を空のままにした場合は、その引数のデフォルト値を適用して動作する。
 ※ このプロンプトに修正・適用スコープは無い。常に read-only 診断で固定。
@@ -105,7 +119,7 @@ AI接続モードで「接続先」を受け取ったら、診断観点の本格
 workflow を使い、診断は観点ごとに並列ファンアウトする。各エージェントは担当観点の read-only コマンドを実行し、観測した状態を根拠として finding を構造化出力する（対象・現状・根拠コマンド・重大度・確信度・リスク・推奨対策・適用時の注意・検証方法）。重い観点（SUID 全走査・全ユーザー cron・全サービス設定）は強度ハイでさらに分担して取りこぼしを減らす。各 finding は敵対的に検証してから確定する。サーバーの状態を変える操作はどのエージェントも行わない。
 
 ■ フェーズ構成
-1. 初期把握: 接続方法・接続先を確認し、read-only コマンド（uname -a 等）で接続を確認。作業ディレクトリの AGENTS.md / CLAUDE.md / README 等のプロジェクト指示を読む（命名ルール等）。docs/local があればそこ、なければ docs に plan を作成（命名ルールがあれば優先。無ければ plan_server_vulnerability_audit.md）。まずホスト基本情報を集め、サーバーの役割（公開Web・内部DB・踏み台・汎用等）を推定。CIS Benchmark 的観点は参考にしつつ、役割を踏まえて意図的な設定を誤検出にしない。
+1. 初期把握: 接続方法・接続先を確認し、read-only コマンド（uname -a 等）で接続を確認。作業ディレクトリの AGENTS.md / CLAUDE.md / README 等のプロジェクト指示を読む（命名ルール等）。明示された owner private repo の `docs/local/plan_server_vulnerability_audit.md` に plan を作成（命名ルールがあれば優先）。owner が無い場合は実 SSH 接続前に止め、保存先を推測しない。まずホスト基本情報を集め、サーバーの役割（公開Web・内部DB・踏み台・汎用等）を推定。CIS Benchmark 的観点は参考にしつつ、役割を踏まえて意図的な設定を誤検出にしない。
 2. 診断フェーズ（並列・read-only）: 下記観点を別エージェントに分け、各自が担当範囲を read-only コマンドで走査し finding を構造化出力。
    ◆ ホスト・OS: ディストリ/バージョン/EOL、カーネル版数、稼働時間、役割推定、認証前バナー（/etc/issue・issue.net・motd・sshd Banner）の過剰な版数/ホスト/連絡先の情報開示
    ◆ SSH設定: 判定は必ず実効値（sudo sshd -T）で行い sshd_config.d/*.conf と Match/Include の条件付き緩和まで突き合わせる（ファイル直読のみで安全判定しない）。PermitRootLogin / PasswordAuthentication / PermitEmptyPasswords / PubkeyAuthentication / Port / MaxAuthTries / AllowUsers・Groups / X11Forwarding、鍵・~/.ssh 権限、fail2ban 等。暗号スイート（Ciphers/MACs/KexAlgorithms/HostKeyAlgorithms/PubkeyAcceptedAlgorithms に CBC・arcfour・3des・hmac-md5/sha1・non-etm・group1/14-sha1・ssh-rsa(SHA-1)・ssh-dss 等の弱アルゴリズム受理）、ホスト鍵・authorized_keys の鍵種別/鍵長（DSA・1024bit 以下 RSA 等。種別・bit・フィンガープリントのみ、鍵本体は出さない）、セッション制御（LoginGraceTime・ClientAliveInterval/CountMax・MaxStartups・MaxSessions）、フォワーディング（AllowTcpForwarding・AllowAgentForwarding・GatewayPorts・PermitTunnel。踏み台でなければリスク）、多段認証（AuthenticationMethods・PAM の MFA）、PermitRootLogin 許可時の root authorized_keys の制限オプション（from=/command=/restrict）と件数、sftp 限定ユーザーの ChrootDirectory/ForceCommand internal-sftp
@@ -136,8 +150,8 @@ workflow を使い、診断は観点ごとに並列ファンアウトする。�
 ■ 最初に必ず行うこと
 1. 接続方法・接続先を確認し、AI接続モードならまず「接続前のユーザー最終承認」（ホスト名・解決した IP・接続ユーザー名・鍵の保存場所とファイル名・ポートを提示して明示承認を得る。承認まで実 SSH 接続をしない）を行い、承認後に「接続先実体の整合チェック」節に従い接続先実体を検証してから先に進む。サーバー上モードなら read-only コマンド（uname -a 等）で接続確認
 2. AGENTS.md / CLAUDE.md / README 等のプロジェクト指示を読む
-3. docs/local があればそこ、なければ docs に plan を作成。完全 read-only・状態変更禁止・提言のみ・止まらず走る・判断待ちは記録してパスを明記し、作業中ずっと更新
-4. 結果報告 md も plan md と同じディレクトリに、最終フェーズを待たず**初期準備フェーズで空テンプレとして先に作成**する（総合評価ヘッダー骨格 + 「対象ホスト・役割推定 / 接続方法 / 実施した診断 / 対策提言一覧（重大度順）/ 判断待ち事項 / 実行できなかった検査と理由」等のセクション見出しを並べた骨格）。途中停止で「plan md だけ残って結果報告 md は空」になる事故を防ぐため、finding が確定するたびと各フェーズ終端（診断・敵対的検証・提言）で結果報告 md にもスコア・提言一覧・適用時の注意を反映する。plan md と結果報告 md で同じ内容を 2 箇所に書く重複は許容する。最終フェーズで追記するのは rubric 採点結果と最終報告の総括のみ
+3. owner private repo の `docs/local/plan_server_vulnerability_audit.md` を完全 read-only・状態変更禁止・提言のみ・止まらず走る・判断待ちは記録してパスを明記し、作業中ずっと更新
+4. owner private repo の既定保存先 `docs/ai-audit-prompts/report_audit_server_<YYYY-MM-DD>.md` を初期準備フェーズで空テンプレとして作成し、finding 確定ごとと各フェーズ終端で逐次更新する。`保存先` 引数で report の保存先を変更でき、`docs/obsidian` は明示指定時のみ使用する。既定フォルダが未存在なら、作成予定と初回の `.gitignore` 追加または追跡の方針を確認し、承認後にだけ作成する。frontmatter は `type: audit-report`、`status: draft`、`tags`、`owner`、`related`、`last_reviewed`、`docsweep_policy: never_archive` とし、`docsweep_state` / `due` は付けない。指定先が無い場合は、既定保存先へ切り替えてよいかを確認し、無断で fallback しない
 
 ■ plan md のメモリ運用（fail→investigate→verify→distill→consult）
 - fail: 却下・誤検出 finding も理由ごと残す / investigate: 誤検出の原因をその場で調べる / verify: 診断を根拠（コマンド出力）付きの確認済み事実へ昇格 / distill:「このサーバーでは〜である」形式の一般ルール（役割・構成・ベースライン）へ蒸留し「確認済みルール」セクションに集約 / consult: 追加調査前に確認済みルールを参照し再導出しない
@@ -146,7 +160,7 @@ workflow を使い、診断は観点ごとに並列ファンアウトする。�
 対象ホスト（識別情報は最小限・秘密はマスク）/ 接続方法 / 役割推定 / 診断観点 / 禁止事項（完全 read-only）/ TODOチェックリスト / 診断ログ / finding 一覧（ID・観点・重大度・確信度・対象・現状・根拠・リスク・推奨対策・適用時の注意・検証方法・スコア影響: 該当カテゴリ / サブ項目・クリアで総合 +N 点・ステータス）/ 敵対的検証結果（確定・却下・重複）/ 確認済みルール / 判断待ち事項 / 最終結果
 
 ■ 結果報告 md（plan md とは別に作成）
-docs/local があればそこ、なければ docs に作成（report 命名規則があれば従う。無ければ report_server_vulnerability_audit_YYYY-MM-DD.md）。冒頭に総合評価ヘッダー（総合スコア / カテゴリ別スコア / サブ項目 / 評価バッジ / 減点理由→クリア条件）を出力。対策提言を重大度順にまとめる。各提言に: 対象 / 現状 / リスク / 推奨対策（コマンド・設定差分）/ 適用時の副作用・注意（SSH・FW はロックアウト回避手順必須）/ 適用後の検証方法 / 前提となる役割。末尾に: サーバー状態を一切変更していない / 対策は提言のみで未適用（適用は人間）/ 自動検出で人間レビュー前提・検出漏れ誤検出あり / 判断待ちで停止せず走り切ったこと / スコアは人間レビュー後に変動しうる旨も最終報告に明記する。
+ owner private repo の解決済み保存先に作成する。既定は `docs/ai-audit-prompts/report_audit_server_<YYYY-MM-DD>.md`、`保存先` 引数で変更できる。`docs/obsidian` は明示指定時のみ使用する。frontmatter は `type: audit-report`、`status: draft` で開始し、完了時だけ `stable` にする。`docsweep_policy: never_archive` を付け、`docsweep_state` / `due` は付けない。冒頭に総合評価ヘッダー（総合スコア / カテゴリ別スコア / サブ項目 / 評価バッジ / 減点理由→クリア条件）を出力する。指定先が無い場合は、既定保存先へ切り替えてよいかを確認し、無断で fallback しない。対策提言を重大度順にまとめ、末尾にサーバー状態を変更していないこと等を明記する。
 
 ■ 優先度
 最優先: 認証なしで外部公開された管理面・DB・サービス（0.0.0.0 公開・無認証、IPv6 [::] だけ全公開の抜け含む）/ SSH の重大弱点（root パスワードログイン許可・パスワード認証＋ブルートフォース対策なし・空パスワード許可）/ 空・弱パスワードアカウント・UID 0 重複・過剰 NOPASSWD sudo / 既知重大 CVE の未更新・EOL OS・重大更新の patched-but-not-active（未再起動） / 侵害の明確な兆候 / world-writable な機密ファイル・権限の緩い秘密鍵・secrets 露出 / docker socket 露出・特権コンテナ・実質特権化（CapAdd・unconfined・docker socket bind）・docker グループ不用意付与

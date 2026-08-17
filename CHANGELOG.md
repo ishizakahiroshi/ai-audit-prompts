@@ -5,6 +5,16 @@
 
 ## [Unreleased]
 
+### Added
+
+- `docs/` を Open Knowledge Format (OKF) v0.2 の Knowledge Bundle として整備。既存 14 文書に概念 `type`、title、description、tags、lifecycle `status` を付け、監査 prompt には `audit.tool` / `audit.target` / `audit.family` を追加
+- Bundle root の `docs/index.md` を追加し、起動ルール → 選択 prompt → 関連する正本の順で progressive disclosure できる一覧を提供
+- Bundle の read-only 適合検査を `python -m docsweep okf-check docs --json`、公開禁止情報の検査を既存の secrets-scan で確認できるよう、README と開発ガイドに検証方法を記載
+
+### Changed
+
+- 監査 report の既定保存先を対象 repo の `docs/ai-audit-prompts/` に変更。`docs/obsidian/` はユーザーが明示指定した場合だけ使い、未存在の既定フォルダを初回作成するときは `.gitignore` に追加するか追跡対象にするかを確認するよう、起動 skill・正本・全監査 prompt を整合させた
+
 ## [0.8.0] - 2026-08-08
 
 ### Added

@@ -1,3 +1,11 @@
+---
+type: "Audit Routing Policy"
+title: "共通監査プロンプト起動ルール"
+description: "監査対象と実行ツールから、適切な監査プロンプトを段階的に選ぶための起動・自動選択ルール。"
+tags: ["audit", "routing", "selection"]
+status: "stable"
+---
+
 # 共通監査プロンプト起動ルール
 
 このディレクトリの監査プロンプトは重い作業用であり、通常の質問、軽い調査、コード説明、単発修正では自動起動しない。
@@ -66,20 +74,20 @@
 
 | 条件 | 使用ファイル |
 |---|---|
-| Codex CLI / Codex 用、DBあり | `codex_audit_db_app.md` |
-| Codex CLI / Codex 用、DBなし | `codex_audit_db_less_app.md` |
-| Claude / ultracode 用、DBあり | `claude_ultracode_audit_db_app.md` |
-| Claude / ultracode 用、DBなし | `claude_ultracode_audit_db_less_app.md` |
-| Claude Fable 用、DBあり | `claude_fable_audit_db_app.md` |
-| Claude Fable 用、DBなし | `claude_fable_audit_db_less_app.md` |
+| Codex CLI / Codex 用、DBあり | [`codex_audit_db_app.md`](codex_audit_db_app.md) |
+| Codex CLI / Codex 用、DBなし | [`codex_audit_db_less_app.md`](codex_audit_db_less_app.md) |
+| Claude / ultracode 用、DBあり | [`claude_ultracode_audit_db_app.md`](claude_ultracode_audit_db_app.md) |
+| Claude / ultracode 用、DBなし | [`claude_ultracode_audit_db_less_app.md`](claude_ultracode_audit_db_less_app.md) |
+| Claude Fable 用、DBあり | [`claude_fable_audit_db_app.md`](claude_fable_audit_db_app.md) |
+| Claude Fable 用、DBなし | [`claude_fable_audit_db_less_app.md`](claude_fable_audit_db_less_app.md) |
 
 ### サーバー診断の場合（ツールのみ。DB軸なし）
 
 | 条件 | 使用ファイル |
 |---|---|
-| Codex CLI / Codex 用 | `codex_audit_server.md` |
-| Claude / ultracode 用 | `claude_ultracode_audit_server.md` |
-| Claude Fable 用 | `claude_fable_audit_server.md` |
+| Codex CLI / Codex 用 | [`codex_audit_server.md`](codex_audit_server.md) |
+| Claude / ultracode 用 | [`claude_ultracode_audit_server.md`](claude_ultracode_audit_server.md) |
+| Claude Fable 用 | [`claude_fable_audit_server.md`](claude_fable_audit_server.md) |
 
 サーバー診断のファイルは完全 read-only（サーバー状態を一切変更しない・対策は提言のみで適用は人間）が不変条件。正本は [README_invariants_server.md](README_invariants_server.md)。
 
@@ -87,7 +95,7 @@
 
 | 条件 | 使用ファイル |
 |---|---|
-| Claude / ultracode 用 | `claude_ultracode_audit_doc_vs_impl.md` |
+| Claude / ultracode 用 | [`claude_ultracode_audit_doc_vs_impl.md`](claude_ultracode_audit_doc_vs_impl.md) |
 
 codex / Claude Fable 版は未作成。指定された場合はその旨を伝え、ultracode 版の使用を提案する。資料突合は常に完全 read-only（ソース・資料とも書き換えない。結果報告 md の新規作成のみ可）で、不変条件はプロンプト内に自己完結している。
 
@@ -152,10 +160,12 @@ codex / Claude Fable 版は未作成。指定された場合はその旨を伝�
 | 対象 | パスを指定 | リポジトリ全体 |
 | 除外 | パスを指定 | 除外なし |
 | 確認 | あり / なし | あり |
+| 保存先 | `docs/ai-audit-prompts` / `docs/obsidian` / repo 相対パス | `docs/ai-audit-prompts` |
+| 初回 Git 管理 | `ignore` / `track` | 保存先フォルダの新規作成時に確認 |
 
 DB区分が明示されている場合は自動判定をスキップし、その値でファイルを選択する。
-強度・スコープ・観点・対象・除外・確認が明示されている場合は、選択したプロンプトの `＿＿＿` をその値に置き換えて実行する。
-確認「あり」（既定）の場合、調査を含む一切の作業前に「使用プロンプト・解決済み引数・ソースを書き換えるかどうか」を要約提示してユーザーの承認を待つ（実行前確認ゲート。正本は [README_invariants.md](README_invariants.md)）。「確認: なし」指定時のみ省略して直ちに開始する。
+強度・スコープ・観点・対象・除外・保存先・初回 Git 管理・確認が明示されている場合は、選択したプロンプトの `＿＿＿` をその値に置き換えて実行する。
+確認「あり」（既定）の場合、調査を含む一切の作業前に「使用プロンプト・解決済み引数・ソースを書き換えるかどうか」を要約提示してユーザーの承認を待つ（実行前確認ゲート。正本は [README_invariants.md](README_invariants.md)）。「確認: なし」指定時のみ省略して直ちに開始する。ただし未存在の保存先フォルダを作る場合、Git 管理方針（`ignore` / `track`）が別途明示されていなければ、暗黙に選ばず作成前に停止する。
 
 ### サーバー診断の引数（`*_audit_server.md` の場合）
 
@@ -169,6 +179,8 @@ DB区分が明示されている場合は自動判定をスキップし、その
 | 観点 | ホスト・OS / SSH設定 / OS・パッケージ脆弱性 / ネットワーク・公開サービス / ファイアウォール / ユーザー・権限 / ファイル権限・SUID / サービス・TLS / ログ・侵害痕跡 / cron・timer / secrets露出 / コンテナ / カーネル・ハードニング / MAC（SELinux/AppArmor） / 時刻同期 / データ保護 / 全部 | 全部 |
 | 対象 | 特定サービス・パス | サーバー全体 |
 | 除外 | パスを指定 | 除外なし |
+| 保存先 | report owner repo の repo 相対パス | `docs/ai-audit-prompts` |
+| 初回 Git 管理 | `ignore` / `track` | 保存先フォルダの新規作成時に確認 |
 
 ### 資料突合の引数（`*_audit_doc_vs_impl.md` の場合）
 
@@ -180,9 +192,13 @@ DB区分が明示されている場合は自動判定をスキップし、その
 | 対象 | パスを指定 | リポジトリ全体 |
 | 正典 | 前提ドキュメントのパス | プロジェクト指示ファイル（CLAUDE.md / AGENTS.md）が監査前提として指定する reference に従う |
 | 強度 | ロー / ミッド / ハイ | ハイ |
+| 保存先 | `docs/ai-audit-prompts` / `docs/obsidian` / repo 相対パス | `docs/ai-audit-prompts` |
+| 初回 Git 管理 | `ignore` / `track` | 保存先フォルダの新規作成時に確認 |
 | 確認 | あり / なし | あり |
 
 ## 起動時の動作
+
+OKF Bundle として利用する場合は、まず `index.md` を読み、次にこの起動ルール、選択した監査プロンプト、関連する不変条件の順に progressive disclosure する。通常の Markdown として直接このファイルから起動しても動作は変わらない。
 
 起動条件を満たしたら、以下の順に進める。
 
@@ -190,6 +206,39 @@ DB区分が明示されている場合は自動判定をスキップし、その
 2. `README_naming.md` を読む
 3. 自動選択ルールで該当する監査プロンプト md を読む
 4. 監査プロンプト本文に従って実行する
+
+### OKF 選択 metadata
+
+各監査プロンプトの `audit.tool`・`audit.target`・`audit.family` は、ファイル名とこの文書の自動選択表に対応する機械選択用 metadata である。許可値と概念 `type` の正本は [README_naming.md](README_naming.md) に置く。`status` は文書 lifecycle であり、監査の実行状態を表さない。
+
+## 成果物の保存先
+
+監査対象が Git repo の場合、作業計画は対象 repo の `docs/local/plan_<audit-topic>.md`、
+監査証跡の既定保存先は対象 repo の
+`docs/ai-audit-prompts/report_audit_<topic>_<YYYY-MM-DD>.md` とする。
+起動時に `保存先=<repo 相対パス>` を明示した場合は、report の保存先だけをそのパスへ変更する。
+
+`docs/ai-audit-prompts` が無い場合は、作成前の確認で「作成予定」と「Git 管理方針」を表示する。
+`ignore` を選んだ場合だけ対象 repo の `.gitignore` に `/docs/ai-audit-prompts/` の正確な規則を追加し、
+`track` を選んだ場合は `.gitignore` を変更しない。既存フォルダの ignore 状態は読み取り、既存方針を尊重する。
+「確認: なし」で新規作成する場合は、Git 管理方針を引数等で明示する。未指定ならフォルダを作成しない。
+
+`docs/obsidian` はユーザーが `保存先=docs/obsidian` と明示した場合だけ使用する。
+その場合は repo 相対 entry の `README.md`、LinkType/Target、書き込み可能性を確認し、central の絶対パスへ直接書き込まない。
+指定された保存先が無い、wrong target、read-only の場合は、既定の
+`docs/ai-audit-prompts` へ切り替えてよいかを確認し、無断で fallback しない。
+
+監査証跡の frontmatter は `type: audit-report`、`status: draft` で開始し、完了時だけ
+`stable` にする。`docsweep_policy: never_archive` を付け、`docsweep_state` と `due` は付けない。
+結果 report は証拠・評価・実行記録であり、未完了作業の正本ではない。対応が必要なら
+`docs/local` に plan / bugfix / pending を別途作り、report と相互リンクする。
+
+保存先が未解決のまま report を作成してはならない。prompt を表示しただけの外部 Codex 監査は
+report 保存済みと扱わない。
+
+server 監査は、実接続前に report owner となる private 管理 repo を明示しなければならない。
+owner が不明な場合は保存先を推測しない。owner repo 内の既定保存先も
+`docs/ai-audit-prompts` とし、`docs/obsidian` は明示指定時だけ使用する。
 
 ## 運用方針
 

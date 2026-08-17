@@ -14,7 +14,9 @@ A collection of paste-ready prompts for getting AI agents (Claude Code / Codex C
 - Every prompt shares the same premises: "no builds, commits, production DB operations, or sweeping rewrites," "run all the way through without stopping," and "record anything that needs a human decision and move on."
 - **By default, no source files are modified** (default scope = "investigate only"). You get a report and per-finding fix proposals (diff / before-after code); specify `Scope: full loop` (or "investigate & fix") only when you want fixes applied.
 - **Every audit report opens with an overall score header**: a total out of 100, plus 5-category scores with sub-item breakdowns and a "deduction reason → how to clear it" column. Immediately after that, the report contains a response-status summary, a prioritized response list, and per-C work details. At a glance you can see overall health, which category is weak, and what to do next. Response status uses `plan` (not started), `fix` (work completed), and `pending` (waiting for a decision or external dependency); verification status is tracked separately.
+- The default audit-report destination is `docs/ai-audit-prompts/` in the target repository. A user may explicitly set the `保存先` (save destination), for example `保存先=docs/obsidian`, or another repository-relative path; an Obsidian entry is used only after it is explicitly selected and confirmed.
 - The invariants that all prompts must uphold are canonicalized in [docs/README_invariants.md](docs/README_invariants.md).
+- The `docs/` directory is also an Open Knowledge Format (OKF) v0.2 Knowledge Bundle. It remains directly usable as ordinary Markdown, and [docs/index.md](docs/index.md) provides progressive disclosure from the activation rules to the selected prompt and its canonical invariants. OKF metadata does not change how the audit prompts execute.
 - This prompt collection comes with no warranty. AI audits can produce false positives and misses. Always have a human review the results — including confirmed findings — before applying them to production. Use at your own risk.
 
 ## How to use
@@ -99,6 +101,7 @@ Exclude: src/api/tests/
 - Omit `DB category` to auto-detect from the repo. Omit any other argument to use its default value.
 - When `Scope` is omitted, it defaults to "investigate only" (report + fix proposals; no source changes). Specify `Scope: full loop` (or "investigate & fix") to have fixes applied.
 - By default, the prompt asks for your final approval before anything runs — showing the chosen prompt file, the resolved arguments, and whether source files will be modified. This is a conversational gate separate from tool permissions, so it works even in bypass-permissions / YOLO modes. Pass `Confirm: no` for non-interactive / CI runs.
+- The report destination is part of that preflight confirmation. If the default `docs/ai-audit-prompts/` directory is missing, the prompt asks whether to create it and whether to add it to `.gitignore` or keep it tracked.
 - The trailing `ultracode` in the Claude version is a switch for multi-agent parallelism. Drop it when you want a lighter run.
 - Reports come back in the language you use — ask in English and you get English, ask in Japanese and you get Japanese. No translation needed.
 
@@ -148,6 +151,7 @@ If writing the path every time is tedious, add the snippet below to the target p
 
 ```
 docs/
+  index.md                    ← entry point for the OKF v0.2 Knowledge Bundle
   README_activation.md        ← auto-selection rules for which prompt to use (read first)
   README_naming.md            ← file naming scheme
   README_invariants.md        ← invariants for code-audit prompts (canonical)

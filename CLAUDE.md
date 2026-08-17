@@ -40,6 +40,7 @@ AI エージェント（Claude Code / Codex CLI 等）に「セキュリティ�
 
 ```
 docs/
+  index.md                    ← OKF v0.2 Knowledge Bundle root and progressive-disclosure entry
   README_activation.md         ← 起動・自動選択ルール（利用者が最初に読む）
   README_naming.md             ← 命名スキーム
   README_invariants.md         ← コード監査の不変条件（正本）
@@ -68,6 +69,7 @@ CHANGELOG.md / LICENSE
 
 - **監査プロンプトの中身を実際に実行しない。** ここはプロンプトを編集・整備するリポジトリであって、監査を走らせる場ではない。ユーザーが明示的に「このプロンプトでこのリポを監査して」と指示した場合のみ実行する。
 - プロンプトを変更したら、**README.md / README.en.md / CHANGELOG.md / 関連正本との整合** を必ず確認する（ファイルを増減したらディレクトリ構成の記述も更新）。日本語版を変えたら英語版も追随させる。
+- `docs/` の公開 Markdown を増減・分類変更した場合は、Bundle root の `docs/index.md`、frontmatter metadata、README 日英、CHANGELOG、関連正本の整合も確認する。`index.md` は OKF 予約形式の root 文書として `okf_version` 以外の frontmatter key を持たせない。
 - `docs/` 配下に新規 `.md`（`plan_*` / `bugfix_*` / `pending_*` など作業メモ）を作る場合は **`docs/local/` に置く**（公開ツリーを汚さない）。
 
 ## AI 作業共通ルール

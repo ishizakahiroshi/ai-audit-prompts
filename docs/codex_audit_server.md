@@ -1,3 +1,15 @@
+---
+type: "Audit Prompt"
+title: "Codex Goal: 稼働サーバーの脆弱性診断・ハードニング提言（完全 read-only）"
+description: "Codex CLI で稼働中サーバーを完全 read-only 診断し、ハードニング提言を行う貼り付け用プロンプト。"
+tags: ["audit", "codex", "server"]
+status: "stable"
+audit:
+  tool: "codex"
+  target: "server"
+  family: "server"
+---
+
 # Codex Goal: 稼働サーバーの脆弱性診断・ハードニング提言（完全 read-only）
 
 Codex CLI の `/goal` に貼り付けるための汎用プロンプト。
@@ -13,6 +25,8 @@ SSH でアクセスできる稼働中サーバーを対象に、脆弱性・設�
 観点: ＿＿＿（後述の診断観点から複数選択可、省略時は全部）
 対象: ＿＿＿（特定サービス・パスに絞る、省略時はサーバー全体）
 除外: ＿＿＿（省略時は除外なし）
+保存先: ＿＿＿（report owner repo の repo 相対パス、省略時は `docs/ai-audit-prompts`。`docs/obsidian` は明示指定時のみ）
+Git管理: ＿＿＿（通常の保存先フォルダの初回作成時に ignore / track、省略時は作成前の確認で決定）
 
 ※ 引数ブロック全体を省略、または各行の値を空のままにした場合は、その引数のデフォルト値を適用して動作する。
 ※ このプロンプトに修正・適用スコープは無い。常に read-only 診断で固定。
@@ -127,9 +141,9 @@ AI接続モードで「接続先」を受け取ったら、診断観点の本格
 1. 初期準備フェーズ
 - 接続方法・接続先を確認し、AI接続モードではまず上記「接続前のユーザー最終承認」を実行する（ホスト名・解決した IP・接続ユーザー名・鍵の保存場所とファイル名・ポートをユーザーに提示し、明示的な承認を得るまで実 SSH 接続をしない）。承認後に上記「接続先実体の整合チェック」を実行する（hostname -f / DNS 解決 / デプロイ痕跡で想定ホストと一致するか検証。不成立なら本格起動せず「対象ホスト不一致」finding を最優先で記録して終了）。サーバー上モードでは uname -a 等の read-only コマンドで接続確認のみ
 - リポジトリ/作業ディレクトリに AGENTS.md / CLAUDE.md / README などのプロジェクト指示があれば読む（命名ルール等のため）
-- docs/local があればそこ、なければ docs に plan_server_vulnerability_audit.md のような plan_*.md を作成する
+- report owner として明示された private 管理 repo の `docs/local/plan_server_vulnerability_audit.md` に plan を作成する。owner が未指定または保存先が不明なら実 SSH 接続前に止め、推測しない
 - plan md に、対象ホスト（識別情報は最小限・秘密はマスク）、接続方法、役割推定、診断観点、TODO、診断ログ、finding、判断待ち事項、最終結果を記録し、作業中ずっと更新する
-- 結果報告 md も plan md と同じディレクトリに、最終フェーズを待たず**初期準備フェーズで空テンプレとして先に作成**する（総合評価ヘッダー骨格 + 「対象ホスト・役割推定 / 接続方法 / 実施した診断 / 対策提言一覧（重大度順）/ 判断待ち事項 / 実行できなかった検査と理由」等のセクション見出しを並べた骨格）。途中停止で「plan md だけ残って結果報告 md は空」になる事故を防ぐため、finding が確定するたびと各フェーズ終端（診断・敵対的検証・提言）で結果報告 md にもスコア・提言一覧・適用時の注意を反映する。plan md と結果報告 md で同じ内容を 2 箇所に書く重複は許容する。最終フェーズで追記するのは rubric 採点結果と最終報告の総括のみ
+- 初期準備フェーズで、owner private repo の既定保存先 `docs/ai-audit-prompts/report_audit_server_<YYYY-MM-DD>.md` を空テンプレとして作成し、finding 確定ごとと各フェーズ終端で逐次更新する。`保存先` 引数で report の保存先を変更でき、`docs/obsidian` は明示指定時のみ使用する。既定フォルダが未存在なら、作成予定と初回の `.gitignore` 追加または追跡の方針を確認し、承認後にだけ作成する。frontmatter は `type: audit-report`、`status: draft`、`tags`、`owner`、`related`、`last_reviewed`、`docsweep_policy: never_archive` とし、`docsweep_state` / `due` は付けない。指定先が無い場合は、既定保存先へ切り替えてよいかを確認し、無断で fallback しない
 - plan md は学習を蓄積するメモリとして運用する（fail: 却下 finding も理由ごと残す / investigate: 誤検出の原因を調べる / verify: 診断を根拠付きの確認済み事実へ昇格 / distill:「このサーバーでは〜である」形式の一般ルールへ蒸留し「確認済みルール」セクションに集約 / consult: 追加調査前に確認済みルールを参照）
 
 2. 診断フェーズ（read-only 情報収集）
