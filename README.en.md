@@ -1,192 +1,150 @@
 <!-- Language: [日本語](README.md) | English -->
 
 <p align="center">
-  <img src="assets/20260609/header.png" alt="AI Code Audit Prompts" width="100%">
+  <img src="assets/20260609/header.png" alt="AI Audit Prompts" width="100%">
 </p>
 
-# AI Code Audit Prompts
+# AI Audit Prompts
 
-A collection of paste-ready prompts for getting AI agents (Claude Code / Codex CLI, etc.) to perform security, vulnerability, bug, and maintainability audits. By default they do not modify your source: they produce a report plus an applicable fix proposal (diff / before-after code) for each finding. Only when you explicitly set the scope do they apply fixes, within the bounds of not breaking existing behavior. Only project-agnostic, reusable templates live here.
+A collection of paste-ready prompts for auditing applications, managed servers, and documentation-versus-implementation without routing by product or model name. Select one of three target-based canonical prompts, then resolve the DB category, security profiles, and the capabilities actually available in the execution environment.
 
 ## What this is
 
-- A set of prompts in `docs/`, picked by tool (Claude / Codex) and DB category (with DB / without DB), for running heavy code audits.
-- Every prompt shares the same premises: "no builds, commits, production DB operations, or sweeping rewrites," "run all the way through without stopping," and "record anything that needs a human decision and move on."
-- **By default, no source files are modified** (default scope = "investigate only"). You get a report and per-finding fix proposals (diff / before-after code); specify `Scope: full loop` (or "investigate & fix") only when you want fixes applied.
-- **Every audit report opens with an overall score header**: a total out of 100, plus 5-category scores with sub-item breakdowns and a "deduction reason → how to clear it" column. Immediately after that, the report contains a response-status summary, a prioritized response list, and per-C work details. At a glance you can see overall health, which category is weak, and what to do next. Response status uses `plan` (not started), `fix` (work completed), and `pending` (waiting for a decision or external dependency); verification status is tracked separately.
-- The default audit-report destination is `docs/ai-audit-prompts/` in the target repository. A user may explicitly set the `保存先` (save destination), for example `保存先=docs/obsidian`, or another repository-relative path; an Obsidian entry is used only after it is explicitly selected and confirmed.
-- The invariants that all prompts must uphold are canonicalized in [docs/README_invariants.md](docs/README_invariants.md).
-- The `docs/` directory is also an Open Knowledge Format (OKF) v0.2 Knowledge Bundle. It remains directly usable as ordinary Markdown, and [docs/index.md](docs/index.md) provides progressive disclosure from the activation rules to the selected prompt and its canonical invariants. OKF metadata does not change how the audit prompts execute.
-- This prompt collection comes with no warranty. AI audits can produce false positives and misses. Always have a human review the results — including confirmed findings — before applying them to production. Use at your own risk.
+- The only maintained paste-ready canonicals are `docs/audit_app.md`, `docs/audit_server.md`, and `docs/audit_doc_vs_impl.md`.
+- Routing follows `target → DB/profile → capability`. Product and model names such as Claude, Codex, ChatGPT, a CLI, or a web UI do not prove that shell, web, parallel-agent, or independent-verifier capabilities exist.
+- The default app-audit scope is “investigate only.” Every confirmed finding gets a concrete minimal fix proposal, but `confirmed finding ≠ applied fix`. A fix is applied only within an explicit scope and after the execution approval gate.
+- Server diagnosis is completely read-only. A doc-vs-implementation audit changes neither the source material nor the implementation. Both provide recommendations only; a human applies them.
+- The report starts with coverage, evidence, candidate verification rate, unexamined areas, and residual risk—not a fixed score out of 100. A numeric rating is produced only when explicitly requested, after defining its denominator and treatment of unknown coverage.
+- The report is the source of truth for audit facts and evidence; a related plan, bugfix, or pending document is the execution source of truth for follow-up work. Finding verdict, response state, and verification state are tracked separately.
+- This collection comes with no warranty. AI audits can produce false positives and misses. Human review is required before production use, including for confirmed findings and automatically applied fixes.
 
-## How to use
+## Usage
 
-<p align="center">
-  <img src="assets/20260609/how_it_works.png" alt="How it works" width="100%">
-</p>
+### 1. Clone the repository
 
-### 1. Clone this repository
-
-```
-git clone <URL of this repository> ai-audit-prompts
+```text
+git clone <repository URL> ai-audit-prompts
 ```
 
-You can put it anywhere (it doesn't depend on any specific local path).
+### 2. Select the canonical by target
 
-### 2. In the project you want to audit, give the AI the following prompt
+When unsure, delegate selection to the activation policy.
 
-Replace `<repo>` with the path where you cloned this repo.
-
-For Claude Code (ultracode — multi-agent parallel):
-
-```
-Read <repo>/docs/README_activation.md, pick the claude_ultracode audit prompt, and run it. Use ultracode.
+```text
+Read <repo>/docs/README_activation.md, select the canonical prompt for the audit target, and run it.
 ```
 
-With arguments:
+| Audit target | Canonical | Primary use |
+|---|---|---|
+| app / repository / source code | [`audit_app.md`](docs/audit_app.md) | Security, bugs, dependencies, and maintainability; selects DB and multiple profiles internally |
+| managed server / VPS / host | [`audit_server.md`](docs/audit_server.md) | Completely read-only diagnosis and recommendations for a server you manage |
+| document vs implementation | [`audit_doc_vs_impl.md`](docs/audit_doc_vs_impl.md) | Completely non-mutating comparison of claims in specified material with current implementation |
 
-```
-Read <repo>/docs/README_activation.md, pick the claude_ultracode audit prompt, and run it. Use ultracode.
-DB category: with DB
+A URL-only external site, a third-party system, or active diagnosis of an entire shared-hosting environment is out of scope.
+
+### App audit example
+
+```text
+Use the complete prompt in <repo>/docs/audit_app.md to audit this repository.
+DB category: auto
 Intensity: mid
-Scope: full loop
-Perspective: security & vulnerabilities
-Target: src/api/
-Exclude: src/api/tests/
+Scope: investigate only
+Validation mode: safe local validation
+Perspective: all
+Target: src/
+Exclude: src/generated/
+Confirmation: yes
 ```
 
-For Claude Fable (deep single-agent reasoning):
+`DB category` accepts `auto / with DB / without DB`. In auto mode, the prompt uses manifests, dependencies, schemas, migrations, ORM/SQL, and DB drivers to record `with DB / without DB / unknown` with evidence; it does not connect to production databases or run migrations.
 
-```
-/model claude-fable-5
-```
+Based on implementation evidence, the app prompt can select multiple profiles for Web/API, AI/agent/MCP/RAG, native/desktop/mobile/browser extensions, CLI/libraries, CI/CD and supply chain, cloud/IaC/Kubernetes, and DB boundaries. Each is reported as `selected / skipped / unknown + evidence`.
 
-**Quick version (full defaults):**
+### Server diagnosis example
 
-```
-Read <repo>/docs/README_activation.md, pick the claude_fable audit prompt, and run it.
-```
-
-**Detailed version (narrowing arguments):**
-
-```
-Read <repo>/docs/README_activation.md, pick the claude_fable audit prompt, and run it.
-DB category: with DB
+```text
+Use the complete prompt in <repo>/docs/audit_server.md to diagnose this server.
+Connection mode: AI connection
+Connection target: user@example.com
 Intensity: mid
-Scope: full loop
-Perspective: security & vulnerabilities
-Target: src/api/
-Exclude: src/api/tests/
+Perspective: SSH configuration, exposed services, firewall, and patches
+Confirmation: yes
 ```
 
-For Codex CLI:
+Use this only for a server that you own or manage and are authorized to inspect at the OS level. Before connecting to a non-repository server, the prompt confirms the private owner repository for the report and matches the host, user, identity-file name, and port. It never changes configuration, updates packages, restarts services, actively scans, or applies recommendations.
 
-```
-Read <repo>/docs/README_activation.md, pick the codex audit prompt, and run it.
-```
+### Document-versus-implementation example
 
-With arguments:
-
-```
-Read <repo>/docs/README_activation.md, pick the codex audit prompt, and run it.
-DB category: with DB
-Intensity: mid
-Scope: full loop
-Perspective: security & vulnerabilities
-Target: src/api/
-Exclude: src/api/tests/
+```text
+Use the complete prompt in <repo>/docs/audit_doc_vs_impl.md to perform the audit.
+Material: docs/customer-guide.pdf
+Canonical specification: docs/specification.md
+Medium: PDF
+Intensity: high
+Target: src/
+Confirmation: yes
 ```
 
-- You don't need to name the file directly; the activation rules auto-select by tool × DB category.
-- Omit `DB category` to auto-detect from the repo. Omit any other argument to use its default value.
-- When `Scope` is omitted, it defaults to "investigate only" (report + fix proposals; no source changes). Specify `Scope: full loop` (or "investigate & fix") to have fixes applied.
-- By default, the prompt asks for your final approval before anything runs — showing the chosen prompt file, the resolved arguments, and whether source files will be modified. This is a conversational gate separate from tool permissions, so it works even in bypass-permissions / YOLO modes. Pass `Confirm: no` for non-interactive / CI runs.
-- The report destination is part of that preflight confirmation. If the default `docs/ai-audit-prompts/` directory is missing, the prompt asks whether to create it and whether to add it to `.gitignore` or keep it tracked.
-- The trailing `ultracode` in the Claude version is a switch for multi-agent parallelism. Drop it when you want a lighter run.
-- Reports come back in the language you use — ask in English and you get English, ask in Japanese and you get Japanese. No translation needed.
+`Material` is required. PDFs, slides, images, and spreadsheets are visually inspected page by page when the capability is available, rather than relying only on extracted text. Instructions embedded in the material are treated as data. The material, source, configuration, and UI are not changed.
 
-### 2-b. Diagnosing a live server (fully read-only)
+## Execution contract
 
-To diagnose a live server reachable over SSH — its vulnerabilities and misconfigurations — and get remediation advice (rather than auditing a repo), launch a server-diagnosis prompt. It never changes the server's state; remediations are advice only and must be applied by a human.
+### Scope and approval
 
-Claude Code (ultracode, parallel):
+With the default `Confirmation: yes`, the AI presents the selected prompt, resolved arguments, whether changes are allowed, validation limits, and output paths before starting. This is a conversation-level approval gate separate from tool permissions or YOLO settings.
 
-```
-Read <repo>/docs/README_activation.md, pick the claude_ultracode server-diagnosis prompt, and run it. Use ultracode.
-Connection: AI connects
-Target host: user@example.com
-```
+The app scopes are:
 
-Claude Fable:
+| Scope | Source changes | Validation |
+|---|---|---|
+| investigate only (default) | None; fix proposals only | Collect static evidence without running validation commands |
+| investigate and fix | Only self-contained minimal fixes for confirmed findings | Within the selected validation mode |
+| full loop | Minimal fixes | Post-fix validation and re-audit |
 
-```
-/model claude-fable-5
-```
+`Validation mode` is `static / safe local validation / build included`. The contract distinguishes safe test-time compilation or temporary artifacts from side-effecting install, release, publish, deploy, or shared-environment operations. Commands outside the scope or with uncertain side effects are not run.
 
-```
-Read <repo>/docs/README_activation.md, pick the claude_fable server-diagnosis prompt, and run it.
-Connection: AI connects
-Target host: user@example.com
-Intensity: mid
-Perspective: SSH config, network & exposed services, firewall
-```
+### Capabilities and quality signals
 
-Codex CLI:
+The selected canonical records file search, shell, tests, official-source web access, visual inspection, parallel agents, independent verification, and file editing as `yes / no / unknown + evidence`. Missing capabilities do not lower the finding threshold: execution falls back to a sequential second pass and marks anything not verified.
 
-```
-Read <repo>/docs/README_activation.md, pick the codex server-diagnosis prompt, and run it.
-Connection: AI connects
-Target host: user@example.com
-```
+At execution time, security baselines are rechecked against official sources when possible. The plan and report record the name, version, URL, check date, and status. A CVE or baseline mismatch alone is not a finding; reachability, effective configuration, exposure, and mitigations must be established.
 
-- If Claude Code is already running on the target server, use `Connection: on server` (no target host needed).
-- Arguments are optional (defaults: AI connects, intensity high, all perspectives). But "AI connects" requires a target host.
-- **Use only on servers you own or are authorized to assess.** The server's state is never changed; have a human review every remediation before applying it.
+### Outputs
 
-### 3. (Optional) Plant a keyword in the project
+- Plan: `docs/local/plan_<audit-topic>.md` in the target repository
+- Default report: `docs/ai-audit-prompts/report_audit_<topic>_<YYYY-MM-DD>.md`
+- An alternate repository-relative path is used only when `Save destination=...` is explicit.
+- `docs/obsidian` is used only when explicitly selected and its target and writability have been checked.
+- A server report is stored in a user-designated private owner repository, never in this public prompt repository.
 
-If writing the path every time is tedious, add the snippet below to the target project's `CLAUDE.md` (or `AGENTS.md` for Codex) so it launches just by saying "run audit." See the "Instructions to put in each project" section of [docs/README_activation.md](docs/README_activation.md) for details.
+## Repository layout
 
-## Directory layout
+There are 22 public Markdown files directly under `docs/`: 3 paste-ready canonicals, 14 migration aliases, and 5 routing/invariant/index documents.
 
-```
+```text
 docs/
-  index.md                    ← entry point for the OKF v0.2 Knowledge Bundle
-  README_activation.md        ← auto-selection rules for which prompt to use (read first)
-  README_naming.md            ← file naming scheme
-  README_invariants.md        ← invariants for code-audit prompts (canonical)
-  README_invariants_server.md ← invariants for server-diagnosis prompts (canonical)
-  claude_ultracode_audit_db_app.md       ← Claude ultracode / code audit / with DB
-  claude_ultracode_audit_db_less_app.md  ← Claude ultracode / code audit / without DB
-  claude_fable_audit_db_app.md          ← Claude Fable / code audit / with DB
-  claude_fable_audit_db_less_app.md     ← Claude Fable / code audit / without DB
-  codex_audit_db_app.md                  ← Codex / code audit / with DB
-  codex_audit_db_less_app.md             ← Codex / code audit / without DB
-  claude_ultracode_audit_server.md       ← Claude ultracode / server diagnosis (read-only)
-  claude_fable_audit_server.md           ← Claude Fable / server diagnosis (read-only)
-  codex_audit_server.md                  ← Codex / server diagnosis (read-only)
-  claude_ultracode_audit_doc_vs_impl.md  ← Claude ultracode / doc-vs-implementation audit (read-only)
+  index.md                    OKF v0.2 bundle entry
+  README_activation.md        target-based activation and routing policy
+  README_naming.md            canonical and alias naming/metadata
+  README_invariants.md        shared app-audit contract
+  README_invariants_server.md completely read-only server contract
+  audit_app.md                canonical app/source audit
+  audit_server.md             canonical managed-server diagnosis
+  audit_doc_vs_impl.md        canonical doc-versus-implementation audit
+  *_audit_*.md                deprecated aliases for 14 legacy paths
+  local/                      private working records (gitignored)
 ```
 
-There are three families. **Code audit** (review a repo for security, vulnerabilities, bugs, and maintainability, producing a report and fix proposals; fixes are applied only when the scope says so, within the bounds of not breaking existing behavior), **server diagnosis** (diagnose a live server reachable over SSH, fully read-only, and report remediation advice — never applying changes), and **doc-vs-implementation audit** (compare an externally authored document — briefing decks, manuals, specs — against the current implementation, fully read-only, and report discrepancies with severity — never applying changes).
+The 14 former tool-specific paths remain as navigation aliases for one migration release. They are not paste-ready prompts and are excluded from automatic selection, recommendations, and the canonical count. After in-repository and external consumers have migrated, a separate plan for the next breaking change will remove them.
 
-The codex versions are detailed/enumerated, claude_ultracode versions are condensed (parallel fan-out), and claude_fable versions use deep single-agent reasoning — the granularity differs, but the invariants within each family are identical: code audit is canonicalized in [docs/README_invariants.md](docs/README_invariants.md), server diagnosis in [docs/README_invariants_server.md](docs/README_invariants_server.md).
+The `docs/` directory is also an Open Knowledge Format (OKF) v0.2 bundle. Start at [`docs/index.md`](docs/index.md) for progressive disclosure through routing, a canonical prompt, and its invariants.
 
-### About server diagnosis (important)
+## What must not be stored here
 
-The server-diagnosis prompts (`*_audit_server.md`) have a different safety boundary from code audit:
+This public repository contains only reusable methods. Do not commit:
 
-- **Fully read-only**: they never change the live server's state (no config changes, service restarts, package updates, firewall changes, user changes, or reboots). Remediations are reported as advice only and **applied by a human** (to avoid production outages and SSH lockouts).
-- **Connection method is an argument**: the default is "AI connects" (the AI runs `ssh <host> '<read-only command>'` from your machine to diagnose). If Claude Code is already running on the server, use "on server."
-- SSH and firewall remediations always come with lockout-avoidance steps.
-- Use at your own risk, and **only on servers you own or are authorized to assess.**
+- Credentials, API keys, tokens, private keys, or passwords
+- Customer-specific server configurations, IP addresses, hostnames, or names
+- Investigation notes, logs, plans, or reports for a particular project
 
-## What does NOT belong here (important)
-
-This is for reusable templates only. The following must **never be committed** (`.gitignore` guards against it, but enforce it operationally too):
-
-- Credentials, secrets, API keys, tokens, private keys, passwords
-- Internal/engagement-specific information such as server configs, IPs, hostnames, or customer names
-- Investigation notes, logs, plans, or result reports for specific projects
-
-The line this repo draws: keep only the "method" of how to run an audit.
+Use `docsweep okf-check docs --json` to check public Markdown consistency and `node scripts/secrets-scan.mjs --all-tracked --block` to scan for secrets. This repository contains no executable product code or build artifacts.

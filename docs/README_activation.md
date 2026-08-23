@@ -1,248 +1,124 @@
 ---
 type: "Audit Routing Policy"
-title: "共通監査プロンプト起動ルール"
-description: "監査対象と実行ツールから、適切な監査プロンプトを段階的に選ぶための起動・自動選択ルール。"
-tags: ["audit", "routing", "selection"]
+title: "共通監査prompt起動ルール"
+description: "監査対象をapp・server・doc-vs-implへ分類し、tool非依存の正典3本から選ぶrouting policy。"
+tags: ["audit", "routing", "selection", "capability-based"]
 status: "stable"
 ---
 
-# 共通監査プロンプト起動ルール
+# 共通監査prompt起動ルール
 
-このディレクトリの監査プロンプトは重い作業用であり、通常の質問、軽い調査、コード説明、単発修正では自動起動しない。
+このbundleの監査promptは重い監査用である。通常の質問、軽い調査、code説明、単発修正では自動起動しない。
 
-各プロジェクトの `AGENTS.md` / `CLAUDE.md` には、重い監査プロンプトを通常時に読ませる指示を書かない。
-
-このファイルは、ユーザーが明示的にこの監査プロンプト集（このリポジトリの `docs/`）を参照して監査実行を依頼した時だけ読む。
-
-## 各プロジェクトに書く指示
-
-```md
-## 共通監査プロンプト
-
-通常作業では監査プロンプト集リポジトリ（clone 済みの ai-audit-prompts 等）を読まない。
-ユーザーが明示的にその監査プロンプト集を参照して監査実行を依頼した場合だけ、その `docs/README_activation.md` を読んで適切な監査プロンプトを選ぶ。
-```
-
-## 起動条件
-
-このファイルは通常ターンでは読ませない。
-
-ユーザーがこの監査プロンプト集を明示して監査実行を依頼した場合だけ、ここから先を読む。
+各projectのinstructionsには、通常作業でこのrepoを常時読ませる指示を置かない。利用者がこの監査prompt集を明示して監査実行を依頼した場合だけ、この文書から対象正典を選ぶ。
 
 ## 起動しない例
 
-以下の場合は、監査プロンプトを読まない。
+- 「セキュリティ的にどう?」「このcode見て」「軽く確認して」
+- 「このfunctionを説明して」「依存関係を見て」「このbugを直して」
+- 「監査promptはどこ?」「このrepoに何がある?」
 
-- `セキュリティ的にどう?`
-- `このコード見て`
-- `バグ直して`
-- `軽く確認して`
-- `この関数を説明して`
-- `依存関係を見て`
-- `監査プロンプトってどこだっけ?`
-- `この監査リポジトリに何がある?`（一覧確認だけなら起動しない）
+これらは通常依頼として必要範囲だけ扱う。
 
-これらは通常の依頼として扱い、必要な範囲だけ調査する。
+## 1. 監査対象を選ぶ
 
-## 監査対象区分の判定（コード / サーバー / 資料突合）
+実行tool、provider、model、CLI/Web UIではなく、何を監査するかで正典を選ぶ。
 
-起動条件を満たしたら、まず「何を監査するか」を判定する。
-
-- **コード監査**（既定）: リポジトリ/ソースコードを対象に、セキュリティ・脆弱性・バグ・保守性を監査し、レポートと修正案を出力する。既定ではソースを書き換えない（スコープ「調査・修正まで」「フルループ」を明示した場合のみ、現行機能を壊さない範囲で修正まで行う）。`*_audit_db_app.md` / `*_audit_db_less_app.md` を使う。
-- **サーバー診断**: SSH でアクセスできる稼働中サーバーを対象に、脆弱性・設定不備・侵害痕跡を**完全 read-only** で診断し、対策を提言する（修正は適用しない）。`*_audit_server.md` を使う。
-- **資料突合**: 外部作成の資料（説明会資料・マニュアル・仕様書・顧客向け文書）の記載と現行実装の差異を**完全 read-only** で洗い出す（修正は適用しない）。`*_audit_doc_vs_impl.md` を使う。資料パスが必須。依頼に「この資料と実装の差異を監査」「説明会資料と仕様が合っているか」「マニュアルと実装を突合」等の表現があれば資料突合と判定する。資料突合と判定した場合、DB区分の判定は行わない。
-
-ユーザーの依頼に以下のような表現があればサーバー診断と判定する（明示があればそれを最優先）。
-
-- 「サーバーの脆弱性を診断/チェック」「SSH した（できる）サーバーを監査」「VPS/ホストのセキュリティを見て」「サーバーのハードニング/設定不備を見て」「どう対策すべきか」（サーバー文脈）
-
-リポジトリ/コードの監査を指す表現（「このコードを監査」「リポジトリを監査」等）はコード監査と判定する。判定できない場合はコード監査を既定とする。
-
-サーバー診断と判定した場合、DB区分の判定は行わない（DB軸はコード監査専用）。続く「ツール区分の判定」でファイルを選ぶ。
-
-### 対象外・誤適用に注意
-
-依頼を区分に当てはめる前に、そもそも本プロンプト集の対象かを確認する。
-
-- **URL だけ渡された外部サイトは監査できない。** 本プロンプト集はコード（リポジトリ/ソース）か、自分の管理下サーバーへの SSH のどちらかを前提とする。外部サイトへ能動的にリクエストを送って調べる診断（DAST/能動スキャン）は所有者の許可が要る別物で、本集の対象外。URL しか無い場合はコードか SSH を求める。
-- **共用サーバー（レンタルサーバー）はサーバー診断（`*_audit_server.md`）の対象にしない。** 一般ユーザー権限しか持てず（sudo 不可）・自分の領域に閉じ込められ、システム領域や他テナントを覗くこと自体が規約違反になり得るため。判定基準は「**root でログインするか**」ではなく「**OS 全体への管理権限（sudo）があり、かつその機器を自分が調べてよい（所有・運用している）か**」。VPS（さくらVPS / ConoHa / EC2 等）は `ubuntu` 等の非 root ユーザーでログインしても sudo が効き自分の管理下なので**サーバー診断の対象**。共用レンタルサーバーはこれを満たさないので対象外。 <!-- secrets-scan: allow -->
-- **共用サーバー上の WordPress 等の CMS サイトはコード監査として扱う。** サーバー診断ではなく、自分の領域内のコード（自作テーマ・自作プラグイン・`wp-config.php`・`functions.php` 等のカスタム部分）を SSH/FTP で取得し、`*_audit_db_app.md` で監査する（WordPress は PHP+MySQL なので DBあり）。CMS 本体や公式プラグインまで全走査せず、カスタム部分に絞るのが実用的。
-
-## 自動選択ルール
-
-### コード監査の場合（ツール × DB区分）
-
-| 条件 | 使用ファイル |
-|---|---|
-| Codex CLI / Codex 用、DBあり | [`codex_audit_db_app.md`](codex_audit_db_app.md) |
-| Codex CLI / Codex 用、DBなし | [`codex_audit_db_less_app.md`](codex_audit_db_less_app.md) |
-| Claude / ultracode 用、DBあり | [`claude_ultracode_audit_db_app.md`](claude_ultracode_audit_db_app.md) |
-| Claude / ultracode 用、DBなし | [`claude_ultracode_audit_db_less_app.md`](claude_ultracode_audit_db_less_app.md) |
-| Claude Fable 用、DBあり | [`claude_fable_audit_db_app.md`](claude_fable_audit_db_app.md) |
-| Claude Fable 用、DBなし | [`claude_fable_audit_db_less_app.md`](claude_fable_audit_db_less_app.md) |
-
-### サーバー診断の場合（ツールのみ。DB軸なし）
-
-| 条件 | 使用ファイル |
-|---|---|
-| Codex CLI / Codex 用 | [`codex_audit_server.md`](codex_audit_server.md) |
-| Claude / ultracode 用 | [`claude_ultracode_audit_server.md`](claude_ultracode_audit_server.md) |
-| Claude Fable 用 | [`claude_fable_audit_server.md`](claude_fable_audit_server.md) |
-
-サーバー診断のファイルは完全 read-only（サーバー状態を一切変更しない・対策は提言のみで適用は人間）が不変条件。正本は [README_invariants_server.md](README_invariants_server.md)。
-
-### 資料突合の場合（ツールのみ。DB軸なし）
-
-| 条件 | 使用ファイル |
-|---|---|
-| Claude / ultracode 用 | [`claude_ultracode_audit_doc_vs_impl.md`](claude_ultracode_audit_doc_vs_impl.md) |
-
-codex / Claude Fable 版は未作成。指定された場合はその旨を伝え、ultracode 版の使用を提案する。資料突合は常に完全 read-only（ソース・資料とも書き換えない。結果報告 md の新規作成のみ可）で、不変条件はプロンプト内に自己完結している。
-
-## DB区分の判定
-
-ユーザーが DBあり / DBなしを明示した場合は、それを最優先する。
-
-明示がない場合は、監査プロンプト選択前にリポジトリを軽く確認し、以下のいずれかが見つかれば DBあり版を選ぶ。
-
-- `migration` / `migrations` ディレクトリ
-- `schema` / `models` / `repositories` / `dao` / `prisma` などの DB 関連ディレクトリ
-- SQL ファイル
-- ORM 設定や schema ファイル
-  - Prisma: `schema.prisma`
-  - Rails: `db/schema.rb`
-  - Django: `models.py`
-  - SQLAlchemy / Alembic
-  - TypeORM / Sequelize / Knex
-- DB driver / ORM 依存関係
-  - Node.js: `pg`, `mysql2`, `sqlite3`, `better-sqlite3`, `mongoose`, `prisma`, `typeorm`, `sequelize`, `knex`
-  - Go: `gorm`, `database/sql`, `sqlx`, `pgx`, `go-sql-driver/mysql`, `lib/pq`
-  - Python: `psycopg`, `mysqlclient`, `sqlalchemy`, `django`, `alembic`
-  - Rust: `diesel`, `sqlx`
-  - PHP: `doctrine`, `eloquent`, `pdo`
-- DB 接続設定
-  - `DATABASE_URL`
-  - `DB_HOST`
-  - `DB_NAME`
-  - `POSTGRES_*`
-  - `MYSQL_*`
-  - `SQLITE_*`
-- コード内の DB 接続、query、transaction、migration 実行処理
-
-以下だけなら DBなし版を選ぶ。
-
-- JSON / YAML / TOML / CSV / Markdown などのローカルファイル保存
-- `localStorage` / `sessionStorage` / `IndexedDB` / Cookie 中心
-- 外部APIだけを使う
-- in-memory state だけ
-- 設定ファイルのみ
-- DB driver / ORM / migration / SQL が見つからない
-
-判定できない場合は止まらず、DBあり版を安全側のデフォルトとして使う。ただし、監査プロンプト内の禁止事項に従い、本番DB接続、DB変更、migration 実適用は行わない。
-
-## ツール区分の判定
-
-- Codex が作業する場合は `codex_*.md`
-- Claude Code / ultracode が作業する場合は `claude_ultracode_*.md`
-- Claude Fable 系モデルが作業する場合（`/model claude-fable-5` 等の指定・モデルが Fable 系）は `claude_fable_*.md`
-- ユーザーが明示したツール名があればそれを優先する
-
-## 引数の扱い（Fable / ultracode / Codex 共通）
-
-起動コマンドに以下の引数が含まれている場合は、その値を優先する。省略された引数はデフォルト値または自動判定を適用する。
-
-| 引数 | 値の例 | 省略時 |
+| 対象 | 正典 | 判定 |
 |---|---|---|
-| DB区分 | あり / なし | 自動判定（「DB区分の判定」ルールに従う） |
+| app / repository / source code | [`audit_app.md`](audit_app.md) | code、設定、test、workflow、package、アプリ構成を監査する。判定不能時の既定 |
+| managed server / VPS / host | [`audit_server.md`](audit_server.md) | 利用者が所有・運用し、OS全体を調査する権限を持つ稼働serverを完全read-only診断する |
+| document vs implementation | [`audit_doc_vs_impl.md`](audit_doc_vs_impl.md) | 指定資料の主張と現行実装を完全非変更で突合する。資料指定必須 |
+
+### server判定
+
+「server/VPS/hostの脆弱性」「SSHできる管理下server」「hardening」「firewall/sshd/OS設定」等の依頼はserverとする。
+
+- root loginの有無ではなく、sudo等でOS全体を調査する正当な管理権限と所有/運用責任があるかで判定する。
+- 共用hostingはserver診断対象外。自分の領域のWordPress/custom code等はapp監査として扱う。
+- URLだけの外部siteは対象外。第三者siteへのactive scan/DASTはこのbundleでは行わない。
+- server診断はreport ownerとなるprivate repo、接続先、接続承認が揃うまで実接続しない。
+
+### doc-vs-impl判定
+
+「この資料と実装の差異」「説明会資料/マニュアル/仕様書と現行仕様を突合」「画面資料が実装どおりか」等はdoc-vs-implとする。資料path/URLが無ければ1回だけ確認し、推測で選ばない。DB区分は判定しない。
+
+### app判定
+
+repository/source codeを対象にsecurity、vulnerability、bug、dependency、maintainabilityを調べる依頼はappとする。app正典はDB区分とsecurity profileを内部で解決する。
+
+## 2. tool/modelではなくcapabilityを記録する
+
+正典を選んだ後、prompt内で実際に利用できる能力を `yes / no / unknown` と根拠付きで記録する。少なくともfile検索、shell/read-only command、test系、Web一次情報、並列agent、独立verifier、file編集、plan/report作成を確認する。
+
+- 並列/独立verifierがあれば探索と検証を分離できる。
+- 並列だけならlead探索へ限定し、統合担当が再読する。
+- 並列がなければ直列二巡で反証する。
+- 能力が不明/不足でも正典を変えず、未検証を明示する。
+
+製品名やmodel名からsubagent、shell、Web、file write等の能力を推測しない。新しいprovider/modelのために正典promptを追加しない。
+
+## 3. appのDB区分とprofile
+
+DB区分はfile選択ではなく `audit_app.md` の引数として渡す。
+
+| user指定/状況 | `DB区分` |
+|---|---|
+| 明示的にDBあり | `あり` |
+| 明示的にDBなし | `なし` |
+| 未指定 | `自動` |
+
+自動時はpromptがmanifest、dependency/lock、schema、migration、ORM/SQL、DB driver、接続設定を軽く確認し、`あり / なし / unknown` と根拠をreportへ残す。判定不能でも本番接続やmigrationを試さない。
+
+appはWeb/API、AI/agent/MCP/RAG、native、desktop、mobile、browser extension、CLI、library/package、CI/CD/supply chain、cloud/IaC/Kubernetes、DBあり/なしを複数profileとして `selected / skipped / unknown + evidence` で選ぶ。全profileを無条件実行しない。
+
+## 引数
+
+### app
+
+| 引数 | 値 | 省略時 |
+|---|---|---|
+| DB区分 | 自動 / あり / なし | 自動 |
 | 強度 | ロー / ミッド / ハイ | ハイ |
 | スコープ | 調査まで / 調査・修正まで / フルループ | 調査まで |
-| 観点 | バグ / セキュリティ・脆弱性 / 依存関係 / 全部 | 全部 |
-| 対象 | パスを指定 | リポジトリ全体 |
-| 除外 | パスを指定 | 除外なし |
-| 確認 | あり / なし | あり |
-| 保存先 | `docs/ai-audit-prompts` / `docs/obsidian` / repo 相対パス | `docs/ai-audit-prompts` |
-| 初回 Git 管理 | `ignore` / `track` | 保存先フォルダの新規作成時に確認 |
-
-DB区分が明示されている場合は自動判定をスキップし、その値でファイルを選択する。
-強度・スコープ・観点・対象・除外・保存先・初回 Git 管理・確認が明示されている場合は、選択したプロンプトの `＿＿＿` をその値に置き換えて実行する。
-確認「あり」（既定）の場合、調査を含む一切の作業前に「使用プロンプト・解決済み引数・ソースを書き換えるかどうか」を要約提示してユーザーの承認を待つ（実行前確認ゲート。正本は [README_invariants.md](README_invariants.md)）。「確認: なし」指定時のみ省略して直ちに開始する。ただし未存在の保存先フォルダを作る場合、Git 管理方針（`ignore` / `track`）が別途明示されていなければ、暗黙に選ばず作成前に停止する。
-
-### サーバー診断の引数（`*_audit_server.md` の場合）
-
-サーバー診断はスコープ引数を持たず（常に完全 read-only 診断で固定）、代わりに接続方法を持つ。
-
-| 引数 | 値の例 | 省略時 |
-|---|---|---|
-| 接続方法 | AI接続 / サーバー上 | AI接続 |
-| 接続先 | `user@host[:port]` | AI接続時は必須。未指定で推測不能なら接続できない旨を報告して終了 |
-| 強度 | ロー / ミッド / ハイ | ハイ |
-| 観点 | ホスト・OS / SSH設定 / OS・パッケージ脆弱性 / ネットワーク・公開サービス / ファイアウォール / ユーザー・権限 / ファイル権限・SUID / サービス・TLS / ログ・侵害痕跡 / cron・timer / secrets露出 / コンテナ / カーネル・ハードニング / MAC（SELinux/AppArmor） / 時刻同期 / データ保護 / 全部 | 全部 |
-| 対象 | 特定サービス・パス | サーバー全体 |
-| 除外 | パスを指定 | 除外なし |
-| 保存先 | report owner repo の repo 相対パス | `docs/ai-audit-prompts` |
-| 初回 Git 管理 | `ignore` / `track` | 保存先フォルダの新規作成時に確認 |
-
-### 資料突合の引数（`*_audit_doc_vs_impl.md` の場合）
-
-資料突合はスコープ・観点・DB区分の引数を持たない（常に完全 read-only の差異調査で固定）。
-
-| 引数 | 値の例 | 省略時 |
-|---|---|---|
-| 資料 | 資料ファイルのパス（複数可） | 必須。未指定なら実行前確認で確認する |
-| 対象 | パスを指定 | リポジトリ全体 |
-| 正典 | 前提ドキュメントのパス | プロジェクト指示ファイル（CLAUDE.md / AGENTS.md）が監査前提として指定する reference に従う |
-| 強度 | ロー / ミッド / ハイ | ハイ |
-| 保存先 | `docs/ai-audit-prompts` / `docs/obsidian` / repo 相対パス | `docs/ai-audit-prompts` |
-| 初回 Git 管理 | `ignore` / `track` | 保存先フォルダの新規作成時に確認 |
+| 検証モード | 静的 / 安全なローカル検証 / build含む | 安全なローカル検証 |
+| 観点 | バグ / セキュリティ・脆弱性 / 依存関係 / 全部 / profile名 | 全部 |
+| 対象 | repo相対path | repo全体 |
+| 除外 | repo相対path | なし |
+| 保存先 | repo相対path | docs/ai-audit-prompts |
+| Git管理 | ignore / track | 未存在folder作成前に確認 |
 | 確認 | あり / なし | あり |
 
-## 起動時の動作
+### server
 
-OKF Bundle として利用する場合は、まず `index.md` を読み、次にこの起動ルール、選択した監査プロンプト、関連する不変条件の順に progressive disclosure する。通常の Markdown として直接このファイルから起動しても動作は変わらない。
+`接続方法`、`接続先`、`強度`、`観点`、`対象`、`除外`、`保存先`、`Git管理`、`確認` を使う。変更scopeはなく、常に完全read-only。
 
-起動条件を満たしたら、以下の順に進める。
+### doc-vs-impl
 
-1. この `README_activation.md` を読む
-2. `README_naming.md` を読む
-3. 自動選択ルールで該当する監査プロンプト md を読む
-4. 監査プロンプト本文に従って実行する
+`資料`（必須）、`正典`、`媒体`、`強度`、`対象`、`除外`、`保存先`、`Git管理`、`確認` を使う。資料/source/UIは常に非変更。
 
-### OKF 選択 metadata
+明示された値を優先し、選んだ正典の空欄へ渡す。確認「あり」ではprompt記載の実行前gateを行う。確認「なし」でも未存在保存先のGit管理やfallbackが未解決なら開始しない。
 
-各監査プロンプトの `audit.tool`・`audit.target`・`audit.family` は、ファイル名とこの文書の自動選択表に対応する機械選択用 metadata である。許可値と概念 `type` の正本は [README_naming.md](README_naming.md) に置く。`status` は文書 lifecycle であり、監査の実行状態を表さない。
+## 成果物routing
 
-## 成果物の保存先
+- plan: target/owner repoの `docs/local/plan_<audit-topic>.md`
+- report既定: `docs/ai-audit-prompts/report_audit_<topic>_<YYYY-MM-DD>.md`
+- server reportもpublic prompt repoではなくowner private repoへ保存する
+- `保存先=` があればreportだけ指定repo相対pathへ変更する
+- `docs/obsidian` は明示指定時だけ使い、entry target/writableを確認する
 
-監査対象が Git repo の場合、作業計画は対象 repo の `docs/local/plan_<audit-topic>.md`、
-監査証跡の既定保存先は対象 repo の
-`docs/ai-audit-prompts/report_audit_<topic>_<YYYY-MM-DD>.md` とする。
-起動時に `保存先=<repo 相対パス>` を明示した場合は、report の保存先だけをそのパスへ変更する。
+reportは `type: audit-report`、`status: draft|stable`、`docsweep_policy: never_archive` を使う。監査事実/evidenceの正本はreport、未対応作業の実行正本はrelated先plan/bugfix/pendingとする。
 
-`docs/ai-audit-prompts` が無い場合は、作成前の確認で「作成予定」と「Git 管理方針」を表示する。
-`ignore` を選んだ場合だけ対象 repo の `.gitignore` に `/docs/ai-audit-prompts/` の正確な規則を追加し、
-`track` を選んだ場合は `.gitignore` を変更しない。既存フォルダの ignore 状態は読み取り、既存方針を尊重する。
-「確認: なし」で新規作成する場合は、Git 管理方針を引数等で明示する。未指定ならフォルダを作成しない。
+## deprecated alias
 
-`docs/obsidian` はユーザーが `保存先=docs/obsidian` と明示した場合だけ使用する。
-その場合は repo 相対 entry の `README.md`、LinkType/Target、書き込み可能性を確認し、central の絶対パスへ直接書き込まない。
-指定された保存先が無い、wrong target、read-only の場合は、既定の
-`docs/ai-audit-prompts` へ切り替えてよいかを確認し、無断で fallback しない。
+統合前のtool × DB/target 14 pathは移行案内として1回のreleaseだけ残すが、自動選択・推奨一覧・正典prompt数へ含めない。aliasはpaste-ready promptではなく、必ず後継3本の全文を使う。
 
-監査証跡の frontmatter は `type: audit-report`、`status: draft` で開始し、完了時だけ
-`stable` にする。`docsweep_policy: never_archive` を付け、`docsweep_state` と `due` は付けない。
-結果 report は証拠・評価・実行記録であり、未完了作業の正本ではない。対応が必要なら
-`docs/local` に plan / bugfix / pending を別途作り、report と相互リンクする。
+alias削除はrepo内外consumer移行後の別planで行う。新規workで旧pathを選ばない。
 
-保存先が未解決のまま report を作成してはならない。prompt を表示しただけの外部 Codex 監査は
-report 保存済みと扱わない。
+## 任意の起動adapter
 
-server 監査は、実接続前に report owner となる private 管理 repo を明示しなければならない。
-owner が不明な場合は保存先を推測しない。owner repo 内の既定保存先も
-`docs/ai-audit-prompts` とし、`docs/obsidian` は明示指定時だけ使用する。
+runtime固有の起動commandやcapability取得補助は、必要ならrepo外adapterで扱う。adapterは正典pathと引数を渡すだけとし、安全境界、監査観点、evidence、summary、rubricを複製しない。adapterが無くても正典3本は単独で完走できる。
 
-## 運用方針
+## OKF progressive disclosure
 
-- 通常作業では監査プロンプトを勝手に展開しない
-- ファイル名をユーザーに毎回指定させない
-- ユーザーはこの監査プロンプト集（リポジトリ）を指定すればよい
-- 判断に迷う場合も、重い監査を勝手に始めず、通常作業として扱う
+OKF Bundleとしては [`index.md`](index.md) → このrouting → 選んだ正典prompt → app/serverのinvariants、の順に読む。通常Markdownとして正典を直接使っても実行契約は変わらない。

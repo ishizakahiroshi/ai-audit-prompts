@@ -7,13 +7,25 @@
 
 ### Added
 
-- `docs/` を Open Knowledge Format (OKF) v0.2 の Knowledge Bundle として整備。既存 14 文書に概念 `type`、title、description、tags、lifecycle `status` を付け、監査 prompt には `audit.tool` / `audit.target` / `audit.family` を追加
-- Bundle root の `docs/index.md` を追加し、起動ルール → 選択 prompt → 関連する正本の順で progressive disclosure できる一覧を提供
-- Bundle の read-only 適合検査を `python -m docsweep okf-check docs --json`、公開禁止情報の検査を既存の secrets-scan で確認できるよう、README と開発ガイドに検証方法を記載
+- 実行製品・modelに依存しない対象別正典 `docs/audit_app.md`、`docs/audit_server.md`、`docs/audit_doc_vs_impl.md` を追加。保守対象のpaste-ready promptを3本へ統合した
+- app正典にDB区分 `自動 / あり / なし` と、Web/API、AI/agent/MCP/RAG、platform、CI/CD・供給網、cloud/IaC等を実装証拠から複数選択するsecurity profileを追加
+- `静的 / 安全なローカル検証 / build含む` の検証モードを追加し、安全なtest内compileとinstall/release/publish/deploy等の副作用を区別した
+- lead / candidate / finding、7項目のevidence contract、候補検証率、独立検証、未調査領域、coverage、residual riskを3正典へ統一した
+- security baselineの名称、版、URL、確認日、確認状態と、AI executionのprovider、exact model、display、reasoning、source等をplan/reportへ追記する契約を追加した
+- `docs/` をOpen Knowledge Format (OKF) v0.2 Knowledge Bundleとして整備し、`docs/index.md` からrouting、正典、invariantsへ段階的に辿れるようにした。`docs/` 直下の公開Markdownは正典3本、移行用alias 14本、運用文書5本の計22本
 
 ### Changed
 
-- 監査 report の既定保存先を対象 repo の `docs/ai-audit-prompts/` に変更。`docs/obsidian/` はユーザーが明示指定した場合だけ使い、未存在の既定フォルダを初回作成するときは `.gitignore` に追加するか追跡対象にするかを確認するよう、起動 skill・正本・全監査 prompt を整合させた
+- routingを `tool × DB` から `target → DB/profile → capability` へ変更。未知のtool/modelも対象別正典へ一意にroutingし、製品名だけで並列agent、shell、Web、file write等の能力を推測しない
+- 固定100点・固定配点を既定reportから外し、coverage、evidence、候補検証率、未調査、residual riskを既定summaryとした。数値評価は明示要求時だけ分母と未調査の扱いを定義して参考値として出す
+- `confirmed finding ≠ applied fix` を明文化し、監査判定、対応状況 `plan / fix / pending`、検証状態を分離した。監査事実の正本をreport、後続作業の実行正本をrelated先plan / bugfix / pendingとした
+- appの既定scope「調査まで」を維持しつつ、修正scopeでも自己完結した最小変更だけをapproval後に適用するよう明確化した。fixture/実機依存や仕様trade-offを伴うfindingは確定しても修正案に留める
+- server診断にprivate owner repo必須、接続先実体照合、完全read-only、cloud管理面の未観測表示を統一した。doc-vs-implは資料指定必須、全page visual確認、否定結論の二経路確認、資料・実装の完全非変更を維持した
+- 監査reportの既定保存先を対象repoの `docs/ai-audit-prompts/` に統一。`docs/obsidian/` は明示指定時だけ使い、未存在folderのGit管理を実行前に解決する
+
+### Deprecated
+
+- 統合前の旧14 prompt pathを、後継相対pathとappのDB引数だけを示す短いaliasへ変更した。aliasはpaste-ready本文、監査metadata、自動選択対象を持たず、1回の移行release後にrepo内外consumerの移行を確認して別planで削除する
 
 ## [0.8.0] - 2026-08-08
 

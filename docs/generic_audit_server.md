@@ -1,6 +1,6 @@
 ---
 type: "Deprecated Audit Alias"
-title: "Deprecated alias: codex_audit_server.md"
+title: "Deprecated alias: generic_audit_server.md"
 description: "統合前の旧pathから対象中心の正典promptへ案内する一時alias。"
 tags: ["audit", "deprecated", "alias"]
 status: "deprecated"
@@ -9,7 +9,7 @@ deprecation:
   removal: "次の破壊的変更release。repo内外consumer移行確認後に別planで削除"
 ---
 
-# [Deprecated] codex_audit_server.md
+# [Deprecated] generic_audit_server.md
 
 この旧pathは移行案内だけを残したdeprecated aliasであり、単体ではpaste-ready監査promptではありません。
 

@@ -1,111 +1,111 @@
 ---
 type: "Naming Convention"
-title: "docs 命名規則"
-description: "監査プロンプトのファイル名と tool・target・family metadata の値域を定義する正本。"
+title: "docs 命名・metadata規則"
+description: "対象中心の正典prompt、deprecated alias、OKF選択metadataを定義する正本。"
 tags: ["audit", "naming", "metadata"]
 status: "stable"
 ---
 
-# docs 命名規則
+# docs 命名・metadata規則
 
-このディレクトリには、各種コード監査を AI エージェントに依頼するための「貼り付け用プロンプト（goal）」を md 形式で置く。用途は共通（セキュリティ・脆弱性・バグ・保守性の監査と現行機能を壊さない範囲での修正）なので、ファイル名を以下のスキームで統一する。
+監査promptの選択軸は実行toolではなく監査対象とする。provider、製品、model、CLI/Web UI、並列機能の違いは、正典prompt開始時のcapability profileと任意の起動adapterで吸収する。
 
-## スキーム
+## 正典prompt
 
+filenameは次の3本に固定する。
+
+| target | filename | family | 固有分岐 |
+|---|---|---|---|
+| app / source code | `audit_app.md` | `code` | DB区分、security profile、scope、検証モード、capability |
+| managed server | `audit_server.md` | `server` | 接続方法、role、観点、capability。常に完全read-only |
+| document vs implementation | `audit_doc_vs_impl.md` | `doc_vs_impl` | 資料、正典、媒体、capability。常に非変更 |
+
+正典はすべてpaste-readyで自己完結し、特定tool/modelの起動commandを必須にしない。
+
+## OKF選択metadata
+
+正典promptのfrontmatterは次を使う。
+
+```yaml
+type: "Audit Prompt"
+status: "stable"
+audit:
+  tool: "any"
+  target: "app | server | doc_vs_impl"
+  family: "code | server | doc_vs_impl"
+  canonical: true
 ```
-{ツール}_audit_{監査対象}.md
-```
 
-- 軸の順序は固定: `ツール名` → `audit` → `監査対象`
-- すべて小文字・アンダースコア区切り（kebab-case ではなく snake_case）
-- `{監査対象}` は「コード監査（DB区分）」「サーバー診断（server）」「資料突合（doc_vs_impl）」の 3 系統。コード監査では DB区分（`db_app` / `db_less_app`）が、サーバー診断では `server` が、資料突合では `doc_vs_impl` が入る。
+値域:
 
-### {ツール}
-
-| 値 | 対象 |
-|---|---|
-| `codex` | Codex CLI に作業ゴールとして貼る用 |
-| `claude_ultracode` | Claude Code の ultracode（多エージェント並列ワークフロー）で実行する用 |
-| `claude_fable` | Claude Code で Fable 系モデル（例: `/model claude-fable-5`。以降のバージョンも対象）を使って実行する用。調査・修正は単一エージェントの深い推論、敵対的検証・rubric 採点は独立コンテキストの verifier サブエージェントへ委託する |
-
-新しいツールを足す場合もこの位置にツール識別子を置く（例: `gemini_audit_db_app.md`）。
-
-### {監査対象}
-
-| 値 | 対象 |
-|---|---|
-| `db_less_app` | コード監査。DB を使わないアプリ。永続化はファイル/設定/JSON/YAML/TOML/ブラウザ保存領域/Cookie/キャッシュ/メモリ/外部API |
-| `db_app` | コード監査。DB を使うアプリ。DBアクセス層（SQL/ORM/トランザクション）も監査対象 |
-| `server` | サーバー診断。SSH でアクセスできる稼働中サーバーを完全 read-only で診断し、対策を提言する（修正は適用しない）。DB区分の軸は持たない |
-| `doc_vs_impl` | 資料突合監査。外部作成の資料（説明会資料・マニュアル・仕様書・顧客向け文書）の記載と現行実装の差異を完全 read-only で洗い出す（修正は適用しない）。DB区分の軸は持たない。資料パスを引数で受ける |
-
-## 現在のファイル
-
-コード監査:
-
-| ツール | DBなし | DBあり |
+| metadata | 許可値 | 規約 |
 |---|---|---|
-| Codex | `codex_audit_db_less_app.md` | `codex_audit_db_app.md` |
-| Claude (ultracode) | `claude_ultracode_audit_db_less_app.md` | `claude_ultracode_audit_db_app.md` |
-| Claude (Fable) | `claude_fable_audit_db_less_app.md` | `claude_fable_audit_db_app.md` |
+| `audit.tool` | `any` | 正典選択にtoolを使わないことを示す |
+| `audit.target` | `app` / `server` / `doc_vs_impl` | filenameと一致させる |
+| `audit.family` | `code` / `server` / `doc_vs_impl` | appだけ`code`、他はtargetと同値 |
+| `audit.canonical` | `true` | 推奨一覧・機械routingの対象であることを示す |
 
-サーバー診断（完全 read-only）:
+`docs/index.md` はOKF v0.2 Bundle rootの予約形式であり、frontmatterは `okf_version` 以外のkeyを持たせない。
 
-| ツール | ファイル |
+通常文書のtype:
+
+| 文書 | `type` |
 |---|---|
-| Codex | `codex_audit_server.md` |
-| Claude (ultracode) | `claude_ultracode_audit_server.md` |
-| Claude (Fable) | `claude_fable_audit_server.md` |
-
-資料突合（完全 read-only）:
-
-| ツール | ファイル |
-|---|---|
-| Claude (ultracode) | `claude_ultracode_audit_doc_vs_impl.md` |
-
-> codex / claude_fable 版の資料突合プロンプトは未作成（必要になった時点でこのスキームで追加する）。
-
-## OKF 選択 metadata
-
-`docs/` は OKF v0.2 Bundle であり、各監査プロンプトの `audit.tool`・`audit.target`・`audit.family` はこの節を値域の正本とする。値はファイル名と `README_activation.md` の自動選択表から機械的に導出し、独自の別名を作らない。
-
-| metadata | 許可値 | 対応関係 |
-|---|---|---|
-| `audit.tool` | `codex` / `claude_ultracode` / `claude_fable` | ファイル名の `{ツール}` と一致 |
-| `audit.target` | `db_app` / `db_less_app` / `server` / `doc_vs_impl` | ファイル名の `{監査対象}` と一致 |
-| `audit.family` | `code` / `server` / `doc_vs_impl` | `db_app`・`db_less_app` は `code`、`server` は `server`、`doc_vs_impl` は `doc_vs_impl` |
-
-通常文書の `type` は次の概念語彙に固定する。`status` は OKF の文書 lifecycle であり、監査の実行状態や docsweep の作業状態ではない。
-
-| 文書群 | `type` |
-|---|---|
-| `*_audit_*.md` | `Audit Prompt` |
+| 正典3 prompt | `Audit Prompt` |
 | `README_invariants*.md` | `Audit Invariant` |
 | `README_activation.md` | `Audit Routing Policy` |
 | `README_naming.md` | `Naming Convention` |
+| 旧path alias | `Deprecated Audit Alias` |
 
-### 監査成果物の命名
+## deprecated alias
 
-prompt のファイル名は上表の `{tool}_audit_{target}.md` とする。prompt が生成・更新する
-監査証跡の既定保存先は prompt リポジトリではなく、監査対象 repo の
-`docs/ai-audit-prompts/report_audit_<topic>_<YYYY-MM-DD>.md` とする。
-ユーザーが `保存先=<repo 相対パス>` を明示した場合は、その保存先を使う。
-作業計画は監査対象 repo の `docs/local/plan_<audit-topic>.md` に置く。
-report は `type: audit-report`、`status: draft|stable`、`docsweep_policy: never_archive`
-を使い、`docsweep_state` / `due` は使わない。
+統合前の14 pathは、1回の移行リリースだけpath案内互換として残す。aliasはpaste-ready互換ではない。
 
-## ファイル内部の書式
+対象:
 
-各ファイルは以下の構成に揃える。
+- app 8本: `codex|claude_ultracode|claude_fable|generic` × `db_app|db_less_app`
+- server 4本: 同4toolの `*_audit_server.md`
+- doc-vs-impl 2本: `claude_ultracode_audit_doc_vs_impl.md` / `generic_audit_doc_vs_impl.md`
 
-1. H1 タイトル（`# {ツール} ... 監査` のように、ツールと DB区分が分かる見出し）
-2. 概要 1〜2 段落（何の用途か / 主要な禁止事項 / `ultracode` キーワードの注記など）
-3. ` ```text ` フェンスブロックに、そのまま貼り付け可能な goal プロンプト全文
+aliasのfrontmatterは正典promptとして自動選択されない形にする。
 
-フェンスブロック内の冒頭は引数ブロック → 引数の定義 → 本文の順に固定する（詳細は `README_invariants.md` の「引数ブロック」節を参照）。
+```yaml
+type: "Deprecated Audit Alias"
+status: "deprecated"
+deprecation:
+  successor: "audit_app.md"
+  arguments:
+    DB区分: "あり"
+  removal: "次の破壊的変更release。repo内外consumer移行確認後に別planで削除"
+```
 
-## 命名時の注意
+- `audit.*` metadataを付けない。
+- 監査本文、profile、rubric、tool固有起動instructionsを複製しない。
+- successorの相対link、旧DB引数対応、削除gateだけを書く。
+- 正典prompt数、推奨一覧、自動routing、OKF主要導線へ含めない。
 
-- 用途が同じプロンプトは、中身の主眼（security 寄り / bug 寄り 等）が違っても**ファイル名には反映しない**。区別軸はあくまで「ツール」と「DB区分」のみ。
-- 区別したい新しい軸が出てきた場合は、このファイルに軸を追記してから命名する（場当たりで suffix を増やさない）。
-- 新規ファイルを足したら、このファイルの「現在のファイル」表も更新する。
+alias削除前に、repo外skill等のactive consumerが新3本へ移行済みであることと、旧path検索結果が履歴参照だけであることを確認する。
+
+## 任意adapter
+
+起動adapterを追加する場合は、正典本文とは別にし、次だけを持たせる。
+
+- runtimeでの起動方法
+- capability取得方法
+- 正典promptと引数の渡し方
+- capability不足時に正典の直列方式へ戻る方法
+
+監査観点、安全境界、evidence、summary、rubricをadapterへ複製しない。adapterの追加・変更は正典prompt数を増やさない。
+
+## 成果物命名
+
+- plan: `<target-repo>/docs/local/plan_<audit-topic>.md`
+- report既定: `<target-repo>/docs/ai-audit-prompts/report_audit_<topic>_<YYYY-MM-DD>.md`
+- server reportもowner private repoへ保存し、owner未確定のまま接続しない
+- userが `保存先=<repo-relative path>` を明示した場合だけreport先を変更する
+
+report frontmatterは `type: audit-report`、`status: draft|stable`、`docsweep_policy: never_archive` を使い、`docsweep_state` / `due` は使わない。
+
+## 命名変更手順
+
+新しい監査対象が必要になった場合だけ、この文書でtargetとfamilyの値域を先に追加する。新しいtool/provider/modelのために正典promptを増やさない。公開Markdownを増減・分類変更した場合は、`docs/index.md`、activation、README日英、CLAUDE、CHANGELOG、OKF検査を同じ変更で同期する。

@@ -1,87 +1,106 @@
-# AI コード監査プロンプト集 — 開発ガイド
+# AI 監査プロンプト集 — 開発ガイド
 
-> このファイルはリポジトリ固有のルールだけを扱う。言語・確認・質問フォーマット・スクリーンショット規約などの **個人/グローバルな AI ルールは公開リポジトリに置かない**。各利用者が使う AI ツールのグローバル設定側に置くこと。この `CLAUDE.md` / `AGENTS.md` は、private ファイルが一切無い public クローンでも成立する内容を保つ。
+> このファイルはrepository固有のルールだけを扱う。言語、確認、質問形式、個人用path等のglobal AI rulesは各利用者のAI tool設定へ置く。この `CLAUDE.md` / `AGENTS.md` はprivate fileが無いfresh public cloneでも成立させる。
 
 ## プロジェクト概要
 
-AI エージェント（Claude Code / Codex CLI 等）に「セキュリティ・脆弱性・バグ・保守性の監査と、現行機能を壊さない範囲の修正」をやらせるための、**貼り付け用プロンプト（メソッド）だけ**を集めたリポジトリ。コード・ビルド・実行環境は持たない。`docs/` 配下の Markdown が成果物そのもの。
+AIにapp/source code、管理下server、資料と実装の差異を監査させる、汎用paste-ready promptだけを収録するpublic repository。製品codeや実行環境は持たず、`docs/` の公開Markdownが成果物である。
 
-監査は 3 系統:
+保守対象の正典は3本だけ:
 
-- **コード監査** — リポジトリのセキュリティ・脆弱性・バグ・保守性を監査し、レポートと修正案を出力する。既定ではソースを書き換えず、スコープ指定時のみ現行機能を壊さない範囲で修正まで行う。
-- **サーバー診断** — SSH でアクセスできる稼働中サーバーを **完全 read-only** で診断し、対策を提言する（適用は人間）。
-- **資料突合** — 外部作成の資料（説明会資料・マニュアル・仕様書・顧客向け文書）の記載と現行実装の差異を **完全 read-only** で洗い出す（修正は適用しない・不変条件はプロンプト内に自己完結）。
+| 対象 | paste-ready正典 | 安全境界 |
+|---|---|---|
+| app / repository / source | `docs/audit_app.md` | 既定は調査のみ。明示scopeとapproval時だけ最小修正 |
+| managed server / VPS / host | `docs/audit_server.md` | 完全read-only。対策適用は人間 |
+| document vs implementation | `docs/audit_doc_vs_impl.md` | 資料・実装・UIを完全非変更。修正は提言だけ |
 
-## 不変条件（正本 = source of truth）
+選択順は `target → DB/profile → capability`。DB区分はapp正典の引数であり、tool/provider/model名は正典選択軸ではない。旧tool別14ファイルは一時的なdeprecated aliasであり、監査本文を持たず、新規workでは選ばない。
 
-プロンプトの中身を編集・追加するときは、まず正本を読み、そこからブレないこと。
+## source of truth
 
-| 系統 | 正本ファイル |
+promptを編集するときは、先に該当する正本とroutingを読む。
+
+| 契約 | 正本 |
 |---|---|
-| コード監査の不変条件 | `docs/README_invariants.md` |
-| サーバー診断の不変条件 | `docs/README_invariants_server.md` |
-| どのプロンプトを使うかの自動選択ルール | `docs/README_activation.md` |
-| ファイル命名スキーム | `docs/README_naming.md` |
+| app監査のscope、profile、evidence、検証、summary | `docs/README_invariants.md` |
+| server診断の完全read-only契約 | `docs/README_invariants_server.md` |
+| 対象選択、引数、capability routing | `docs/README_activation.md` |
+| filename、metadata、alias | `docs/README_naming.md` |
+| doc-vs-implの非変更契約 | `docs/audit_doc_vs_impl.md` 内で自己完結 |
 
-各プロンプト（`*_audit_*.md`）は上記正本の具体化であり、不変条件を個別ファイルに書き散らさない。共通ルールを変えるときは **正本を直し、各プロンプトを追随させる**（逆をやらない）。
+共通契約を変えるときは、正本 → canonical prompt → activation/index/README/CHANGELOGの順に同期する。aliasへ監査品質規約を複製しない。
 
-## ファイル命名（`docs/README_naming.md` が正本）
+## 命名とmetadata
 
+正典filenameは固定:
+
+```text
+audit_app.md
+audit_server.md
+audit_doc_vs_impl.md
 ```
-{ツール}_audit_{監査対象}.md
-```
 
-- すべて小文字・snake_case（`-` ではなく `_`）。軸順は `ツール` → `audit` → `監査対象` で固定。
-- ツール: `codex` / `claude_ultracode`（多エージェント並列）/ `claude_fable`（単一エージェント深い推論 + verifier 委託）。
-- 監査対象: `db_app` / `db_less_app`（コード監査の DB 区分）/ `server`（サーバー診断・DB 区分なし）/ `doc_vs_impl`（資料突合・DB 区分なし）。
-- 新ツール・新対象を足すときも同スキームに従う（例: `gemini_audit_db_app.md`）。
+正典は `type: "Audit Prompt"`、`status: "stable"`、`audit.tool: "any"`、`audit.target`、`audit.family`、`audit.canonical: true` を持つ。
+
+旧path aliasは `type: "Deprecated Audit Alias"`、`status: "deprecated"`、後継相対path、appならDB引数、削除条件だけを持つ。`audit:` metadataやpaste-ready本文を持たせない。詳細は `docs/README_naming.md` を正本とする。
 
 ## ディレクトリ構成
 
-```
+```text
 docs/
-  index.md                    ← OKF v0.2 Knowledge Bundle root and progressive-disclosure entry
-  README_activation.md         ← 起動・自動選択ルール（利用者が最初に読む）
-  README_naming.md             ← 命名スキーム
-  README_invariants.md         ← コード監査の不変条件（正本）
-  README_invariants_server.md  ← サーバー診断の不変条件（正本）
-  {ツール}_audit_{対象}.md      ← 各貼り付け用プロンプト
-  local/                       ← 非公開メモ（plan_* 等・gitignore 対象）
-assets/                        ← README 用画像（既存追跡分のみ。新規は gitignore）
-scripts/                       ← secrets-scan（secrets-scan.mjs）と pre-commit hook 導入（install-hooks.sh / .ps1）
-.githooks/pre-commit           ← コミット時に secrets-scan を実行する hook（install-hooks で有効化）
-.github/workflows/secrets-scan.yml ← push/PR 時の secrets-scan CI
-README.md / README.en.md       ← 日本語 / 英語の入口
+  index.md                     OKF v0.2 Bundle root
+  README_activation.md         対象中心のrouting
+  README_naming.md             filename/metadata規約
+  README_invariants.md         app監査の正本
+  README_invariants_server.md  server診断の正本
+  audit_app.md                 app監査の正典
+  audit_server.md              server診断の正典
+  audit_doc_vs_impl.md         資料と実装の差異監査の正典
+  *_audit_*.md                 旧14pathのdeprecated alias
+  local/                       private作業記録（gitignore対象）
+assets/                        README用の既存asset
+scripts/                       secrets-scanとhook installer
+.githooks/pre-commit           commit前secrets scan
+.github/workflows/             push/PR secrets scan
+README.md / README.en.md       日本語 / 英語の公開入口
 CHANGELOG.md / LICENSE
 ```
 
-## このリポジトリに置かないもの（最重要）
+`docs/` 直下の公開Markdownは22本（正典3、alias 14、routing/invariants/index 5）。`docs/local/` とignoredなprivate entryは公開数、OKF公開bundle、indexへ含めない。
 
-汎用テンプレート専用。次は **絶対にコミットしない**（`.gitignore` で予防済みだが運用でも徹底）:
+## このrepositoryに置かないもの
 
-- 認証情報・secrets・API キー・トークン・秘密鍵・パスワード
-- サーバー構成・IP・ホスト名・顧客名などの社内/案件固有情報
-- 特定プロジェクトの調査メモ・ログ・plan / 結果報告 md（非公開メモは `docs/local/` へ。これは gitignore 済み）
+汎用method以外をpublic treeへ置かない。
 
-「監査の進め方（メソッド）」だけを置く、が本リポジトリの線引き。
+- credential、secret、API key、token、private key、password
+- server構成、IP、hostname、顧客名等の案件固有情報
+- 特定projectの調査memo、log、plan、report
+- 個人固有のAI設定、private path、接続情報
 
-## 作業運用ルール（このリポジトリ固有）
+作業memoは `docs/local/` に置き、公開成果物へprivate情報を転記しない。
 
-- **監査プロンプトの中身を実際に実行しない。** ここはプロンプトを編集・整備するリポジトリであって、監査を走らせる場ではない。ユーザーが明示的に「このプロンプトでこのリポを監査して」と指示した場合のみ実行する。
-- プロンプトを変更したら、**README.md / README.en.md / CHANGELOG.md / 関連正本との整合** を必ず確認する（ファイルを増減したらディレクトリ構成の記述も更新）。日本語版を変えたら英語版も追随させる。
-- `docs/` の公開 Markdown を増減・分類変更した場合は、Bundle root の `docs/index.md`、frontmatter metadata、README 日英、CHANGELOG、関連正本の整合も確認する。`index.md` は OKF 予約形式の root 文書として `okf_version` 以外の frontmatter key を持たせない。
-- `docs/` 配下に新規 `.md`（`plan_*` / `bugfix_*` / `pending_*` など作業メモ）を作る場合は **`docs/local/` に置く**（公開ツリーを汚さない）。
+## 作業運用
 
-## AI 作業共通ルール
+- このrepositoryを整備するとき、監査prompt本文を実際の監査として実行しない。利用者が対象repo/server/materialへの監査を明示した場合だけ実行する。
+- public Markdownの追加、削除、分類変更では、`docs/index.md`、frontmatter、README日英、CHANGELOG、関連正本を同じ変更で同期する。
+- 日本語READMEと英語READMEは、構成、正典数、引数、status語、移行期間を一致させる。
+- `docs/index.md` はOKF reserved rootとしてfrontmatterに `okf_version` 以外を追加しない。
+- `docs/` 配下のplan / bugfix / pending等は `docs/local/` に置く。
+- prompt変更後は最低限、`git diff --check`、fresh public bundleへの `docsweep okf-check <bundle> --json`、`node scripts/secrets-scan.mjs --all-tracked --block` を確認する。未追跡の新規公開fileを含む作業中はtemporary Git indexで`--staged --block`も使う。
+- alias削除はrepo内外consumerの移行確認をgateにし、このmodernizationとは別planで行う。
+- 未実装の予定をREADME/CHANGELOGへ提供済みとして書かない。過去releaseの記録は改ざんしない。
 
-ビルド・コミット禁止、secrets-scan 責務、plan/bugfix/pending md の作成ルール（命名・書式含む）等の AI 作業共通ルールは、各利用者のグローバル AI 設定に従う（作者環境の例: `~/.claude/CLAUDE.md` および `~/.claude/guides/`）。
+## AI作業共通ルール
 
-## 参照リンク
+commit/push/tag/release/publish/deploy、secrets-scan責務、plan/bugfix/pendingの作成規則等は、各利用者のglobal AI設定に従う（作者環境の例: `~/.claude/CLAUDE.md` と `~/.claude/guides/`）。
 
-| 項目 | パス |
+## 参照
+
+| 項目 | path |
 |---|---|
-| 起動・自動選択ルール | `docs/README_activation.md` |
-| コード監査の不変条件（正本） | `docs/README_invariants.md` |
-| サーバー診断の不変条件（正本） | `docs/README_invariants_server.md` |
-| 命名スキーム | `docs/README_naming.md` |
-| Codex 用入口 | `AGENTS.md` |
+| Bundle入口 | `docs/index.md` |
+| 起動・routing | `docs/README_activation.md` |
+| app正典 | `docs/audit_app.md` |
+| server正典 | `docs/audit_server.md` |
+| doc-vs-impl正典 | `docs/audit_doc_vs_impl.md` |
+| Codex入口 | `AGENTS.md` |

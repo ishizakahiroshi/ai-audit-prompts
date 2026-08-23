@@ -4,40 +4,51 @@ okf_version: "0.2"
 
 # AI Audit Prompts Knowledge Bundle
 
-この `docs/` は、監査プロンプトとその正本を収録した Open Knowledge Format v0.2 Bundle です。
-通常の Markdown として直接利用でき、まずこの index、次に起動ルール、対象 prompt、関連する正本の順に段階的に読めます。
+この `docs/` は、tool非依存の監査promptとその運用契約を収録したOpen Knowledge Format v0.2 Bundleです。通常のMarkdownとして直接使えます。
 
-## 起動と metadata
+推奨導線は、このindex → [起動・routing規約](README_activation.md) → 対象別の正典prompt → app/serverのinvariantsです。
 
-- [共通監査プロンプト起動ルール](README_activation.md): 監査対象と実行ツールから、適切な監査プロンプトを段階的に選ぶための起動・自動選択ルール。
-- [docs 命名規則](README_naming.md): 監査プロンプトのファイル名と tool・target・family metadata の値域を定義する正本。
+## 起動と規約
 
-## 正本
+- [共通監査prompt起動ルール](README_activation.md): `target → DB/profile → capability` で正典を選ぶ。
+- [docs命名・metadata規則](README_naming.md): 正典、deprecated alias、metadata値域を定義する。
+- [app監査の共通契約](README_invariants.md): scope、approval、profile、evidence、検証、summaryの正本。
+- [server診断の共通契約](README_invariants_server.md): 完全read-only、接続先照合、診断、evidence、summaryの正本。
+- doc-vs-implの非変更契約は、正典prompt内に自己完結している。
 
-- [監査プロンプト 共通不変条件（正本）](README_invariants.md): コード監査プロンプト全体で共有する安全境界・進行・報告形式の不変条件を定義する正本。
-- [サーバー診断プロンプト 共通不変条件（正本）](README_invariants_server.md): サーバー診断プロンプト全体で共有する完全 read-only の安全境界・診断・報告形式の不変条件を定義する正本。
+## 推奨する正典prompt
 
-## コード監査
+自動選択と新規利用の対象は次の3本だけです。実行tool/provider/modelではなく監査対象から選びます。
 
-コード監査 prompt は [共通監査プロンプト起動ルール](README_activation.md) の選択表から選び、共通不変条件は [監査プロンプト 共通不変条件（正本）](README_invariants.md) を参照する。
+- [アプリ／source code監査](audit_app.md): DB区分とWeb/API、AI/agent、platform、CI/CD、supply chain、cloud/IaC等のprofileを実装証拠から選ぶ。
+- [管理下server診断（完全read-only）](audit_server.md): 所有・管理下serverの実効状態を変更せず調べ、対策を提言する。
+- [資料と実装の差異監査（完全非変更）](audit_doc_vs_impl.md): 必須指定された資料のclaimを、現行実装・設定・UI・正典と突合する。
 
-- [Claude Fable: DBを使うアプリ向けセキュリティ・脆弱性・バグ監査](claude_fable_audit_db_app.md): Claude Fable の深い推論で DB を使うアプリのセキュリティ・脆弱性・バグ・保守性を監査する貼り付け用プロンプト。
-- [Claude Fable: DBを使わないアプリ向けセキュリティ・脆弱性・バグ監査](claude_fable_audit_db_less_app.md): Claude Fable の深い推論で DB を使わないアプリのセキュリティ・脆弱性・バグ・保守性を監査する貼り付け用プロンプト。
-- [Claude ultracode Goal: DBを使うアプリ向け 詳細バグ潰し・セキュリティ・脆弱性監査](claude_ultracode_audit_db_app.md): Claude ultracode の多エージェント並列で DB を使うアプリのバグ・セキュリティ・脆弱性・保守性を監査する貼り付け用プロンプト。
-- [Claude ultracode Goal: DBを使わないアプリ向け 詳細バグ潰し・セキュリティ・脆弱性監査](claude_ultracode_audit_db_less_app.md): Claude ultracode の多エージェント並列で DB を使わないアプリのバグ・セキュリティ・脆弱性・保守性を監査する貼り付け用プロンプト。
-- [Codex Goal: DBを使うアプリ向けセキュリティ・脆弱性・バグ修正](codex_audit_db_app.md): Codex CLI で DB を使うアプリのセキュリティ・脆弱性・バグ・保守性を監査し、必要に応じて修正する貼り付け用プロンプト。
-- [Codex Goal: DBを使わないアプリ向けセキュリティ・脆弱性・バグ修正](codex_audit_db_less_app.md): Codex CLI で DB を使わないアプリのセキュリティ・脆弱性・バグ・保守性を監査し、必要に応じて修正する貼り付け用プロンプト。
+## 移行用deprecated alias
 
-## サーバー診断
+次の14ファイルは旧pathから後継正典を案内するだけのaliasです。paste-ready promptではなく、自動選択・推奨一覧・正典数に含めません。
 
-サーバー診断 prompt は [共通監査プロンプト起動ルール](README_activation.md) の選択表から選び、安全境界は [サーバー診断プロンプト 共通不変条件（正本）](README_invariants_server.md) を参照する。
+app（後継: `audit_app.md`、DB引数をalias metadataに保持）:
 
-- [Claude Fable: 稼働サーバーの脆弱性診断・ハードニング提言（完全 read-only）](claude_fable_audit_server.md): Claude Fable の深い推論で稼働中サーバーを完全 read-only 診断し、ハードニング提言を行う貼り付け用プロンプト。
-- [Claude ultracode Goal: 稼働サーバーの脆弱性診断・ハードニング提言（完全 read-only）](claude_ultracode_audit_server.md): Claude ultracode の多エージェント並列で稼働中サーバーを完全 read-only 診断し、ハードニング提言を行う貼り付け用プロンプト。
-- [Codex Goal: 稼働サーバーの脆弱性診断・ハードニング提言（完全 read-only）](codex_audit_server.md): Codex CLI で稼働中サーバーを完全 read-only 診断し、ハードニング提言を行う貼り付け用プロンプト。
+- [codex / DBあり](codex_audit_db_app.md)
+- [codex / DBなし](codex_audit_db_less_app.md)
+- [claude_ultracode / DBあり](claude_ultracode_audit_db_app.md)
+- [claude_ultracode / DBなし](claude_ultracode_audit_db_less_app.md)
+- [claude_fable / DBあり](claude_fable_audit_db_app.md)
+- [claude_fable / DBなし](claude_fable_audit_db_less_app.md)
+- [generic / DBあり](generic_audit_db_app.md)
+- [generic / DBなし](generic_audit_db_less_app.md)
 
-## 資料突合
+server（後継: `audit_server.md`）:
 
-資料突合 prompt は [共通監査プロンプト起動ルール](README_activation.md) から選び、不変条件を prompt 本文内に自己完結させる。
+- [codex](codex_audit_server.md)
+- [claude_ultracode](claude_ultracode_audit_server.md)
+- [claude_fable](claude_fable_audit_server.md)
+- [generic](generic_audit_server.md)
 
-- [Claude ultracode Goal: 資料 vs 実装 差異監査（read-only）](claude_ultracode_audit_doc_vs_impl.md): Claude ultracode の多エージェント並列で外部資料と現行実装の差異を完全 read-only で監査する貼り付け用プロンプト。
+doc-vs-impl（後継: `audit_doc_vs_impl.md`）:
+
+- [claude_ultracode](claude_ultracode_audit_doc_vs_impl.md)
+- [generic](generic_audit_doc_vs_impl.md)
+
+aliasは1回の移行releaseだけ残し、repo内外consumerの移行確認後に別planで削除します。

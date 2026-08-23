@@ -1,207 +1,150 @@
 <!-- Language: 日本語 | [English](README.en.md) -->
 
 <p align="center">
-  <img src="assets/20260609/header.png" alt="AI コード監査プロンプト集" width="100%">
+  <img src="assets/20260609/header.png" alt="AI 監査プロンプト集" width="100%">
 </p>
 
-# AI コード監査プロンプト集
+# AI 監査プロンプト集
 
-AI エージェント（Claude Code / Codex CLI 等）に「セキュリティ・脆弱性・バグ・保守性の監査」をやらせるための、貼り付け用プロンプト集です。既定ではソースを書き換えず、レポートと finding ごとの修正案（diff / before-after コード）を出力します。スコープを明示した場合のみ、現行機能を壊さない範囲の修正まで行います。プロジェクトに依存しない汎用テンプレートだけを置きます。
-
-## なぜ作ったか
-
-AI にコード監査をやらせたい——脆弱性もバグも保守性も見て、現行機能を壊さない範囲で直してほしい。やりたいことは毎回同じなのに、**毎回プロンプトをゼロから書いていました**。しかも書くたびに指示が微妙にブレる。
-
-- 「ビルドするな」と書き忘れて、勝手にコミットされかけた
-- 途中で「これ直していいですか？」と止まったまま放置された
-- 観点を並べ忘れて、SQLi だけ見て認可漏れを見落とした
-- 「最後まで走って」と言い忘れて、序盤で満足して止まられた
-
-毎回これを思い出して書くのが面倒で、書いても抜けが怖い。だったら**監査のやり方そのものを固めてしまえばいい**——というのがこのリポジトリです。貼って走らせれば、止まらず最後まで・観点を漏らさず走り切り、レポートと finding ごとの修正案を出します。修正まで任せたい時はスコープを指定すれば、現行機能を壊さない範囲で一気にやり切ります。毎回プロンプトを考える時間と、指示のブレが消えます。
+実行製品やモデル名に依存せず、AI にアプリ、管理下サーバー、資料と実装の差異を監査させるための貼り付け用プロンプト集です。監査対象から3本の正典を選び、DB区分、security profile、実行環境のcapabilityを順に解決します。
 
 ## これは何か
 
-- 重いコード監査を、ツール（Claude / Codex）と DB 区分（DB あり / なし）に応じて使い分けるためのプロンプトを `docs/` にまとめたもの。
-- 各プロンプトは「ビルド・コミット・本番DB操作・抜本改修は禁止」「止まらず最後まで走り切る」「判断待ちは記録してパス」を共通の前提にしています。
-- **既定ではソースを書き換えません**（スコープの既定値 = 調査まで）。レポートと finding ごとの修正案（diff / before-after コード）を出力し、修正まで任せたい時だけ「スコープ: 調査・修正まで / フルループ」を指定します。
-- **監査レポートの冒頭に「総合 100 点満点 + 5 カテゴリスコア + サブ項目内訳 + 減点理由→クリア条件」をまとめた総合評価ヘッダーを必ず出します**。その直後に対応状況サマリ、対応一覧、対応 C の詳細を置き、開いた瞬間に「全体としてどうか」「どこが弱いか」「次に何をするか」が一目で分かります。対応状況は `plan`（未着手） / `fix`（対応作業完了） / `pending`（判断・外部依存待ち）、検証状態は別列で管理します。
-- 監査 report の既定保存先は対象 repo の `docs/ai-audit-prompts/` です。`保存先=docs/obsidian` などを明示した場合だけ別の repo 相対保存先へ変更し、Obsidian entry を使うときは実行前確認で明示します。
-- 全プロンプトが守るべき不変条件は [docs/README_invariants.md](docs/README_invariants.md) を正本とします。
-- `docs/` は Open Knowledge Format (OKF) v0.2 の Knowledge Bundle としても利用できます。通常の Markdown として直接読め、[docs/index.md](docs/index.md) から起動ルール → 選択した prompt → 関連する正本の順に段階的に辿れます。OKF 対応は監査 prompt の実行仕様を変更しません。
-- 本プロンプト集は無保証です。AI による監査は誤検出・検出漏れがあり得ます。確定 finding も含め、本番反映前に必ず人間がレビューしてください。利用は自己責任で。
+- 保守するpaste-ready正典は `docs/audit_app.md`、`docs/audit_server.md`、`docs/audit_doc_vs_impl.md` の3本です。
+- routingは `target → DB/profile → capability` です。Claude、Codex、ChatGPT、CLI、Web UI等の製品名やmodel名だけで、shell、Web、並列agent、独立verifier等の能力を推測しません。
+- app監査の既定scopeは「調査まで」です。確定findingには具体的な最小修正案を付けますが、`confirmed finding ≠ applied fix` です。修正は明示scopeと実行前承認の範囲だけで行います。
+- server診断は完全read-only、doc-vs-impl監査は資料・実装とも完全非変更です。どちらも対策や修正は提言だけで、適用は人間が行います。
+- report冒頭は固定100点ではなく、coverage、evidence、候補検証率、未調査、residual riskを示します。数値評価は利用者が明示要求した場合だけ、分母と未調査の扱いを定義して参考値として出します。
+- 監査事実とevidenceの正本はreport、後続作業の実行正本はrelated先のplan / bugfix / pendingです。`確定 / 却下 / 判断待ち / 重複`、`plan / fix / pending`、検証状態を別々に追跡します。
+- このprompt集は無保証です。AI監査には誤検出・検出漏れがあり得るため、確定findingや自動適用した修正も本番反映前に人間がreviewしてください。
 
 ## 使い方
 
-<p align="center">
-  <img src="assets/20260609/how_it_works.png" alt="使い方の流れ" width="100%">
-</p>
+### 1. cloneする
 
-### 1. このリポジトリを clone する
-
-```
+```text
 git clone <このリポジトリのURL> ai-audit-prompts
 ```
 
-置き場所はどこでも構いません（特定のローカルパスに依存しません）。
+### 2. 対象から正典を選ぶ
 
-### 2. 監査したいプロジェクトで、AI に次のプロンプトを投げる
+迷ったときは起動ルールへ任せられます。
 
-clone した先のパスを `<repo>` に読み替えてください。
-
-Claude Code 用（ultracode・多エージェント並列）:
-
-```
-<repo>/docs/README_activation.md を読んで、claude_ultracode 版の監査プロンプトを選んで実行して。ultracode で。
+```text
+<repo>/docs/README_activation.md を読み、監査対象に合う正典promptを選んで実行して。
 ```
 
-引数を絞りたい場合:
+| 監査対象 | 正典 | 主な用途 |
+|---|---|---|
+| app / repository / source code | [`audit_app.md`](docs/audit_app.md) | security、bug、dependency、maintainability。DBと複数profileを内部で選択 |
+| managed server / VPS / host | [`audit_server.md`](docs/audit_server.md) | 所有・管理下serverの完全read-only診断と対策提言 |
+| document vs implementation | [`audit_doc_vs_impl.md`](docs/audit_doc_vs_impl.md) | 指定資料のclaimと現行実装を完全非変更で突合 |
 
-```
-<repo>/docs/README_activation.md を読んで、claude_ultracode 版の監査プロンプトを選んで実行して。ultracode で。
-DB区分: あり
+URLだけの外部site、第三者system、共用hosting全体への能動診断は対象外です。
+
+### app監査の例
+
+```text
+<repo>/docs/audit_app.md のprompt全文を使って監査して。
+DB区分: 自動
 強度: ミッド
-スコープ: フルループ
-観点: セキュリティ・脆弱性
-対象: src/api/
-除外: src/api/tests/
+スコープ: 調査まで
+検証モード: 安全なローカル検証
+観点: 全部
+対象: src/
+除外: src/generated/
+確認: あり
 ```
 
-Claude Fable 用（深い推論・単一エージェント）:
+`DB区分` は `自動 / あり / なし`。自動時はmanifest、dependency、schema、migration、ORM/SQL、DB driver等から `あり / なし / unknown` を根拠付きで判定し、本番DB接続やmigration実行はしません。
 
-```
-/model claude-fable-5
-```
+appは実装証拠に基づき、Web/API、AI/agent/MCP/RAG、native/desktop/mobile/browser extension、CLI/library、CI/CD/supply chain、cloud/IaC/Kubernetes、DB等のprofileを `selected / skipped / unknown + evidence` で複数選択します。
 
-モデルを切り替えてから、次のプロンプトを投げてください。
+### server診断の例
 
-**簡易版（全デフォルト）:**
-
-```
-<repo>/docs/README_activation.md を読んで、claude_fable 版の監査プロンプトを選んで実行して。DB区分は自動判定でいい。
-```
-
-**詳細版（引数を絞る場合の例）:**
-
-```
-<repo>/docs/README_activation.md を読んで、claude_fable 版の監査プロンプトを選んで実行して。
-DB区分: あり
-強度: ミッド
-スコープ: フルループ
-観点: セキュリティ・脆弱性
-対象: src/api/
-除外: src/api/tests/
-```
-
-引数はすべて省略可能です（DB区分は自動判定、他はデフォルト値で動きます）。「まずざっと見たい」なら簡易版、「認可まわりだけ深く調べたい」なら詳細版の使い分けがおすすめです。
-
-Codex CLI 用:
-
-```
-<repo>/docs/README_activation.md を読んで、codex 版の監査プロンプトを選んで実行して。
-```
-
-引数を絞りたい場合:
-
-```
-<repo>/docs/README_activation.md を読んで、codex 版の監査プロンプトを選んで実行して。
-DB区分: あり
-強度: ミッド
-スコープ: フルループ
-観点: セキュリティ・脆弱性
-対象: src/api/
-除外: src/api/tests/
-```
-
-- ファイル名を直接指定しなくても、起動ルールがツール×DB区分を自動選択します。
-- `DB区分: あり / なし` を明示すると自動判定をスキップします。省略時は自動判定。
-- スコープ省略時は「調査まで」（レポート＋修正案のみ・ソース書き換えなし）。修正までやらせたい時は「スコープ: フルループ」（または「調査・修正まで」）を指定。
-- 既定では、実行前に「どのプロンプト・どの引数で・ソースを書き換えるか」の最終確認が入り、承認するまで監査は始まりません。ツール実行許可とは別レイヤーの確認なので、バイパスパーミッション / YOLO モードでも有効です。CI など非対話で回す時は「確認: なし」を指定。
-- report 保存先も実行前確認に含まれます。既定の `docs/ai-audit-prompts/` が無い場合は、フォルダ作成と `.gitignore` に追加するか追跡対象にするかを確認します。
-- Claude 版末尾の `ultracode` は多エージェント並列のスイッチ。軽く済ませたい時は外す。
-- 監査結果は、あなたが話しかけた言語で返ります（英語で頼めば英語、日本語なら日本語）。翻訳の手間はありません。
-
-### 2-b. 稼働サーバーを診断したい場合（完全 read-only）
-
-リポジトリではなく、SSH でアクセスできる稼働中サーバーの脆弱性・設定不備を診断し、対策を提言させたい場合は、サーバー診断プロンプトを起動します。サーバーの状態は一切変更せず、対策は提言のみ（適用は人間）です。
-
-Claude Code（ultracode・並列）でサーバー診断:
-
-```
-<repo>/docs/README_activation.md を読んで、claude_ultracode 版のサーバー診断プロンプトを選んで実行して。ultracode で。
-接続方法: AI接続
-接続先: user@example.com
-```
-
-Claude Fable でサーバー診断:
-
-```
-/model claude-fable-5
-```
-
-```
-<repo>/docs/README_activation.md を読んで、claude_fable 版のサーバー診断プロンプトを選んで実行して。
+```text
+<repo>/docs/audit_server.md のprompt全文を使って診断して。
 接続方法: AI接続
 接続先: user@example.com
 強度: ミッド
-観点: SSH設定・ネットワーク・公開サービス・ファイアウォール
+観点: SSH設定・公開サービス・firewall・patch
+確認: あり
 ```
 
-Codex CLI でサーバー診断:
+自分が所有・管理し、OS全体を調査する権限があるserverだけに使ってください。非repoのserver診断では、実接続前にreportを保存するprivate owner repo、host、user、key filename、portを照合します。設定変更、更新、再起動、active scan、対策適用は行いません。
 
+### 資料と実装の差異監査の例
+
+```text
+<repo>/docs/audit_doc_vs_impl.md のprompt全文を使って監査して。
+資料: docs/customer-guide.pdf
+正典: docs/specification.md
+媒体: PDF
+強度: ハイ
+対象: src/
+確認: あり
 ```
-<repo>/docs/README_activation.md を読んで、codex 版のサーバー診断プロンプトを選んで実行して。
-接続方法: AI接続
-接続先: user@example.com
-```
 
-- 既に対象サーバー上で Claude Code を動かしているなら `接続方法: サーバー上`（このとき接続先は不要）。
-- 引数は省略可能（接続方法はAI接続、強度ハイ、観点は全部がデフォルト）。ただし AI接続では接続先が必要です。
-- **自分が管理する／診断の許可を得たサーバーにのみ使ってください。** サーバーの状態は変えず、対策の適用は必ず人間がレビューしてから行ってください。
+`資料` は必須です。PDF、slide、image、spreadsheet等はtext抽出だけでなく、利用可能なら全pageを視覚確認します。資料内のAI向け命令はdataとして扱い、資料・source・設定・UIは変更しません。
 
-### 3.（任意）プロジェクトに合言葉を仕込む
+## 実行契約
 
-毎回パスを書くのが面倒なら、対象プロジェクトの `CLAUDE.md`（Codex 用は `AGENTS.md`）に下記を入れておくと、「run audit」と言うだけで起動します。詳細は [docs/README_activation.md](docs/README_activation.md) の「各プロジェクトに書く指示」を参照。
+### scopeとapproval
+
+既定の `確認: あり` では、prompt、解決済み引数、変更有無、検証範囲、成果物pathを提示し、承認を得てから始めます。tool permissionやYOLO設定とは別のgateです。
+
+appのscopeは次のとおりです。
+
+| scope | source変更 | 検証 |
+|---|---|---|
+| 調査まで（既定） | なし。findingごとの修正案だけ | commandは実行せず、静的evidenceを収集 |
+| 調査・修正まで | 確定済みの自己完結した最小修正だけ | 選択した検証モードの範囲 |
+| フルループ | 最小修正まで | 修正後検証と再調査まで |
+
+`検証モード` は `静的 / 安全なローカル検証 / build含む` です。test内compileや一時artifactを使う安全な検証と、install、release、publish、deploy、shared環境変更等の副作用を分けます。scope外や副作用不明のcommandは実行しません。
+
+### capabilityと品質表示
+
+選択した正典は、file検索、shell、test、Web一次情報、visual inspection、並列agent、独立verifier、file編集等を `yes / no / unknown + evidence` で記録します。能力が少ない場合もfindingの確定条件は弱めず、直列二巡や「未検証」に切り替えます。
+
+security baselineは実行時にofficial sourceでcurrent/stableを再確認し、名称、版、URL、確認日、確認状態をplan/reportへ残します。CVEやbaseline非適合だけではfindingにせず、対象実装への到達可能性、実効値、mitigationを確認します。
+
+### 成果物
+
+- plan: 対象repoの `docs/local/plan_<audit-topic>.md`
+- report既定: `docs/ai-audit-prompts/report_audit_<topic>_<YYYY-MM-DD>.md`
+- `保存先=...` を明示した場合だけ別のrepo相対pathを使います。
+- `docs/obsidian` は明示指定時だけ使い、entryのtargetとwritableを確認します。
+- server reportはこのpublic prompt repoではなく、利用者が指定したprivate owner repoへ保存します。
 
 ## ディレクトリ構成
 
-```
+`docs/` 直下の公開Markdownは22本です。内訳はpaste-ready正典3本、移行用alias 14本、routing/invariants/index 5本です。
+
+```text
 docs/
-  index.md                    ← OKF v0.2 Knowledge Bundle の入口
-  README_activation.md        ← どのプロンプトを使うかの自動選択ルール（最初に読む）
-  README_naming.md            ← ファイル命名スキーム
-  README_invariants.md        ← コード監査プロンプトで揃える不変条件（正本）
-  README_invariants_server.md ← サーバー診断プロンプトで揃える不変条件（正本）
-  claude_ultracode_audit_db_app.md       ← Claude ultracode / コード監査 / DBあり
-  claude_ultracode_audit_db_less_app.md  ← Claude ultracode / コード監査 / DBなし
-  claude_fable_audit_db_app.md          ← Claude Fable / コード監査 / DBあり
-  claude_fable_audit_db_less_app.md     ← Claude Fable / コード監査 / DBなし
-  codex_audit_db_app.md                  ← Codex / コード監査 / DBあり
-  codex_audit_db_less_app.md             ← Codex / コード監査 / DBなし
-  claude_ultracode_audit_server.md       ← Claude ultracode / サーバー診断（read-only）
-  claude_fable_audit_server.md           ← Claude Fable / サーバー診断（read-only）
-  codex_audit_server.md                  ← Codex / サーバー診断（read-only）
-  claude_ultracode_audit_doc_vs_impl.md  ← Claude ultracode / 資料突合（read-only）
+  index.md                    OKF v0.2 Bundleの入口
+  README_activation.md        対象中心の起動・routing規約
+  README_naming.md            正典・aliasの命名とmetadata
+  README_invariants.md        app監査の共通契約
+  README_invariants_server.md server診断の完全read-only契約
+  audit_app.md                app/source code監査の正典
+  audit_server.md             managed server診断の正典
+  audit_doc_vs_impl.md        資料と実装の差異監査の正典
+  *_audit_*.md                旧14pathのdeprecated alias
+  local/                      非公開作業記録（gitignore対象）
 ```
 
-監査は 3 系統あります。**コード監査**（リポジトリのセキュリティ・脆弱性・バグ・保守性を監査してレポートと修正案を出力。スコープ指定時のみ現行機能を壊さない範囲で修正まで）と、**サーバー診断**（SSH でアクセスできる稼働中サーバーを完全 read-only で診断し、対策を提言）、**資料突合**（説明会資料・マニュアル・仕様書など外部作成資料の記載と現行実装の差異を完全 read-only で洗い出し。修正は適用しない）です。
+旧tool別14pathは1回の移行releaseだけ案内用に残します。aliasはpaste-ready promptではなく、自動選択・推奨一覧・正典数に含めません。repo内外consumerの移行確認後、次の破壊的変更を扱う別planで削除します。
 
-codex 版は詳細列挙型、claude_ultracode 版は凝縮型（並列ファンアウト）、claude_fable 版は単一エージェント深い推論型で粒度が異なりますが、各系統で守る不変条件は同じで、コード監査は [docs/README_invariants.md](docs/README_invariants.md)、サーバー診断は [docs/README_invariants_server.md](docs/README_invariants_server.md) で正本管理しています。
+`docs/` はOpen Knowledge Format (OKF) v0.2 Bundleでもあり、[`docs/index.md`](docs/index.md)からrouting、正典、invariantsへ段階的に辿れます。
 
-### サーバー診断について（重要）
+## このリポジトリに置かないもの
 
-サーバー診断プロンプト（`*_audit_server.md`）は、コード監査とは安全境界が異なります。
+このrepositoryは汎用methodだけを置くpublic repositoryです。次をcommitしません。
 
-- **完全 read-only**: 稼働サーバーの状態を一切変更しません（設定変更・サービス再起動・パッケージ更新・ファイアウォール変更・ユーザー変更・再起動は禁止）。発見した問題の対策は提言として報告するだけで、**適用は人間が行います**（本番障害・SSH ロックアウトを避けるため）。
-- **接続方法は引数で選択**: 既定は「AI接続」（AI がローカルから `ssh <接続先> '<read-onlyコマンド>'` で診断）。既にサーバー上で Claude Code が動いているなら「サーバー上」を指定。
-- SSH・ファイアウォールの提言にはロックアウト回避手順が必ず添えられます。
-- あくまで自己責任で、**自分が管理する／診断の許可を得たサーバー**にのみ使ってください。
+- credential、API key、token、private key、password等の秘密
+- server構成、IP、hostname、顧客名等の案件固有情報
+- 特定projectの調査memo、log、plan、report
 
-## このリポジトリに置かないもの（重要）
-
-汎用テンプレート専用です。次は**絶対にコミットしない**（`.gitignore` で予防していますが、運用でも徹底）:
-
-- 認証情報・secrets・APIキー・トークン・秘密鍵・パスワード
-- サーバー構成・IP・ホスト名・顧客名などの社内/案件固有情報
-- 特定プロジェクトの調査メモ・ログ・plan / 結果報告 md
-
-監査の「進め方（メソッド）」だけを置く、というのが本リポジトリの線引きです。
+公開Markdownの整合確認には `docsweep okf-check docs --json`、秘密検査には `node scripts/secrets-scan.mjs --all-tracked --block` を使えます。このrepositoryには実行codeやbuild成果物はありません。
