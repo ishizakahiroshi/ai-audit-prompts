@@ -16,6 +16,7 @@ A collection of paste-ready prompts for auditing applications, managed servers, 
 - Server diagnosis is completely read-only. A doc-vs-implementation audit changes neither the source material nor the implementation. Both provide recommendations only; a human applies them.
 - The report starts with coverage, evidence, candidate verification rate, unexamined areas, and residual risk—not a fixed score out of 100. A numeric rating is produced only when explicitly requested, after defining its denominator and treatment of unknown coverage.
 - The report is the source of truth for audit facts and evidence; a related plan, bugfix, or pending document is the execution source of truth for follow-up work. Finding verdict, response state, and verification state are tracked separately.
+- Compliance with laws and standards (EU CRA, EU AI Act, PCI DSS, ISO/IEC 42001, Japan's AI Guidelines for Business, and so on) is not judged. Only when you explicitly request it, or the target or material explicitly claims compliance, does the audit record the name, version, URL, and check date under “regulatory context (unverified)” in the report; verifying a compliance claim against the implementation is handled only by the doc-versus-implementation canonical. Without such a mention, the section is omitted entirely, and possibly applicable regulations are never guessed or listed.
 - This collection comes with no warranty. AI audits can produce false positives and misses. Human review is required before production use, including for confirmed findings and automatically applied fixes.
 
 ## Usage
@@ -58,7 +59,7 @@ Confirmation: yes
 
 `DB category` accepts `auto / with DB / without DB`. In auto mode, the prompt uses manifests, dependencies, schemas, migrations, ORM/SQL, and DB drivers to record `with DB / without DB / unknown` with evidence; it does not connect to production databases or run migrations.
 
-Based on implementation evidence, the app prompt can select multiple profiles for Web/API, AI/agent/MCP/RAG, native/desktop/mobile/browser extensions, CLI/libraries, CI/CD and supply chain, cloud/IaC/Kubernetes, and DB boundaries. Each is reported as `selected / skipped / unknown + evidence`.
+Based on implementation evidence, the app prompt can select multiple profiles for Web/API, AI/agent/MCP/RAG, native/desktop/mobile/browser extensions, CLI/libraries, CI/CD and supply chain, cloud/IaC/Kubernetes, and DB boundaries. Each is reported as `selected / skipped / unknown + evidence`. Regardless of whether the AI profile is selected, every app audit also checks the AI coding-agent / IDE configuration committed to the repository — instruction files, hooks, MCP server definitions, permission / auto-approve settings, editor tasks, and skill definitions — for automatic execution paths, along with any tracked secrets or AI session artifacts.
 
 ### Server diagnosis example
 
@@ -71,7 +72,7 @@ Perspective: SSH configuration, exposed services, firewall, and patches
 Confirmation: yes
 ```
 
-Use this only for a server that you own or manage and are authorized to inspect at the OS level. Before connecting to a non-repository server, the prompt confirms the private owner repository for the report and matches the host, user, identity-file name, and port. It never changes configuration, updates packages, restarts services, actively scans, or applies recommendations.
+Use this only for a server that you own or manage and are authorized to inspect at the OS level. Before connecting to a non-repository server, the prompt confirms the private owner repository for the report and matches the host, user, identity-file name, and port. It never changes configuration, updates packages, restarts services, actively scans, or applies recommendations. Exposed AI runtimes, vector databases, MCP servers, agent gateways, and the privileges of resident agent processes are part of the perspectives. A single TLS handshake against the host's own loopback listeners and a single token-less GET to the link-local metadata endpoint count as read-only observation rather than active requests to external systems; authentication attempts, payload submission, and repeated connections remain prohibited.
 
 ### Document-versus-implementation example
 
@@ -85,7 +86,7 @@ Target: src/
 Confirmation: yes
 ```
 
-`Material` is required. PDFs, slides, images, and spreadsheets are visually inspected page by page when the capability is available, rather than relying only on extracted text. Instructions embedded in the material are treated as data. The material, source, configuration, and UI are not changed.
+`Material` is required. PDFs, slides, images, and spreadsheets are visually inspected page by page when the capability is available, rather than relying only on extracted text. Instructions embedded in the material are treated as data. The material, source, configuration, and UI are not changed. When `Canonical specification` is omitted, the prompt identifies current canonical candidates from project instructions, spec-driven artifacts (spec / plan / tasks, requirements / design, and similar), machine-readable contracts such as OpenAPI, and ADRs; in-flight change proposals and derived files such as llms.txt are never treated as canonical.
 
 ## Execution contract
 
@@ -105,9 +106,9 @@ The app scopes are:
 
 ### Capabilities and quality signals
 
-The selected canonical records file search, shell, tests, official-source web access, visual inspection, parallel agents, independent verification, and file editing as `yes / no / unknown + evidence`. Missing capabilities do not lower the finding threshold: execution falls back to a sequential second pass and marks anything not verified.
+The selected canonical records file search, shell, tests, official-source web access, visual inspection, parallel agents, independent verification, and file editing as `yes / no / unknown + evidence`; it also records the execution mode actually in effect (restricted modes such as read-only, and whether a sandbox or network isolation applied). Missing capabilities do not lower the finding threshold: execution falls back to a sequential second pass and marks anything not verified.
 
-At execution time, security baselines are rechecked against official sources when possible. The plan and report record the name, version, URL, check date, and status. A CVE or baseline mismatch alone is not a finding; reachability, effective configuration, exposure, and mitigations must be established.
+At execution time, security baselines are rechecked against official sources when possible. The plan and report record the name, version, URL, check date, and status. A CVE or baseline mismatch alone is not a finding; reachability, effective configuration, exposure, and mitigations must be established. External scores such as CVSS (version, vector, scorer), EPSS (score, percentile, model version, retrieval date), CISA KEV, and SSVC are recorded as inputs with provenance; none of them alone decides severity, confirmation, or rejection.
 
 ### Outputs
 

@@ -73,7 +73,7 @@ DNS、deployment痕跡、roleの重要な照合が不成立なら、本格的な
 - reboot/shutdown/power、cron/timer/at変更
 - container/orchestrator変更（run/start/stop/rm/build、`kubectl apply/delete/edit/scale`、helm install/upgrade等）
 - DB query、dump内容の閲覧、migration、backup実行、restore test
-- active scan、brute force、credential試行、負荷test、exploit実行、外部serviceへの能動request
+- active scan、brute force、credential試行、負荷test、exploit実行、外部serviceへの能動request。自host宛loopback（127.0.0.1 / ::1）のlisten serviceへの単発TLS handshake照会と、link-local metadata endpointへのtoken無し単発GET（HTTP statusのみ記録）は外部serviceへの能動requestに含めないが、認証試行、payload送信、credential本文の取得、反復接続はしない
 - secret、credential、private key、token、password/hash、接続文字列の値の出力
 - git commit/push/tag、publish/deploy/release
 
@@ -84,17 +84,17 @@ DNS、deployment痕跡、roleの重要な照合が不成立なら、本格的な
 状態を変えない非対話commandだけを使う。例:
 
 - OS/process/network: `uname`、`cat /etc/os-release`、`uptime`、`ps`、`ss -tlnp`、`ip -br a`
-- systemd/log: `systemctl status|list-units|list-unit-files|list-timers --no-pager`、`journalctl --no-pager`、`journalctl --verify`
-- package: `dpkg -l`、`apt list --upgradable`、`rpm -qa`、`dnf check-update`、`needrestart -b`
+- systemd/log: `systemctl status|list-units|list-unit-files|list-timers|show -p ...|cat --no-pager`、`systemd-analyze security [unit] --no-pager`、`journalctl --no-pager`、`journalctl --verify`
+- package: `dpkg -l`、`apt list --upgradable`、`apt-cache policy`、`apt-config dump`、`rpm -qa`、`dnf check-update`、`dnf updateinfo list security`、`needrestart -b`、`needs-restarting -r`、`ubuntu-security-status`、`pro status`、`subscription-manager status`
 - firewall: `ufw status`、`iptables -S`、`ip6tables -S`、`nft list ruleset`、firewalldの`--get*`/`--list*`
-- identity/config: `getent`、`sudo sshd -T`（必要なら `-C user=...`）、read-only `cat`、`ssh-keygen -lf`でtype/bit/fingerprintだけ
+- identity/config: `getent`、`sudo sshd -T`（必要なら `-C user=...`）、`sudo -l -U <user>`、read-only `cat`、`ssh-keygen -lf`でtype/bit/fingerprintだけ
 - file/host: delete/execを伴わない`find`、`findmnt`、`getcap -r /`、`lsblk`、`swapon --show`、`dmsetup ls --target crypt`
-- security: `sysctl -a`、`auditctl -s|-l`、`sestatus`、`getenforce`、`aa-status`、`mokutil --sb-state`
+- security: `sysctl -a`、`auditctl -s|-l`、`sestatus`、`getenforce`、`aa-status`、`mokutil --sb-state|--db|--kek|--dbx`（Subject/Not Afterのみ）、`pesign -S -i <efi>`、`/proc/cmdline`・`/sys/kernel/security/lockdown`・`/sys/module/module/parameters/sig_enforce`等の`/sys`・`/proc`読取だけ
 - integrity: `debsums -s`、`rpm -Va`。AIDE等は既存DBの軽量照会だけ
-- time/TLS: `timedatectl status`、`chronyc tracking|sources`、`ntpq -pn`、`openssl x509 -noout ...`
-- container: `docker ps|info|inspect`等の照会だけ
+- time/TLS: `timedatectl status`、`chronyc tracking|sources`、`ntpq -pn`、`openssl version -a`、`openssl list -tls-groups`、`openssl x509 -noout ...`、自host宛 `openssl s_client -connect 127.0.0.1:<port> -servername <name> -brief </dev/null`（negotiated protocol/cipher/group/cert dateのみ記録）
+- container: `docker/podman ps|info|inspect`、`kubectl version|get`（secret系resourceの値は出さない）、`crictl version`等の照会だけ
 
-dual-mode toolは必ずread-only形を明示する。bare `swapon`、`auditctl -w|-e|-D|-a|-A`、firewall add/delete/reload、`needrestart -r`、AIDE `--init`/`--propupd`等を使わない。対話pagerを無効化し、`yes` pipeで確認を突破しない。
+dual-mode toolは必ずread-only形を明示する。bare `swapon`、`auditctl -w|-e|-D|-a|-A`、firewall add/delete/reload、`needrestart -r`、AIDE `--init`/`--propupd`、`pro`/`subscription-manager` のattach/register/enable形、`unattended-upgrade --dry-run`（simulationでもpackageをdownloadする）、監視・security agent等の自己診断commandの `--fix`/`--deep` 等の変更・能動probe形を使わない。対話pagerを無効化し、`yes` pipeで確認を突破しない。
 
 commandのread-only性が不明なら実行せず、理由と代替証拠をreportへ残す。
 
@@ -106,8 +106,9 @@ commandのread-only性が不明なら実行せず、理由と代替証拠をrepo
 - Web一次情報
 - 並列agent、独立context verifier
 - plan/report作成
+- 監査agent自身の実行mode制約（read-only等の制限mode、sandbox、network制限）の有無。全許可modeで動いた場合はその旨を明記
 
-並列があれば観点別のlead探索へ使えるが、接続先照合前にfan-outしない。独立verifierがなければ前提を捨てた二巡目で反証し、`独立検証: なし` とする。接続能力がなければ実診断済みと装わず、収集手順と未調査を報告する。
+並列があれば観点別のlead探索へ使えるが、接続先照合前にfan-outしない。verifierへはcandidate ID、対象host/service/config、想定risk path、根拠command/出力、実行してよい照会、判定形式（確定 / 却下 / 判断待ち / 重複 + 根拠）だけを渡し、探索側の結論文や評価語を渡さない。独立verifierがなければ前提を捨てた二巡目で反証し、`独立検証: なし` とする。接続能力がなければ実診断済みと装わず、収集手順と未調査を報告する。
 
 plan/reportのAI executionはrole/context、agent、runtime、provider、exact model ID、display、reasoning effort、source、execution IDを取得できる範囲で追記する。優先順位は `orchestrator → runtime/CLI → UI → user report → unknown/unavailable`。推測や上書きをしない。秘密、会話全文、chain-of-thought、token量は保存しない。
 
@@ -131,37 +132,37 @@ profile表には状態、選択根拠、対象surface、確認済み観点、未
 6. 決定的なread-only観測または安全な再現証拠
 7. 推奨対策の有効性、適用時副作用、検証方法
 
-欠けるものは判断待ちまたは却下にする。file直読だけで実効値を断定せず、include/override/conditional設定と照合する。server roleを無視して意図的な公開portをfindingにしない。
+欠けるものは判断待ちまたは却下にする。却下にも根拠を要求し、到達不能や既存防御を示す実効値・別layerの観測、または安全な照会の結果を伴わない却下は判断待ちに留める。複数agentの合意やreviewer数を証拠にしない。file直読だけで実効値を断定せず、include/override/conditional設定と照合する。server roleを無視して意図的な公開portをfindingにしない。
 
-package/CVEはofficial advisoryでaffected version、実行中serviceからのreachability/exposure、fixed version、patched-but-not-active、現行mitigationを確認する。CISA KEV/active exploitationを優先するが、KEV非掲載を安全根拠にしない。
+package/CVEはofficial advisoryでaffected version、実行中serviceからのreachability/exposure（稼働process/serviceが脆弱なcode path・機能・設定を実際に使うか。distro backportを考慮し、version文字列だけで断定しない）、fixed version、patched-but-not-active、現行mitigationを確認する。重大度は対象roleでのimpactから、確信度はevidenceの強さから監査側が付ける。CVSS（版・vector・算出者）、EPSS（score・percentile・model版・取得日）、CISA KEV（dateAdded・catalogVersion）、SSVC判定は、参照した場合に出典付きの入力として記録し、いずれも単独で重大度・確定・却下の根拠にしない。CISA KEV/active exploitationを優先するが、KEV非掲載やNVD未enrichmentを安全根拠にしない。
 
 ## 診断観点
 
 強度ハイは全観点を深く、ミッドはSSH・公開面・firewall・privileged user・known update中心、ローは外部到達面と認証中心。指定外観点を省略した場合はcoverageへ明記する。
 
-1. **host/OS**: distro/version/EOL、kernel、uptime、role、banner情報開示
-2. **SSH/remote identity**: `sshd -T`実効値、Include/Match、root/password/empty password、allow list、key permission/type/bit、weak cipher/MAC/KEX/host key、session/forwarding、MFA、sftp chroot
-3. **package/CVE**: update、EOL、hold/versionlock/phased/破損、reboot-required/needrestart、repo署名、integrity、live patch、microcode、CPU mitigation、KEV/reachability/exposure
-4. **network/public service**: IPv4/IPv6別listen、loopback/public、不要service、metadata endpoint/IMDS。cloud control planeはserver内観測と分離
+1. **host/OS**: distro/version/EOL、extended support（ESM/ELTS/EUS等）のattach状態とsecurity repoの有効性、kernel、uptime、role、banner情報開示。EOL/無支援の判定にはrole・exposureを、提言には移行計画を添える
+2. **SSH/remote identity**: `sshd -T`実効値、Include/Match、root/password/empty password、allow list、key permission/type/bit（RSA鍵長とRequiredRSASize、ssh-dss/SHA-1系の残存）、weak cipher/MAC/KEX/host key、hybrid PQ KEX（mlkem768x25519-sha256 / sntrup761x25519-sha512）の有無（informational）、session/forwarding、MFA、root key restriction、sftp chroot。OpenSSHのsecurity fixはdistro backportがあるため、version文字列だけで脆弱と断定しない
+3. **package/CVE**: update、EOL、hold/versionlock/phased/破損、reboot-required/needrestart（放置期間含む）、自動update機構（unattended-upgrades / dnf-automatic等の有効状態・security origin・timer・直近の失敗log）、repo署名、integrity、live patch、microcode、CPU mitigation、KEV/reachability/exposure
+4. **network/public service**: IPv4/IPv6別listen、loopback/public、不要service、AI/agent service（LLM runtime、vector DB、HTTP transportのMCP server、agent gateway/control UI、workflow automation）、metadata endpoint/IMDS。AI/agent serviceは既定で認証を持たないものが多く、非loopback bind・認証なし・firewall未制限の組合せはhigh candidateとする。loopbackでもreverse proxy越しの無認証公開やcontrol UIのbrowser経由到達を確認し、bind/auth設定はunit Environment/config読取で取り、token値は出さない。IMDSはtoken無し単発GETのHTTP statusで判定し（401=IMDSv2 required、200=IMDSv1許容でSSRF経由credential窃取のcandidate）、GCP/AzureはMetadata header要件を確認し、credential本文は取得しない。cloud control planeはserver内観測と分離
 5. **firewall**: ufw/iptables/ip6tables/nft/firewalld、default policy、v4/v6対称性、zone/interface/direct rule。cloud SGは別管理面としてunknown化
-6. **user/privilege**: duplicate UID0、unused account、empty password、sudo/NOPASSWD/Defaults、PAM password quality、su、umask、federation/IdP境界
+6. **user/privilege**: duplicate UID0、unused account、empty password、sudo/NOPASSWD/Defaults、PAM password quality、su、umask、federation/IdP境界、AI agent/MCP server/automation processの実行identity（root、NOPASSWD sudo、docker group所属、権限確認を全面skipするflagを含む常駐commandline、systemd unitのUser/NoNewPrivileges等）
 7. **file permission**: SUID/SGID、world-writable/sticky、sensitive file、mount noexec/nosuid/nodev、file capability、orphan file、log permission
-8. **service/TLS/data service**: enabled/running service、unauthenticated DB/cache/admin、TLS protocol/cipher/cert chain/SAN/key/signature、DB transport、rate limit/WAF/auth gate
+8. **service/TLS/data service**: enabled/running service、unauthenticated DB/cache/admin、TLS protocol/cipher/group（hybrid PQ group対応はinformational）/cert chain/SAN/key/signature、libssl版とEOL、証明書の有効期間と自動更新（timer/cron・失敗log・期限監視・reload経路。CA/B Forum SC-081の有効期間短縮scheduleを前提に、手動更新運用は破綻riskとして提言）、OCSP stapling設定の陳腐化やclientAuth EKU依存のmTLS（CA発行方針変更で更新後に破綻する経路）、DB transportとauth method（pg_hba.conf等のmethod/接続元範囲、md5/trust残存、password_encryption。role hash種別はDB query禁止のため判断待ち）、rate limit/WAF/auth gate
 9. **logging/alerting/IOC（軽量）**: auth failure、login/process/connection/tmp/cron、auditd、persistent/remote logging、alert到達性、integrity monitor、log gap/tamper。完全forensicsではない
-10. **scheduled task**: user/system cron、systemd timer、実行user、writable target、失敗履歴
+10. **scheduled task**: user/system cron、systemd timer、実行user、writable target、失敗履歴、self-hosted CI runner/agent daemonの登録痕跡（runner unit/process/登録directory、身に覚えのないrunner名や登録日時、実行user）
 11. **secret exposure/management**: world-readable file/history/key、Vault/SSM/sops等。値は出さない
-12. **container/Kubernetes local surface**: privilege/capability/security option/user/bind/socket/host network/port/API、image pin、env secret。cluster control plane/RBAC/admission/network policyは観測不能ならunknown
-13. **kernel/host hardening**: security sysctl、core dump、effective vs persistent、Secure Boot/lockdown/module signing
+12. **container/Kubernetes local surface**: privilege/capability/security option/user/bind/socket/host network/port/API、image pin（immutable digest指定かmutable tagかを区別）、env secret、runtime/orchestrator自体とhost公開componentの版・EOL・upstream保守終了（EOL OS/packageと同じ判定軸で扱う）。cluster control plane/RBAC/admission/network policyは観測不能ならunknown
+13. **kernel/host hardening**: security sysctl、core dump、effective vs persistent、Secure Boot実効状態と署名chain/失効更新の世代（cloud VMでは鍵更新がplatform管理のことがあり、それだけで「問題なし」にしない）、lockdown実効値とmodule signing整合、service sandboxing実効directive（systemd-analyze securityのscoreはheuristicで単独findingにしない）
 14. **MAC**: SELinux/AppArmorのenforce/complain/unconfined。roleと例外を確認
 15. **time integrity**: service、actual sync、offset/source。TLS/token/TOTP/log correlationへの影響
-16. **at-rest/backup**: LUKS/swap、backup unit/timer/log、DB dump/WAL/replica痕跡、最新時刻/size/generation。dump内容、復元、managed control planeは触らず、復元可能性は判断待ち
+16. **at-rest/backup**: LUKS/swap、backup unit/timer/log、DB dump/WAL/replica痕跡、最新時刻/size/generation、backup先の種別（同一host / 同一account / 別account・region / offline）、host上のcredentialでbackupを削除・上書きできるか（object lock/versioning/retention、append-only、backup用keyの権限をlocal config読取の範囲で確認し、cloud側実効値が見えなければunknown）、暗号化・整合性検証と復元testの痕跡（log/runbook/最終日時）。offline/immutable copyが無ければroleとdata重要度を添えてcandidateにする。dump内容、復元、integrity check実行、managed control planeは触らず、復元可能性は判断待ち
 17. **cloud/IaC/control plane boundary**: hostから見えるagent/metadata/configと、別管理面のIAM、security group、snapshot、Kubernetes/IaC stateを分け、後者を「問題なし」にしない
 
 SSH/firewall提言には、lockout/service断risk、別session保持、console/rollback、段階適用、適用後疎通を必ず添える。
 
 ## security baseline
 
-Web一次情報が使える場合はofficial sourceで実行時に版・EOL・advisory・KEVを再確認する。使えない場合はpromptのpinned baselineを `未再確認` として使う。plan/reportに名称、版/公開年、URL、確認日、確認状態を残す。draft/RCをstable扱いしない。
+Web一次情報が使える場合はofficial sourceで実行時に版・EOL・advisory・KEVを再確認する。一次はvendor/projectのsecurity advisory・release notes、distroのsecurity tracker/errata、CVE recordのCNA container、日本製product/OSSではJVN/JPCERT/CC注意喚起とし、NVD、JVN iPedia、EUVD、集約DB、scanner出力は二次としてaffected/fixed versionの単独根拠にしない。使えない場合はpromptのpinned baseline（確認日付き）を `未再確認` として使う。plan/reportに名称、版/公開年、URL、確認日、確認状態を残す。draft/RCをstable扱いしない。
 
 baseline適合だけでfindingを確定せず、対象role、exposure、実効値、mitigationを要求する。
 
@@ -180,6 +181,7 @@ report冒頭は固定点数でなく次を出す。
 - 観点別coverage、得られたevidence、未調査領域/critical route
 - 接続先照合状態、独立検証の有無
 - residual risk、判断待ち、結果 `確定 / 暫定 / 算定不能`
+- regulatory context: ownerの依頼または資料が特定の法令・規格への適合に触れる場合だけ、名称・版/施行日・URL・確認日を数行で記録する。該当性・適合可否・重大度は判定せず、checklist化しない。主張がなければこの欄を省く
 
 接続後に台帳とcoverage分母を作れており、重要観点未調査や未検証candidateが残る場合は暫定とする。接続不能または最小inventoryさえ取得できず評価基盤を作れない場合は算定不能とする。数値評価は明示要求時だけ、対象・分母・重み・未調査の扱いを定義し `heuristic / provisional` と表示する。
 

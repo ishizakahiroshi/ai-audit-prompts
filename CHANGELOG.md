@@ -9,19 +9,28 @@
 
 - 実行製品・modelに依存しない対象別正典 `docs/audit_app.md`、`docs/audit_server.md`、`docs/audit_doc_vs_impl.md` を追加。保守対象のpaste-ready promptを3本へ統合した
 - app正典にDB区分 `自動 / あり / なし` と、Web/API、AI/agent/MCP/RAG、platform、CI/CD・供給網、cloud/IaC等を実装証拠から複数選択するsecurity profileを追加
+- app正典のcoreへ、repo内のAI coding agent / IDE設定（instruction file、hook、MCP server定義、permission / auto-approve設定、folder open時に走るeditor task、skill定義）をAI profileの選択に関係なく監査するsurfaceを追加した。自動実行経路、権限緩和、隠しUnicode / HTMLコメント命令、version未固定のnpx / uvx起動、inline script、出所を検証できないremote endpoint、tracked secretやAI session artifactの混入を判定する。CI/CD profileには、issue / PR本文を入力にAI agent / CLIを実行するjobのauto-approve / permission bypass flag、tool allowlistの実効性、write権限、OIDC / cloud credential fileの残置を別candidateとして追加した
+- app正典のCI/CD / supply chain profileへ、package managerのinstall-time policy（dependency lifecycle scriptのblock / allowlist、git / tarball依存の許可、minimum release age等の新版cooldown）、fork由来PRが書き込めるcache keyとrelease / publish jobの復元境界、publish jobでのOIDC token / credentialと任意code実行stepの同居、trusted publishing（OIDC）か長期tokenかの区別、immutable releaseとconsumer側のsignature / attestation検証、SBOMの最小要素相当field（hash、license、生成tool、生成context）とVEX / CSAF抑止のjustification突合、AI生成由来package名（slopsquatting）のregistry初回公開日・publisher照合を追加した
 - `静的 / 安全なローカル検証 / build含む` の検証モードを追加し、安全なtest内compileとinstall/release/publish/deploy等の副作用を区別した
 - lead / candidate / finding、7項目のevidence contract、候補検証率、独立検証、未調査領域、coverage、residual riskを3正典へ統一した
 - security baselineの名称、版、URL、確認日、確認状態と、AI executionのprovider、exact model、display、reasoning、source等をplan/reportへ追記する契約を追加した
 - `docs/` をOpen Knowledge Format (OKF) v0.2 Knowledge Bundleとして整備し、`docs/index.md` からrouting、正典、invariantsへ段階的に辿れるようにした。`docs/` 直下の公開Markdownは正典3本、移行用alias 14本、運用文書5本の計22本
+- server正典へ、状態を変えない照会だけで次を追加した: 公開TLS証明書の有効期間schedule（CA/B Forum SC-081v3、2026-03-15以降は最大200日）と自動更新の点検、Secure Boot証明書の失効更新世代の適用状況（mokutil --db / --kek、Subject / Not Afterのみ）、OpenSSH 10系のhybrid PQ KEXとOpenSSL 3.5系のTLS group、systemd-analyze securityとunit sandboxing、kernel lockdown実効値、自動update機構の有効状態・失敗履歴、hostへ露出したAI runtime / vector DB / MCP server / agent gatewayと常駐agent processの実行権限、self-hosted runner登録痕跡、backupのoffline / immutable / restore痕跡。診断対象host自身への単発・無認証のloopback / link-local照会（TLS handshake、token無しGET）だけを外部への能動requestと区別した
+- doc-vs-impl正典へ、正典未指定時の現行正典候補の探索（spec駆動成果物、ADR、CHANGELOG / release notes、agent instruction file。進行中のchange / proposalとllms.txt等の自動生成派生文書は非正典）、機械可読contract（OpenAPI等）のroute追加、資料の生成元（人間 / AI・bot PR / 自動生成）とreview痕跡の記録、現行画面として掲載された画像の実screenshot / mock / AI生成分類、incompleteness（記載不足）とincorrectness（矛盾）の区別、既存test/fixtureをevidenceに使う反証を追加した
+- 3正典へregulatory context（未検証）の扱いを追加した。法令・規格は、利用者の明示要求または対象・資料の適合主張があるときだけ名称・版・URL・確認日を記録し、それ以外では該当性・適合可否・severityを判定せず、資料にない一般checklistとして持ち込まない。国内product向けにJVN / JPCERT/CCを一次advisory sourceへ追記した
+- 監査運用へ、監査対象revision（commit SHA / working tree差分の有無）と実行mode / sandboxの記録、却下側にもevidenceを要求する対称なevidence contract、verifierへの引き渡し内容の最小化（結論文・評価語を渡さない）、threat model / SECURITY.mdによるscope内外の区別、失敗した検証と放棄candidateの件数付き列挙、再監査時のfinding単位の新規 / 継続 / 解消 / 再出現表示を追加した
 
 ### Changed
 
 - routingを `tool × DB` から `target → DB/profile → capability` へ変更。未知のtool/modelも対象別正典へ一意にroutingし、製品名だけで並列agent、shell、Web、file write等の能力を推測しない
+- 安全境界へ、repo内のagent / IDE設定（instruction file、hook、MCP server定義、permission / auto-approve設定、editor task、skill定義）を監査対象surfaceとして扱い監査側の権限拡大に使わないこと、対象内のAI向け命令はdataとして扱い従うのは正典promptと正規のproject instructionsだけであること、実際に動いた実行mode（read-only等の制限mode、sandbox、network遮断の有無）をinventoryへ記録することを明記した
 - 固定100点・固定配点を既定reportから外し、coverage、evidence、候補検証率、未調査、residual riskを既定summaryとした。数値評価は明示要求時だけ分母と未調査の扱いを定義して参考値として出す
 - `confirmed finding ≠ applied fix` を明文化し、監査判定、対応状況 `plan / fix / pending`、検証状態を分離した。監査事実の正本をreport、後続作業の実行正本をrelated先plan / bugfix / pendingとした
 - appの既定scope「調査まで」を維持しつつ、修正scopeでも自己完結した最小変更だけをapproval後に適用するよう明確化した。fixture/実機依存や仕様trade-offを伴うfindingは確定しても修正案に留める
 - server診断にprivate owner repo必須、接続先実体照合、完全read-only、cloud管理面の未観測表示を統一した。doc-vs-implは資料指定必須、全page visual確認、否定結論の二経路確認、資料・実装の完全非変更を維持した
 - 監査reportの既定保存先を対象repoの `docs/ai-audit-prompts/` に統一。`docs/obsidian/` は明示指定時だけ使い、未存在folderのGit管理を実行前に解決する
+- security baselineのpinを2026-09-01時点のofficial sourceで再確認した。OpenSSF OSPS Baselineをv2026.02.19からv2026.08.28へ更新し、NIST SSDF 1.2のdraft注記を2026-09-01時点へ更新、CISA KEVにJSON feed URLを併記した。app側にMCP specification（revision 2026-07-28）とSecurity Best Practices、CISA 2026 Minimum Elements for SBOM、OWASP AI Testing Guide v1.0、OWASP HTTP Security Response Headers / Content Security Policy Cheat Sheet、NIST SP 800-218A、RFC 9700 / RFC 10017、WebAuthn Level 3（W3C Recommendation 2026-08-25）を、server側にCA/B Forum SC-081v3、Microsoft Secure Boot証明書更新、OpenSSH / OpenSSL release情報、NIST IR 8374r1、NIST IR 8547（draft）、CIS Benchmarks、SSVC、OWASP Top 10 for Agentic Applications 2026を追加した。draftはdraftのまま残す
+- 脆弱性情報の扱いを更新した。official advisoryを一次（vendor / project advisory、maintainer発行またはreviewed済みGHSA、CVE recordのCNA / CISA ADP container、distro security tracker、JVNのvendor statement）と二次（NVD、unreviewed GHSA、OSV等の集約DB、JVN iPedia、EUVD、scanner出力）に分け、CVSS（版・vector・算出者）、EPSS（score・percentile・model版・取得日）、CISA KEV（catalogVersion・dateAdded）、SSVC / BOD 26-04の決定点を出典付き入力として記録し、単独で重大度・確定・却下の根拠にしない。reachabilityは粒度、判定手段、状態（reachable / no path found / unknown）で記録する
 
 ### Deprecated
 

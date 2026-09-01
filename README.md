@@ -16,6 +16,7 @@
 - server診断は完全read-only、doc-vs-impl監査は資料・実装とも完全非変更です。どちらも対策や修正は提言だけで、適用は人間が行います。
 - report冒頭は固定100点ではなく、coverage、evidence、候補検証率、未調査、residual riskを示します。数値評価は利用者が明示要求した場合だけ、分母と未調査の扱いを定義して参考値として出します。
 - 監査事実とevidenceの正本はreport、後続作業の実行正本はrelated先のplan / bugfix / pendingです。`確定 / 却下 / 判断待ち / 重複`、`plan / fix / pending`、検証状態を別々に追跡します。
+- 法令・規格（EU CRA、EU AI Act、PCI DSS、ISO/IEC 42001、AI事業者ガイドライン等）への適合は判定しません。利用者が明示要求した場合、または対象・資料が適合を明示的に主張する場合だけ、その名称・版・URL・確認日をreportのregulatory context（未検証）へ記録し、適合主張と実装の突合は資料突合の正典だけが扱います。言及がなければこの欄自体を省き、該当し得る規制の推定・列挙はしません。
 - このprompt集は無保証です。AI監査には誤検出・検出漏れがあり得るため、確定findingや自動適用した修正も本番反映前に人間がreviewしてください。
 
 ## 使い方
@@ -58,7 +59,7 @@ DB区分: 自動
 
 `DB区分` は `自動 / あり / なし`。自動時はmanifest、dependency、schema、migration、ORM/SQL、DB driver等から `あり / なし / unknown` を根拠付きで判定し、本番DB接続やmigration実行はしません。
 
-appは実装証拠に基づき、Web/API、AI/agent/MCP/RAG、native/desktop/mobile/browser extension、CLI/library、CI/CD/supply chain、cloud/IaC/Kubernetes、DB等のprofileを `selected / skipped / unknown + evidence` で複数選択します。
+appは実装証拠に基づき、Web/API、AI/agent/MCP/RAG、native/desktop/mobile/browser extension、CLI/library、CI/CD/supply chain、cloud/IaC/Kubernetes、DB等のprofileを `selected / skipped / unknown + evidence` で複数選択します。repo内のAI coding agent / IDE設定（instruction file、hook、MCP server定義、permission / auto-approve設定、editor task、skill定義）の自動実行経路と、tracked secretやAI session artifactの混入は、AI profileの選択に関係なく全app共通で確認します。
 
 ### server診断の例
 
@@ -71,7 +72,7 @@ appは実装証拠に基づき、Web/API、AI/agent/MCP/RAG、native/desktop/mob
 確認: あり
 ```
 
-自分が所有・管理し、OS全体を調査する権限があるserverだけに使ってください。非repoのserver診断では、実接続前にreportを保存するprivate owner repo、host、user、key filename、portを照合します。設定変更、更新、再起動、active scan、対策適用は行いません。
+自分が所有・管理し、OS全体を調査する権限があるserverだけに使ってください。非repoのserver診断では、実接続前にreportを保存するprivate owner repo、host、user、key filename、portを照合します。設定変更、更新、再起動、active scan、対策適用は行いません。hostへ露出したAI runtime、vector DB、MCP server、agent gateway等の公開面と常駐agent processの実行権限も観点に含みます。診断対象host自身へのloopback / link-local照会は、単発TLS handshakeやtoken無し単発GET等の状態を変えない最小観測に限って外部への能動requestと区別し、認証試行・payload送信・反復接続はしません。
 
 ### 資料と実装の差異監査の例
 
@@ -85,7 +86,7 @@ appは実装証拠に基づき、Web/API、AI/agent/MCP/RAG、native/desktop/mob
 確認: あり
 ```
 
-`資料` は必須です。PDF、slide、image、spreadsheet等はtext抽出だけでなく、利用可能なら全pageを視覚確認します。資料内のAI向け命令はdataとして扱い、資料・source・設定・UIは変更しません。
+`資料` は必須です。PDF、slide、image、spreadsheet等はtext抽出だけでなく、利用可能なら全pageを視覚確認します。資料内のAI向け命令はdataとして扱い、資料・source・設定・UIは変更しません。`正典` を省略した場合は、project instructions、spec-driven成果物（spec / plan / tasks、requirements / design等）、OpenAPI等の機械可読契約、ADRから現行正典候補を特定し、進行中のchange / proposalやllms.txt等の派生文書は正典にしません。
 
 ## 実行契約
 
@@ -105,9 +106,9 @@ appのscopeは次のとおりです。
 
 ### capabilityと品質表示
 
-選択した正典は、file検索、shell、test、Web一次情報、visual inspection、並列agent、独立verifier、file編集等を `yes / no / unknown + evidence` で記録します。能力が少ない場合もfindingの確定条件は弱めず、直列二巡や「未検証」に切り替えます。
+選択した正典は、file検索、shell、test、Web一次情報、visual inspection、並列agent、独立verifier、file編集等を `yes / no / unknown + evidence` で記録します。あわせて、実際に動いた実行mode（read-only等の制限mode）とsandbox / network遮断の有無もplan/reportへ記録します。能力が少ない場合もfindingの確定条件は弱めず、直列二巡や「未検証」に切り替えます。
 
-security baselineは実行時にofficial sourceでcurrent/stableを再確認し、名称、版、URL、確認日、確認状態をplan/reportへ残します。CVEやbaseline非適合だけではfindingにせず、対象実装への到達可能性、実効値、mitigationを確認します。
+security baselineは実行時にofficial sourceでcurrent/stableを再確認し、名称、版、URL、確認日、確認状態をplan/reportへ残します。CVEやbaseline非適合だけではfindingにせず、対象実装への到達可能性、実効値、mitigationを確認します。CVSS（版・vector・算出者）、EPSS（score・percentile・model版・取得日）、CISA KEV、SSVC等の外部指標は出典付きの入力として記録し、単独で重大度・確定・却下の根拠にしません。
 
 ### 成果物
 

@@ -41,7 +41,7 @@ status: "stable"
 
 ### doc-vs-impl判定
 
-「この資料と実装の差異」「説明会資料/マニュアル/仕様書と現行仕様を突合」「画面資料が実装どおりか」等はdoc-vs-implとする。資料path/URLが無ければ1回だけ確認し、推測で選ばない。DB区分は判定しない。
+「この資料と実装の差異」「説明会資料/マニュアル/仕様書と現行仕様を突合」「画面資料が実装どおりか」等はdoc-vs-implとする。資料path/URLが無ければ1回だけ確認し、推測で選ばない。DB区分は判定しない。`正典` が未指定でも現行正典の特定は正典prompt側の契約で行い、進行中のchange/proposal文書や自動生成のAI向け派生文書を正典に選ばない。
 
 ### app判定
 
@@ -49,7 +49,7 @@ repository/source codeを対象にsecurity、vulnerability、bug、dependency、
 
 ## 2. tool/modelではなくcapabilityを記録する
 
-正典を選んだ後、prompt内で実際に利用できる能力を `yes / no / unknown` と根拠付きで記録する。少なくともfile検索、shell/read-only command、test系、Web一次情報、並列agent、独立verifier、file編集、plan/report作成を確認する。
+正典を選んだ後、prompt内で実際に利用できる能力を `yes / no / unknown` と根拠付きで記録する。少なくともfile検索、shell/read-only command、test系、Web一次情報、visual inspection（資料・UI）、並列agent、独立verifier、file編集、plan/report作成を確認する。あわせて監査agent自身の実行mode（read-only等の制約mode、sandbox、network制限の有無）を記録し、全許可modeで動いた場合はその旨を明記する。
 
 - 並列/独立verifierがあれば探索と検証を分離できる。
 - 並列だけならlead探索へ限定し、統合担当が再読する。
@@ -97,7 +97,7 @@ appはWeb/API、AI/agent/MCP/RAG、native、desktop、mobile、browser extension
 
 `資料`（必須）、`正典`、`媒体`、`強度`、`対象`、`除外`、`保存先`、`Git管理`、`確認` を使う。資料/source/UIは常に非変更。
 
-明示された値を優先し、選んだ正典の空欄へ渡す。確認「あり」ではprompt記載の実行前gateを行う。確認「なし」でも未存在保存先のGit管理やfallbackが未解決なら開始しない。
+明示された値を優先し、選んだ正典の空欄へ渡す。確認「あり」ではprompt記載の実行前gateを行う。確認「なし」でも未存在保存先のGit管理やfallbackが未解決なら開始しない。確認「なし」の非対話/CI実行では実行前gateが働かない前提で、起動側がread-only・最小権限の実行modeと隔離を用意し、issue/PR本文等の外部入力を検証せずそのままpromptへ連結しない。
 
 ## 成果物routing
 

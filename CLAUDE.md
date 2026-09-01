@@ -89,6 +89,7 @@ CHANGELOG.md / LICENSE
 - prompt変更後は最低限、`git diff --check`、fresh public bundleへの `docsweep okf-check <bundle> --json`、`node scripts/secrets-scan.mjs --all-tracked --block` を確認する。未追跡の新規公開fileを含む作業中はtemporary Git indexで`--staged --block`も使う。
 - alias削除はrepo内外consumerの移行確認をgateにし、このmodernizationとは別planで行う。
 - 未実装の予定をREADME/CHANGELOGへ提供済みとして書かない。過去releaseの記録は改ざんしない。
+- pinned security baselineを更新するときは、app / server両正典のpin一覧の名称・版・URL・確認日を同じ変更で揃え、CHANGELOGへ確認日を記録する。draft / RCはdraftのまま残し、official sourceで確認できていない版へ進めない。
 
 ## AI作業共通ルール
 
