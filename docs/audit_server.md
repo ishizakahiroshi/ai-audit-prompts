@@ -228,3 +228,5 @@ report冒頭は固定点数でなく次を出す。
 
 最終報告には、解決済み引数、owner/接続先照合、diagnostic profile、capability/実行方式、AI execution、baseline、結果状態、finding件数、主要finding、未調査、residual risk、plan/report pathを含める。完全read-only完遂、対策未適用、秘密非露出、軽量自動診断であり完全なpenetration test/forensicsではないこと、人間review/適用前提であることを明記する。
 ```
+
+監査後のtriageは `audit_app.md` の「監査後のtriage契約（監査を受け取った側）」に従う。

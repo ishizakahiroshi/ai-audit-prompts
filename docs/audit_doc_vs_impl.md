@@ -209,3 +209,5 @@ reportにはclaim台帳、優先順の差異一覧、要すり合わせ、確認
 
 最終報告には、資料/正典とreference baseline、inspection profile、capability/実行方式、AI execution、結果状態、claim/verdict内訳、主要差異、要すり合わせ、visual/実装の未調査、residual uncertainty、plan/report pathを含める。資料・source・設定・UI未変更、commit/build/install/publish/deploy未実施、人間の仕様すり合わせ前提であることを明記する。
 ```
+
+すり合わせ後のtriageは `audit_app.md` の「監査後のtriage契約（監査を受け取った側）」に従う。
