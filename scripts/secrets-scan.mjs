@@ -48,6 +48,8 @@ const ALLOWED_EMAIL_DOMAINS = [
   'users.noreply.github.com',  // GitHub の noreply
   'anthropic.com',             // AI コミット footer（Co-Authored-By）
   'example.com',               // ドキュメントの例示用
+  'example.net',               // ドキュメントの例示用（RFC 2606 予約）
+  'example.org',               // ドキュメントの例示用（RFC 2606 予約）
   // ここに各プロジェクトの公開窓口ドメインを追記する（例: 'manabi-map.app'）
 ];
 
