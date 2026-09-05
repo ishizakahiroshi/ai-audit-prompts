@@ -197,7 +197,7 @@ Web一次情報を利用できる場合は実行時に公式一次情報だけ�
 - report: 既定 `docs/ai-audit-prompts/report_audit_<topic>_<YYYY-MM-DD>.md`。明示されたrepo相対保存先だけ変更可
 - `docs/obsidian` は明示指定時だけ使用し、entryのtargetとwritableを確認する
 - reportは初期準備で骨格を作り、candidate判定と各phase終端で逐次更新する
-- report frontmatter: `type: audit-report`、`status: draft|stable`、`tags`、`owner`、`related`、`last_reviewed`、`docsweep_policy: never_archive`。`docsweep_state` / `due` は使わない
+- reportのmetadataは、監査report種別、状態（`draft` / `stable`）、`tags`、`owner`、`related`、最終確認日が分かる形にする。**key名と形式は受け手の文書運用に合わせてよく、特定toolを前提にしない。** 監査reportは自動archive・自動期限の対象にしない（例: docsweepを使うなら `type: audit-report`、`status: draft|stable`、`docsweep_policy: never_archive` を付け、`docsweep_state` / `due` は付けない）
 
 reportは監査事実・証拠・評価・実行記録の正本、related先のplan/bugfix/pendingは未対応作業の実行正本とする。相互IDまたはlinkで対応させ、状態を二重管理しない。finding IDにはrun間で安定するfingerprintを添え、再監査では新規 / 継続 / 解消 / 再出現を集計する。
 

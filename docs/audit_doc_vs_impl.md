@@ -98,7 +98,7 @@ profile表には状態、選択根拠、対象claim/surface、取得evidence、�
 
 - plan: docs/local/plan_<audit-topic>.md
 - report: 既定docs/ai-audit-prompts/report_audit_<topic>_<YYYY-MM-DD>.md、または明示されたrepo相対path
-- report frontmatter: type: audit-report、status: draft、tags、owner、related、last_reviewed、docsweep_policy: never_archive。docsweep_state / dueは付けない
+- reportのmetadata: 監査report種別、状態（draft / stable）、tags、owner、related、最終確認日が分かる形にする。key名と形式は受け手の文書運用に合わせてよく、特定toolを前提にしない。監査reportは自動archive・自動期限の対象にしない（例: docsweepを使うなら type: audit-report、status: draft、docsweep_policy: never_archive を付け、docsweep_state / due は付けない）
 
 reportは初期準備で骨格を作り、claim batchとcandidate判定ごと、各phase終端で逐次更新する。完了時だけstableにする。docs/obsidianは明示指定時だけ使い、entryのtargetとwritableを確認する。無断fallbackしない。
 
@@ -210,4 +210,4 @@ reportにはclaim台帳、優先順の差異一覧、要すり合わせ、確認
 最終報告には、資料/正典とreference baseline、inspection profile、capability/実行方式、AI execution、結果状態、claim/verdict内訳、主要差異、要すり合わせ、visual/実装の未調査、residual uncertainty、plan/report pathを含める。資料・source・設定・UI未変更、commit/build/install/publish/deploy未実施、人間の仕様すり合わせ前提であることを明記する。
 ```
 
-すり合わせ後のtriageは `audit_app.md` の「監査後のtriage契約（監査を受け取った側）」に従う。
+すり合わせ後のtriageと、資料または実装の修正へ進む場合の修正フェーズは、`audit_app.md` の「監査後のtriage契約（監査を受け取った側）」と「修正フェーズの契約（監査を受け取った側）」に従う。

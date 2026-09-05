@@ -107,7 +107,7 @@ appはWeb/API、AI/agent/MCP/RAG、native、desktop、mobile、browser extension
 - `保存先=` があればreportだけ指定repo相対pathへ変更する
 - `docs/obsidian` は明示指定時だけ使い、entry target/writableを確認する
 
-reportは `type: audit-report`、`status: draft|stable`、`docsweep_policy: never_archive` を使う。監査事実/evidenceの正本はreport、未対応作業の実行正本はrelated先plan/bugfix/pendingとする。
+reportのmetadataは、監査report種別と状態（`draft` / `stable`）が分かる形にし、監査reportを自動archive・自動期限の対象にしない。key名と形式は受け手の文書運用に合わせてよい（例: docsweepなら `type: audit-report`、`status: draft|stable`、`docsweep_policy: never_archive`）。監査事実/evidenceの正本はreport、未対応作業の実行正本はrelated先の実行md（plan / bugfix / issue tracker等）とする。
 
 ## deprecated alias
 

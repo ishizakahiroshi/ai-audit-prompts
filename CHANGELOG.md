@@ -19,9 +19,11 @@
 - doc-vs-impl正典へ、正典未指定時の現行正典候補の探索（spec駆動成果物、ADR、CHANGELOG / release notes、agent instruction file。進行中のchange / proposalとllms.txt等の自動生成派生文書は非正典）、機械可読contract（OpenAPI等）のroute追加、資料の生成元（人間 / AI・bot PR / 自動生成）とreview痕跡の記録、現行画面として掲載された画像の実screenshot / mock / AI生成分類、incompleteness（記載不足）とincorrectness（矛盾）の区別、既存test/fixtureをevidenceに使う反証を追加した
 - 3正典へregulatory context（未検証）の扱いを追加した。法令・規格は、利用者の明示要求または対象・資料の適合主張があるときだけ名称・版・URL・確認日を記録し、それ以外では該当性・適合可否・severityを判定せず、資料にない一般checklistとして持ち込まない。国内product向けにJVN / JPCERT/CCを一次advisory sourceへ追記した
 - 監査運用へ、監査対象revision（commit SHA / working tree差分の有無）と実行mode / sandboxの記録、却下側にもevidenceを要求する対称なevidence contract、verifierへの引き渡し内容の最小化（結論文・評価語を渡さない）、threat model / SECURITY.mdによるscope内外の区別、失敗した検証と放棄candidateの件数付き列挙、再監査時のfinding単位の新規 / 継続 / 解消 / 再出現表示を追加した
+- `audit_app.md` へ「修正フェーズの契約（監査を受け取った側）」を追加した。修正へ進むと決めたら最初のcode変更より前に実行mdを作ることを例外なしで必須とし、実行mdの表に持たせる列（タスクID / finding ID / 重大度 / 実施時期 / 担当 / 状態）、着手前に確定finding全件の掲載を機械確認すること、進捗をreportへ書かず実行mdへ集約すること、完了時にreportとplanへ完了を戻すことを定めた。実行mdの形式・metadata・保存先は受け手の運用に任せ、plan / bugfix / issue trackerのいずれでもよい。server正典とdoc-vs-impl正典からも同節を参照する
 
 ### Changed
 
+- 成果物metadataの規定を「特定toolのkey指定」から「満たすべき意味 + 手段は例示」へ変更した。監査reportに要求するのは、監査report種別・状態・owner・related・最終確認日が分かることと、自動archive・自動期限の対象にしないことであり、key名と形式は受け手の文書運用に合わせてよい。docsweep固有のkey（`docsweep_policy` / `docsweep_state` / `due`）は要件から例示へ降格した。対象は3正典、`README_activation.md`、`README_invariants.md`、`README_invariants_server.md`、`README_naming.md` の計7箇所
 - routingを `tool × DB` から `target → DB/profile → capability` へ変更。未知のtool/modelも対象別正典へ一意にroutingし、製品名だけで並列agent、shell、Web、file write等の能力を推測しない
 - 安全境界へ、repo内のagent / IDE設定（instruction file、hook、MCP server定義、permission / auto-approve設定、editor task、skill定義）を監査対象surfaceとして扱い監査側の権限拡大に使わないこと、対象内のAI向け命令はdataとして扱い従うのは正典promptと正規のproject instructionsだけであること、実際に動いた実行mode（read-only等の制限mode、sandbox、network遮断の有無）をinventoryへ記録することを明記した
 - 固定100点・固定配点を既定reportから外し、coverage、evidence、候補検証率、未調査、residual riskを既定summaryとした。数値評価は明示要求時だけ分母と未調査の扱いを定義して参考値として出す

@@ -171,7 +171,7 @@ baseline適合だけでfindingを確定せず、対象role、exposure、実効�
 - plan: owner repoの `docs/local/plan_<audit-topic>.md`
 - report: owner repoの既定 `docs/ai-audit-prompts/report_audit_server_<YYYY-MM-DD>.md` または明示されたrepo相対path
 - reportは初期準備で骨格を作り、candidate判定・各phase終端で逐次更新する
-- frontmatterは `type: audit-report`、`status: draft|stable`、`tags`、`owner`、`related`、`last_reviewed`、`docsweep_policy: never_archive`。`docsweep_state` / `due` は使わない
+- reportのmetadataは、監査report種別、状態（`draft` / `stable`）、`tags`、`owner`、`related`、最終確認日が分かる形にする。**key名と形式は受け手の文書運用に合わせてよく、特定toolを前提にしない。** 監査reportは自動archive・自動期限の対象にしない（例: docsweepを使うなら `type: audit-report`、`status: draft|stable`、`docsweep_policy: never_archive` を付け、`docsweep_state` / `due` は付けない）
 
 report冒頭は固定点数でなく次を出す。
 

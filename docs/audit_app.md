@@ -81,7 +81,7 @@ Git管理: ＿＿＿（ignore / track。確認なしで未存在保存先を作�
 6. planとreportの骨格を作る。
    - plan: docs/local/plan_<audit-topic>.md
    - report: 既定docs/ai-audit-prompts/report_audit_<topic>_<YYYY-MM-DD>.md、または明示保存先
-   - report frontmatter: type: audit-report、status: draft、tags、owner、related、last_reviewed、docsweep_policy: never_archive。docsweep_state / dueは付けない。
+   - reportのmetadata: 監査report種別、状態（draft / stable）、tags、owner、related、最終確認日が分かる形にする。key名と形式は受け手の文書運用に合わせてよく、特定toolを前提にしない。監査reportは自動archive・自動期限の対象にしない（例: docsweepを使うなら type: audit-report、status: draft、docsweep_policy: never_archive を付け、docsweep_state / due は付けない）。
    - reportはcandidate判定ごと、各phase終端で逐次更新し、完了時だけstableにする。
    - docs/obsidianは明示指定時だけ使い、repo相対entryのtargetとwritableを確認する。無断fallbackしない。
 
@@ -362,3 +362,23 @@ report冒頭に次を置く。固定100点を既定にしない。
 3. 設計方針を変える提案は、リポジトリの見送り台帳・設計書の既決事項と突き合わせる。見送るなら台帳へ1項目（再検討してよい条件・再検討の根拠にしてはいけないもの付き）を足す。
 4. 「別scope」「対象外」と書いて閉じる項目は、同じ作業の中でpending mdを起こす。起票しないと閉じたmdは読み返されない（実例: F-09は起票漏れのまま翌日の監査で同じ箇所を再指摘された）。
 5. 採否の正本は1つのmd（plan/bugfix）に固定し、監査report冒頭にはそのmdへのポインタを1行足す。severity再評価・実装・検証の証跡は正本へ集約する。
+
+## 修正フェーズの契約（監査を受け取った側）
+
+triageで採用が決まった項目を実際に直すときの契約。正典の既定scopeは調査までなので、ここから先は受け手の運用になる。
+
+**修正へ進むと決めたら、最初のcode変更より前に実行mdを作る。例外を設けない。** 実行mdが要るかどうかは、要るかどうかが判明する前に決めるしかない。「1件だけだから」「今日中に終わるから要らない」は着手前にしか判断できず、そして残件は後から出る。そのとき実行mdは存在しない。判定を自己申告の条件にすると、免除がやがて通常経路になる。
+
+**実行mdは短くてよい。** 求めるのは分量ではなく、表があることと着手前に存在すること。確定findingが1件なら1行の表で足りる。
+
+**実行mdの形式、metadata、保存先は受け手の運用に任せる。** plan / bugfix / issue trackerのどれでもよい。この契約が要求するのは次の3点であって、特定のtoolや文書形式ではない。
+
+1. **表に最低限もたせる列**: タスクID / 対応するfinding ID / 重大度 / 実施時期 / 担当（人・model） / 状態。finding IDを列に持たないと、後からreportへ戻れない。
+2. **着手前に、確定finding全件が実行mdへ載っていることを機械的に確認する。** report側のfinding IDを列挙し、実行md側にそれぞれ1行以上あることを確かめる。取りこぼしは着手前にしか安く直せない。
+3. **進捗は実行mdにだけ書き、reportへ書き込まない。** 監査結果と実装進捗を同じfileへ混ぜると、確定したfindingと適用済みの修正が同じ行で見分けられなくなる。完了したらreportとplanの当該findingへ完了を戻す。往復しないとreportと実装状態が静かに乖離し、乖離は次の監査まで誰も気づかない。
+
+修正はscopeと承認の内側で自己完結する最小変更に留める。batchで進めるなら1 batch = 承認済みタスクの部分集合とし、batchの境界でtestとscanを緑にしてから次へ進む。「実装済」と「検証済」を同じ状態として扱わない。
+
+**実行mdは、監査の推奨対処が誤っていた場合の訂正を残す場所でもある。** triage契約2の「提案どおりに実装せず対象実装を読んで再導出する」を実際に行うと、再導出の結果を書く場所が要る。残さなければ次の担当者が同じ提案を再実装する（実例: 2026-09-05のlegacy PHP application監査で、蓄積XSSの推奨対処を「出力をescapeする」としたが、着手前に既存contentを数えると`<a>`要素が78個あり、そのまま適用すると公開pageのlinkが全て文字列化して壊れることが判明した。実行md側で案を差し替え、測定値ごと記録した）。
+
+実績: 2026-09-01 doxguard（確定16件 → 21タスク）、2026-09-05 legacy PHP application（確定29件 → 30タスク）。

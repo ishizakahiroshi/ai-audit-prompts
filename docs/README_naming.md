@@ -104,7 +104,7 @@ alias削除前に、repo外skill等のactive consumerが新3本へ移行済み�
 - server reportもowner private repoへ保存し、owner未確定のまま接続しない
 - userが `保存先=<repo-relative path>` を明示した場合だけreport先を変更する
 
-report frontmatterは `type: audit-report`、`status: draft|stable`、`docsweep_policy: never_archive` を使い、`docsweep_state` / `due` は使わない。
+reportのmetadataは、監査report種別と状態（`draft` / `stable`）が分かる形にし、監査reportを自動archive・自動期限の対象にしない。**この規則が要求するのは意味であって特定toolのkey名ではない。** key名と形式は受け手の文書運用に合わせてよい（例: docsweepを使う場合は `type: audit-report`、`status: draft|stable`、`docsweep_policy: never_archive` を付け、`docsweep_state` / `due` は付けない）。
 
 ## 命名変更手順
 
