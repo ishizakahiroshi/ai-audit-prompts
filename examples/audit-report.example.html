@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<!-- SPDX-License-Identifier: MIT; Copyright (c) 2026 Hiroshi Ishizaka (ishizakahiroshi). See repository LICENSE. -->
+<!-- Static report snapshot. Replace text and attributes with escaped values; never inject target content into scripts or styles. -->
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'none'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'"><title>監査結果を、次の対応につなげる — 全て合成の公開デモ</title><style>
+:root{--bg:#f7f3ea;--ink:#241f1a;--ink-soft:#625c54;--line:rgba(36,31,26,.14);--accent:#ff7a3d;--card:#fffdf8;--ok:#2e7d4f;--warn:#8b5900;--bad:#b3261e;--display:'Baloo 2','Zen Maru Gothic',system-ui,sans-serif;--body:'Zen Maru Gothic','Yu Gothic UI',Meiryo,system-ui,sans-serif}
+*{box-sizing:border-box}body{margin:0;font:16px/1.75 var(--body);color:var(--ink);background:var(--bg)}.wrap{width:min(1120px,92vw);margin:auto;padding:32px 0 64px}h1,h2,h3,.tag{font-family:var(--display)}h1{font-size:clamp(26px,4vw,36px);line-height:1.4;margin:12px 0}h2{font-size:25px;margin:40px 0 16px;padding-bottom:8px;border-bottom:2px solid var(--ink)}h3{font-size:19px;margin:0 0 12px}p{margin:10px 0}a{color:#8c390f;text-decoration-thickness:1.5px;text-underline-offset:3px}code{font:14px/1.5 ui-monospace,Consolas,monospace;overflow-wrap:anywhere}.card,.panel{border:2px solid var(--ink);border-radius:18px;background:var(--card);padding:24px;box-shadow:4px 5px 0 var(--line);margin:16px 0}.top{box-shadow:none}.top p{max-width:78ch}.tags{display:flex;flex-wrap:wrap;gap:8px}.tag{display:inline-block;padding:2px 10px;border:2px solid var(--ink);border-radius:999px;font-size:13px;font-weight:700}.tag-warn{background:#fff0d8}.tag-ok{background:#edf5ee}.tag-accent{background:#fff0e5}.meta,.hint{color:var(--ink-soft);font-size:14px;overflow-wrap:anywhere}.limit-banner{border:2px dashed #918577;border-radius:12px;background:#fffaf0;padding:14px 18px;margin:20px 0}.intro-grid{display:grid;grid-template-columns:1.05fr 1fr;gap:20px}.intro-grid .panel{margin:0}.chart-row{display:grid;grid-template-columns:200px 1fr;gap:16px;align-items:center}.donut{margin:0}.donut svg{display:block;width:200px;height:200px;max-width:100%}.donut text{fill:var(--ink);text-anchor:middle}.count{font-size:38px;font-weight:800}.donut-label{font-size:14px}.legend-item{display:flex;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}.swatch{width:14px;height:14px;flex-shrink:0;border:1px solid var(--ink);border-radius:4px}.security-number{font-size:48px;font-weight:800;line-height:1.3;margin:10px 0}.security-number small{font-size:18px}.severity{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.severity div{background:var(--bg);border-radius:10px;padding:10px 3px;text-align:center;font-size:13px}.severity b{display:block;font-size:23px}.score-row{display:grid;grid-template-columns:minmax(180px,.8fr) minmax(0,2fr);gap:24px}.score-number{font-size:64px;line-height:1.3;font-weight:800}.score-number small{font-size:24px}.score-aspect{margin:14px 0}.score-label{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}.track{height:14px;border:1px solid var(--ink);border-radius:999px;overflow:hidden;background:#ede8de;margin:6px 0}.fill{height:100%;background:var(--accent)}.unrated{border-style:dashed;background:transparent}.score-meta{display:grid;grid-template-columns:150px minmax(0,1fr);gap:6px 18px;font-size:14px}.score-meta dt{font-weight:700}.score-meta dd{margin:0;overflow-wrap:anywhere}.facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.facts .card{margin:0;padding:20px}.facts ul{padding-left:20px;margin:6px 0}.facts li{font-size:15px}.bulk{display:flex;align-items:center;flex-wrap:wrap;gap:14px;padding:16px;border:2px solid var(--ink);border-radius:14px;background:#fff0e5}.bulk p{flex:1;min-width:180px;margin:0;font-size:14px}.decision .qid{background:var(--ink);color:white;border-radius:6px;padding:3px 8px;font-size:14px}.decision .why b{color:var(--ink)}.fig{background:var(--bg);padding:12px;border:1px solid var(--line);border-radius:12px;margin:16px 0}.fig svg{display:block;width:100%;max-width:740px;height:auto;margin:auto}.fig text{font:16px var(--body);text-anchor:middle;fill:var(--ink)}.fig figcaption{font-size:14px;color:var(--ink-soft);margin-top:8px}.opts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:18px 0}.opt{display:flex;align-items:flex-start;gap:10px;padding:16px;border:2px solid #bbb1a5;border-radius:12px;background:white;cursor:pointer;min-width:0}.opt:has(input:checked){border-color:#8c390f;background:#fff0e5}.opt input{margin:7px 0 0;accent-color:#ac480f;flex-shrink:0;width:18px;height:18px}.opt .lbl{min-width:0;flex:1}.opt-main{font-weight:700;display:block}.opt-sub{display:block;font-size:14px;color:var(--ink-soft);margin-top:8px}.rec-mark{display:inline-block;font-size:12px;margin-top:6px;color:var(--ok);border:1px solid var(--ok);border-radius:999px;padding:0 7px}.memo,#summaryBox{display:block;width:100%;min-height:76px;border:1px solid #9b8e7e;border-radius:8px;padding:12px;font:14px/1.7 var(--body);resize:vertical;background:white;color:var(--ink)}label.memo-label{display:block;margin-top:18px}.backlink{text-align:right;font-size:14px}.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0}button{font:700 14px var(--body);border:2px solid var(--ink);border-radius:999px;background:white;color:var(--ink);padding:10px 16px;cursor:pointer;min-height:44px}button.primary{background:var(--accent)}button:disabled{opacity:.5;cursor:default}:focus-visible{outline:3px solid #a9440e;outline-offset:4px}#summaryBox{min-height:240px}#decisionCount{font-weight:700}#actionState,#saveState{font-size:14px;color:var(--ink-soft)}table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:14px}th,td{text-align:left;border-bottom:1px solid var(--line);padding:10px 8px;vertical-align:top;overflow-wrap:anywhere}th{font-weight:700}summary{font-weight:700;cursor:pointer}details .detail-content{margin-top:12px}footer{font-size:14px;margin-top:24px;color:var(--ink-soft)}.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+@media(max-width:850px){.intro-grid,.score-row{grid-template-columns:1fr}.opts{grid-template-columns:1fr}.facts{grid-template-columns:1fr}.panel,.card{padding:20px}.score-meta{grid-template-columns:130px minmax(0,1fr)}}
+@media(max-width:530px){.wrap{width:94vw;padding-top:16px}.chart-row{grid-template-columns:1fr}.donut{justify-self:center}.panel,.card{padding:18px 14px}.severity{gap:4px}.score-meta{grid-template-columns:1fr}.score-meta dd{margin-bottom:8px}.score-number{font-size:52px}.fig{padding:6px}}
+.fig .diagram-narrow{display:none}@media(max-width:530px){.fig .diagram-wide{display:none}.fig .diagram-narrow{display:block;max-width:330px}}
+@media print{body{background:white;font-size:13px}.wrap{width:100%;padding:0}.toolbar,.bulk,#saveState,#actionState,.js-hint{display:none!important}.card,.panel{box-shadow:none}.intro-grid,.facts,.score-row{display:block}.opts{grid-template-columns:1fr}.panel,.opt,.fig,.score-aspect{break-inside:avoid}h2,h3{break-after:avoid}details .detail-content{display:block!important}details::details-content{content-visibility:visible;height:auto}details summary{list-style:none}.memo{min-height:48px;field-sizing:content;overflow:visible}#summaryBox{field-sizing:content;min-height:100px;overflow:visible}a{color:var(--ink)}.tag,.fill,.swatch{print-color-adjust:exact}.limit-banner{break-inside:avoid}}
+body.static .toolbar,body.static .bulk{display:none}
+</style></head>
+<body class="interactive" data-run-id="synthetic-app-20261009-demo-v1" data-report-stem="report_audit_app_synthetic-demo_2026-10-09"><main class="wrap">
+<header class="card top"><div class="tags"><span class="tag tag-accent">全て合成の公開デモ</span><span class="tag">対象: app / 合成サンプル</span></div><h1 id="report-title">監査結果を、次の対応につなげる</h1><p>実案件の監査ではありません。合成サンプルの結果・点数・選択肢で、レポートの読み方と判断機能を試せます。</p><div class="tags"><span class="tag">監査実行状態: 部分完了（他環境の確認が未実施）</span><span class="tag tag-warn">結果状態: 暫定</span><span class="tag">対策・修正: 未適用</span></div><p class="meta">prompt版: 2026-10-09 · run: synthetic-app-20261009-demo-v1<br>revision: <span id="revision">SYNTHETIC-REVISION-01 / dirty: なし（合成）</span><br>集計日時: <span id="snapshot-time">2026-10-09 12:00 JST（合成）</span><br>取扱い: 公開可（全て合成）</p><nav aria-label="report navigation"><a href="#overview">全体サマリー</a> · <a href="#scope">範囲と未確認</a> · <a href="#decisions">対応判断</a> · <a href="#evidence">証拠と台帳</a></nav></header>
+<p class="limit-banner"><b>未修正／未確認:</b> 判断待ち 1件、互換性と他環境の表示は未確認。未修正の品質findingが2件あります。</p>
+<section id="overview"><h2>全体サマリー</h2><div class="intro-grid"><div class="panel"><h3>候補の判定内訳</h3><div class="chart-row"><figure class="donut"><svg viewBox="0 0 200 200" role="img" aria-labelledby="donut-title"><title id="donut-title">候補総数5件。確定2件、却下1件、判断待ち1件、重複1件</title><circle cx="100" cy="100" r="75" fill="none" stroke="#e5dfd4" stroke-width="18"/><circle cx="100" cy="100" r="75" fill="none" stroke="#ff7a3d" stroke-width="18" pathLength="100" stroke-dasharray="40 60" stroke-dashoffset="0" transform="rotate(-90 100 100)"/><circle cx="100" cy="100" r="75" fill="none" stroke="#2e7d4f" stroke-width="18" pathLength="100" stroke-dasharray="20 80" stroke-dashoffset="-40" transform="rotate(-90 100 100)"/><circle cx="100" cy="100" r="75" fill="none" stroke="#b8860b" stroke-width="18" pathLength="100" stroke-dasharray="20 80" stroke-dashoffset="-60" transform="rotate(-90 100 100)"/><circle cx="100" cy="100" r="75" fill="none" stroke="#a89e91" stroke-width="18" pathLength="100" stroke-dasharray="20 80" stroke-dashoffset="-80" transform="rotate(-90 100 100)"/><text x="100" y="101" class="count" data-candidate-total="5">5</text><text x="100" y="126" class="donut-label">候補（件）</text></svg></figure><div><div class="legend-item"><span class="swatch" style="background:#ff7a3d"></span><span>確定: <b data-count="確定">2</b>件</span></div><div class="legend-item"><span class="swatch" style="background:#2e7d4f"></span><span>却下: <b data-count="却下">1</b>件</span></div><div class="legend-item"><span class="swatch" style="background:#b8860b"></span><span>判断待ち: <b data-count="判断待ち">1</b>件</span></div><div class="legend-item"><span class="swatch" style="background:#a89e91"></span><span>重複: <b data-count="重複">1</b>件</span></div></div></div><p class="hint">分母: candidate総数 5件（重複含む）。脆弱性件数ではありません。</p><p>候補検証率: <b id="candidate-rate">3 / 5 = 60%</b></p></div>
+<div class="panel"><h3>確定findingの重大度</h3><div class="security-number">2 <small>件 / 確定のみ</small></div><p>品質: 2件 · security finding: 0件</p><div class="severity"><div>critical<b>0</b></div><div>high<b>0</b></div><div>medium<b>1</b></div><div>low<b>1</b></div></div><p class="hint">候補・判断待ちを確定件数に含めません。対策の適用・検証の完了は別の状態です。</p><p class="hint">独立検証: なし（同contextの直列二巡の合成例）</p></div></div></section>
+<section class="card" id="rating"><h2 style="margin-top:0">点数評価</h2><div class="score-row"><div><div class="score-number" data-score-value="36" data-score-max="50">36 <small>/ 50</small></div><p class="tag tag-warn">暫定／参考評価<br>heuristic / provisional</p><p class="hint">合成サンプルの操作品質（安全性の評価ではない）</p></div><div><div class="score-aspect"><div class="score-label"><b>入力案内</b><span>20 / 25</span></div><div class="track" aria-hidden="true"><div class="fill" style="width:80%"></div></div><p class="hint">入力の前に必要条件を表示するか · <a href="#rating-evidence">評価根拠</a></p></div><div class="score-aspect"><div class="score-label"><b>状態表示</b><span>16 / 25</span></div><div class="track" aria-hidden="true"><div class="fill" style="width:64%"></div></div><p class="hint">保存結果と未保存の区別が見えるか · <a href="#rating-evidence">評価根拠</a></p></div><div class="score-aspect"><div class="score-label"><b>互換性</b><span>未評価</span></div><div class="track unrated" aria-hidden="true"><div class="fill" style="width:0%"></div></div><p class="hint">他の環境では未確認 · <a href="#rating-evidence">評価根拠</a></p></div></div></div><dl class="score-meta"><dt>評価対象</dt><dd>合成サンプルの操作品質（安全性の評価ではない）</dd><dt>基準・版</dt><dd>合成品質基準 v1（デモ専用）</dd><dt>重み</dt><dd>入力案内 1、状態表示 1。互換性は評価外</dd><dt>算出式・分母</dt><dd>入力案内 20 + 状態表示 16 = 36 / (25 + 25) = 36 / 50</dd><dt>未調査の扱い</dt><dd>互換性は未評価・総合分母外。対象全体の評価にしない</dd><dt>評価者</dt><dd>合成評価者（デモ）</dd><dt>評価日時</dt><dd>2026-10-09 12:00 JST（合成）</dd></dl><p class="hint">総合点は評価した範囲だけの参考値。未調査を満点にはしていません。</p></section>
+<section id="scope"><h2>範囲・検証・未確認</h2><div class="facts"><article class="card"><h3>監査した範囲</h3><ul><li>合成の入力画面と保存状態</li><li>core / UI品質: selected</li><li>経路coverage: 2 / 3（合成）</li></ul></article><article class="card"><h3>検証の実施状態</h3><ul><li>合成fixtureの読取りと再現</li><li>修正後検証: 未実施</li><li>他環境の試験: 未実行（環境なし）</li></ul></article><article class="card"><h3>残る未確認</h3><ul><li>C-04: 他環境の表示</li><li>互換性: 未評価</li><li>0件・高得点で安全を宣言しない</li></ul></article></div></section>
+<section id="decisions"><h2>対応の判断</h2><p>選択はブラウザ内の下書きです。修正・承認・送信・DB操作は実行しません。</p><div class="bulk"><button type="button" id="recommend" class="primary" data-js disabled>未選択だけにおすすめを入れる</button><p>個別の回答とメモはそのまま残します。</p></div><article class="card decision" id="finding-F-01" data-finding-id="F-01" data-recommended="act">
+<h3><span class="qid">F-01</span> <span class="decision-title">入力漏れを送信前に知らせるか</span></h3>
+<div class="tags"><span class="tag">品質 / medium</span><span class="tag">監査判定: 確定</span><span class="tag">対応 / 検証: plan / 未実施</span></div>
+<div class="why"><p><b>何を決める？</b> 利用者が空欄に気づけるよう、送信前の案内を加えるかを決めます。</p><p><b>影響:</b> 必須項目が空でも最後まで進めるため、利用者が入力をやり直す可能性があります。</p></div>
+<figure class="fig"><svg class="diagram-wide" viewBox="0 0 740 125" role="img" aria-labelledby="fig-F-01">
+<title id="fig-F-01">入力漏れに後で気づくから送信前に空欄が分かるへ</title>
+<rect x="10" y="10" width="335" height="90" rx="12" fill="#fff0d8" stroke="#8b5900"/>
+<rect x="395" y="10" width="335" height="90" rx="12" fill="#edf5ee" stroke="#2e7d4f"/>
+<text x="177" y="38">いま</text><text x="177" y="72">入力漏れに後で気づく</text>
+<path d="M352 55 H382" fill="none" stroke="#241f1a" stroke-width="2"/><path d="M377 50 L383 55 L377 60" fill="none" stroke="#241f1a" stroke-width="2"/>
+<text x="562" y="38">直すと</text><text x="562" y="72">送信前に空欄が分かる</text>
+</svg><svg class="diagram-narrow" viewBox="0 0 330 260" role="img" aria-labelledby="fig-F-01-mobile">
+<title id="fig-F-01-mobile">入力漏れに後で気づくから送信前に空欄が分かるへ</title>
+<rect x="10" y="10" width="310" height="90" rx="12" fill="#fff0d8" stroke="#8b5900"/>
+<rect x="10" y="160" width="310" height="90" rx="12" fill="#edf5ee" stroke="#2e7d4f"/>
+<text x="165" y="38">いま</text><text x="165" y="72">入力漏れに後で気づく</text>
+<path d="M165 112 V144" fill="none" stroke="#241f1a" stroke-width="2"/><path d="M160 139 L165 145 L170 139" fill="none" stroke="#241f1a" stroke-width="2"/>
+<text x="165" y="188">直すと</text><text x="165" y="222">送信前に空欄が分かる</text>
+</svg><figcaption>利用者が空欄に気づけるよう、送信前の案内を加えるかを決めます。</figcaption></figure><fieldset style="border:0;padding:0;margin:0"><legend>この項目の対応を選ぶ（下書き・未承認）</legend><div class="opts"><label class="opt"><input type="radio" name="choice-F-01" value="act" aria-label="F-01 対応する"><span class="lbl"><span class="opt-main">対応する</span><span class="rec-mark">おすすめ</span><span class="opt-sub">メリット: 困りごとを減らせます。<br>デメリット: 利用者は新しい案内の見方を覚える必要があります。</span></span></label><label class="opt"><input type="radio" name="choice-F-01" value="hold" aria-label="F-01 保留する"><span class="lbl"><span class="opt-main">保留する</span><span class="opt-sub">メリット: 利用者の困り方を確かめてから決められます。<br>デメリット: 確認が終わるまで現在の困りごとが続きます。</span></span></label><label class="opt"><input type="radio" name="choice-F-01" value="skip" aria-label="F-01 見送る"><span class="lbl"><span class="opt-main">見送る</span><span class="opt-sub">メリット: 利用者の画面操作を変えずに済みます。<br>デメリット: 現在の困りごとが残ります。</span></span></label></div></fieldset>
+<p><b>おすすめの理由:</b> やり直しを減らし、入力内容を失わずに直せるため。</p><p><b>期日:</b> 次の公開前（合成条件）</p><p><b>改修の目安:</b> 変更0.5日／確認0.5日（デモ用概算。本番反映は別）</p><p><b>直るまでの防ぎ方（暫定）:</b> 公開まで担当者が入力の必須項目を一覧で確認します。</p>
+<p><a href="#evidence-F-01">根拠と反証を読む</a></p><label class="memo-label" for="memo-F-01">メモ（下書き）</label><textarea id="memo-F-01" class="memo" placeholder="条件や補足を記入できます"></textarea>
+<p class="backlink"><a href="#decisions">判断の一覧へ戻る</a></p></article><article class="card decision" id="finding-F-02" data-finding-id="F-02" data-recommended="act">
+<h3><span class="qid">F-02</span> <span class="decision-title">保存結果を画面に残すか</span></h3>
+<div class="tags"><span class="tag">品質 / low</span><span class="tag">監査判定: 確定</span><span class="tag">対応 / 検証: plan / 未実施</span></div>
+<div class="why"><p><b>何を決める？</b> 保存済み・未保存の状態を、画面に残して見分けられるようにするかを決めます。</p><p><b>影響:</b> 短い通知だけでは、利用者が保存されたかを後から確かめにくくなります。</p></div>
+<figure class="fig"><svg class="diagram-wide" viewBox="0 0 740 125" role="img" aria-labelledby="fig-F-02">
+<title id="fig-F-02">通知が消えると不明から保存状態が画面に残るへ</title>
+<rect x="10" y="10" width="335" height="90" rx="12" fill="#fff0d8" stroke="#8b5900"/>
+<rect x="395" y="10" width="335" height="90" rx="12" fill="#edf5ee" stroke="#2e7d4f"/>
+<text x="177" y="38">いま</text><text x="177" y="72">通知が消えると不明</text>
+<path d="M352 55 H382" fill="none" stroke="#241f1a" stroke-width="2"/><path d="M377 50 L383 55 L377 60" fill="none" stroke="#241f1a" stroke-width="2"/>
+<text x="562" y="38">直すと</text><text x="562" y="72">保存状態が画面に残る</text>
+</svg><svg class="diagram-narrow" viewBox="0 0 330 260" role="img" aria-labelledby="fig-F-02-mobile">
+<title id="fig-F-02-mobile">通知が消えると不明から保存状態が画面に残るへ</title>
+<rect x="10" y="10" width="310" height="90" rx="12" fill="#fff0d8" stroke="#8b5900"/>
+<rect x="10" y="160" width="310" height="90" rx="12" fill="#edf5ee" stroke="#2e7d4f"/>
+<text x="165" y="38">いま</text><text x="165" y="72">通知が消えると不明</text>
+<path d="M165 112 V144" fill="none" stroke="#241f1a" stroke-width="2"/><path d="M160 139 L165 145 L170 139" fill="none" stroke="#241f1a" stroke-width="2"/>
+<text x="165" y="188">直すと</text><text x="165" y="222">保存状態が画面に残る</text>
+</svg><figcaption>保存済み・未保存の状態を、画面に残して見分けられるようにするかを決めます。</figcaption></figure><fieldset style="border:0;padding:0;margin:0"><legend>この項目の対応を選ぶ（下書き・未承認）</legend><div class="opts"><label class="opt"><input type="radio" name="choice-F-02" value="act" aria-label="F-02 対応する"><span class="lbl"><span class="opt-main">対応する</span><span class="rec-mark">おすすめ</span><span class="opt-sub">メリット: 困りごとを減らせます。<br>デメリット: 利用者は新しい案内の見方を覚える必要があります。</span></span></label><label class="opt"><input type="radio" name="choice-F-02" value="hold" aria-label="F-02 保留する"><span class="lbl"><span class="opt-main">保留する</span><span class="opt-sub">メリット: 利用者の困り方を確かめてから決められます。<br>デメリット: 確認が終わるまで現在の困りごとが続きます。</span></span></label><label class="opt"><input type="radio" name="choice-F-02" value="skip" aria-label="F-02 見送る"><span class="lbl"><span class="opt-main">見送る</span><span class="opt-sub">メリット: 利用者の画面操作を変えずに済みます。<br>デメリット: 現在の困りごとが残ります。</span></span></label></div></fieldset>
+<p><b>おすすめの理由:</b> 利用者が同じ入力を繰り返さずに済むため。</p><p><b>期日:</b> 次の画面改善時（合成条件）</p><p><b>改修の目安:</b> 変更0.5日／確認0.5日（デモ用概算。本番反映は別）</p><p><b>直るまでの防ぎ方（暫定）:</b> 担当者が一覧を開いて保存結果を確かめる手順を案内します。</p>
+<p><a href="#evidence-F-02">根拠と反証を読む</a></p><label class="memo-label" for="memo-F-02">メモ（下書き）</label><textarea id="memo-F-02" class="memo" placeholder="条件や補足を記入できます"></textarea>
+<p class="backlink"><a href="#decisions">判断の一覧へ戻る</a></p></article></section>
+<section id="evidence"><h2>却下・残る懸念・証拠</h2><p class="limit-banner">判断待ち C-04: 既存fixtureだけでは他環境での表示を確認できません。まず表示条件を取得する必要があります。修正の判断には進めません。</p><details class="card"><summary>候補台帳と反証を読む（5件）</summary><div class="detail-content"><table><thead><tr><th>ID</th><th>監査判定</th><th>種別</th></tr></thead><tbody><tr><td>F-01</td><td>確定</td><td>品質</td></tr><tr><td>F-02</td><td>確定</td><td>品質</td></tr><tr><td>C-03</td><td>却下</td><td>—</td></tr><tr><td>C-04</td><td>判断待ち</td><td>—</td></tr><tr><td>C-05</td><td>重複</td><td>—</td></tr></tbody></table><p>C-03の却下: 既存の表示条件が想定経路を止める合成例。C-05の重複: F-01と同じ入力・経路の再検出。</p><section id="evidence-F-01"><h3>F-01 の根拠（合成）</h3><p>決定的証拠: 合成fixtureで入力漏れに後で気づく状態を再現。既存防御と別経路を読む直列二巡で反証しました。未修正・確認済みにはしていません。改修後は同じfixtureで再確認します。</p></section><section id="evidence-F-02"><h3>F-02 の根拠（合成）</h3><p>決定的証拠: 合成fixtureで通知が消えると不明状態を再現。既存防御と別経路を読む直列二巡で反証しました。未修正・確認済みにはしていません。改修後は同じfixtureで再確認します。</p></section><section id="rating-evidence"><h3>評価根拠（デモ専用）</h3><p>入力案内20/25・状態表示16/25は合成の評価表を転記したものです。各観点は別の合成品質尺度で同じ重み。互換性は未評価として総合対象外。実案件の点数や安全性を表しません。</p></section></div></details></section>
+<section class="card" id="answers"><h2 style="margin-top:0">判断の一覧と持ち出し</h2><p id="decisionCount">選択済み 0 / 2件（下書き）</p><table><thead><tr><th style="width:18%">finding ID</th><th>判断すること</th><th style="width:24%">回答</th></tr></thead><tbody id="decision-list"><tr><td><a href="#finding-F-01">F-01</a></td><td>入力漏れを送信前に知らせるか</td><td>未選択</td></tr><tr><td><a href="#finding-F-02">F-02</a></td><td>保存結果を画面に残すか</td><td>未選択</td></tr></tbody></table><p id="saveState" role="status">下書きはこのrun・ファイルごとにブラウザへ保存します。</p><div class="toolbar"><button type="button" id="copy" class="primary" data-js disabled>下書きをコピー</button><button type="button" id="download" data-js disabled>Markdownを保存</button><button type="button" id="print" data-js disabled>印刷 / PDF</button><button type="button" id="clear" data-js disabled>この回答を消去</button></div><label for="summaryBox">コピー用の下書き（監査reportとは別）</label><textarea id="summaryBox" readonly>JavaScript有効時に回答の下書きを表示します。</textarea><p id="actionState" role="status" aria-live="polite">まだ回答を選んでいません。</p><noscript><p>JavaScriptが無効です。監査本文・点数・図・選択肢は読めます。下書きの自動保存・コピー・書き出しは使えません。印刷はブラウザの印刷操作を使えます。</p></noscript></section>
+<footer>監査事実・証拠・評価の正本はMarkdown report。HTMLと回答は追加の表示・下書きです。このデモには実案件のMarkdownや外部証拠へのlinkはありません。<br>MIT License · Copyright (c) 2026 Hiroshi Ishizaka (ishizakahiroshi).</footer>
+</main><script>
+'use strict';
+(() => {
+  const report = document.body;
+  const cards = [...document.querySelectorAll('.decision[data-finding-id]')];
+  const output = document.getElementById('summaryBox');
+  const saveState = document.getElementById('saveState');
+  const actionState = document.getElementById('actionState');
+  const key = 'audit-report-draft:v1:' + JSON.stringify([report.dataset.runId, location.pathname]);
+  let storageAvailable = true;
+  const text = id => document.getElementById(id).textContent.trim();
+  function choice(card) { return card.querySelector('input[type=radio]:checked'); }
+  function choiceLabel(input) { return input ? input.closest('.opt').querySelector('.opt-main').textContent.trim() : '未選択'; }
+  function snapshot() { return 'run: ' + report.dataset.runId + '\nrevision: ' + text('revision') + '\n集計日時: ' + text('snapshot-time'); }
+  function generateSummary() {
+    const lines = [text('report-title'), '対応判断の下書き・未承認（修正・承認・送信は実行しません）', snapshot(), ''];
+    cards.forEach(card => {
+      lines.push('[' + card.dataset.findingId + '] ' + card.querySelector('.decision-title').textContent.trim());
+      lines.push('回答: ' + choiceLabel(choice(card)));
+      lines.push('メモ: ' + (card.querySelector('.memo').value || 'なし'), '');
+    });
+    if (!cards.length) lines.push('判断カード: 0件');
+    return lines.join('\n');
+  }
+  function escapeMarkdown(value) {
+    return String(value).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/\\/g,'\\\\').replace(/([|`*_{}\[\]()#+!])/g,'\\$1').replace(/\r?\n/g,'<br>');
+  }
+  function generateMarkdown() {
+    const lines = ['# 対応判断の下書き・未承認', '', escapeMarkdown(text('report-title')), '',
+      escapeMarkdown(snapshot()), '', '選択は修正・承認・送信を実行しません。', '',
+      '| finding ID | 判断すること | 回答 | メモ |', '|---|---|---|---|'];
+    cards.forEach(card => lines.push('| ' + [card.dataset.findingId, card.querySelector('.decision-title').textContent.trim(),
+      choiceLabel(choice(card)), card.querySelector('.memo').value || 'なし'].map(escapeMarkdown).join(' | ') + ' |'));
+    if (!cards.length) lines.push('', '判断カード: 0件');
+    return lines.join('\n');
+  }
+  function refresh() {
+    const answered = cards.filter(card => choice(card)).length;
+    document.getElementById('decisionCount').textContent = '選択済み ' + answered + ' / ' + cards.length + '件（下書き）';
+    output.value = generateSummary();
+    const list = document.getElementById('decision-list');
+    list.replaceChildren();
+    cards.forEach(card => {
+      const row = document.createElement('tr');
+      const idCell = document.createElement('td');
+      const a = document.createElement('a'); a.href = '#' + card.id; a.textContent = card.dataset.findingId;
+      idCell.append(a); row.append(idCell);
+      [card.querySelector('.decision-title').textContent.trim(), choiceLabel(choice(card))].forEach(value => {
+        const cell = document.createElement('td'); cell.textContent = value; row.append(cell);
+      });
+      list.append(row);
+    });
+  }
+  function save() {
+    if (!storageAvailable) return;
+    const answers = cards.map(card => ({id:card.dataset.findingId, choice:choice(card)?.value || null, memo:card.querySelector('.memo').value}));
+    try { localStorage.setItem(key, JSON.stringify({version:1, answers})); saveState.textContent = 'このブラウザに下書きを保存しました。共有先には渡りません。'; }
+    catch { storageAvailable = false; saveState.textContent = 'ブラウザ保存不可。その場の選択とコピー・Markdown保存は使えます。'; }
+  }
+  function restore() {
+    try {
+      const raw = localStorage.getItem(key);
+      if (!raw) return;
+      const saved = JSON.parse(raw);
+      if (!saved || saved.version !== 1 || !Array.isArray(saved.answers)) { saveState.textContent = '保存された下書きの形式が違うため復元しませんでした。'; return; }
+      const seen = new Set();
+      saved.answers.forEach(answer => {
+        if (!answer || typeof answer.id !== 'string' || seen.has(answer.id)) return;
+        seen.add(answer.id);
+        const card = cards.find(c => c.dataset.findingId === answer.id);
+        if (!card) return;
+        const input = [...card.querySelectorAll('input[type=radio]')].find(i => i.value === answer.choice);
+        if (input) input.checked = true;
+        if (typeof answer.memo === 'string') card.querySelector('.memo').value = answer.memo;
+      });
+      saveState.textContent = 'このrun・ファイルの下書きを復元しました（未承認）。';
+    } catch {
+      storageAvailable = false;
+      saveState.textContent = '下書きを読めません。その場の選択とコピー・Markdown保存は使えます。';
+    }
+  }
+  function pickRecommended() {
+    cards.forEach(card => { if (!choice(card)) { const rec = [...card.querySelectorAll('input[type=radio]')].find(i => i.value === card.dataset.recommended); if (rec) rec.checked = true; } });
+    refresh(); save(); actionState.textContent = '未選択の項目だけにおすすめを入れました。下書きであり承認ではありません。';
+  }
+  function clearAnswers() {
+    cards.forEach(card => { card.querySelectorAll('input[type=radio]').forEach(i => i.checked = false); card.querySelector('.memo').value = ''; });
+    try { localStorage.removeItem(key); storageAvailable = true; saveState.textContent = 'このrun・ファイルの下書きだけを消去しました。'; }
+    catch { saveState.textContent = '画面の回答は消去しました。ブラウザ保存は利用できません。'; }
+    refresh(); actionState.textContent = '回答を未選択に戻しました。';
+  }
+  async function copySummary() {
+    output.value = generateSummary();
+    try { await navigator.clipboard.writeText(output.value); actionState.textContent = '下書きをコピーしました。'; }
+    catch { output.focus(); output.select(); actionState.textContent = '自動コピー不可。出力欄を選択しました。コピー操作で取得できます。'; }
+  }
+  function downloadMarkdown() {
+    const stem = /^[A-Za-z0-9_-]+$/.test(report.dataset.reportStem || '') ? report.dataset.reportStem : 'report_audit';
+    const url = URL.createObjectURL(new Blob([generateMarkdown()], {type:'text/markdown;charset=utf-8'}));
+    const a = document.createElement('a'); a.href = url; a.download = stem + '_decisions.md'; document.body.append(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000); actionState.textContent = 'Markdownの下書き保存を開始しました。';
+  }
+  document.getElementById('recommend').addEventListener('click', pickRecommended);
+  document.getElementById('clear').addEventListener('click', clearAnswers);
+  document.getElementById('copy').addEventListener('click', copySummary);
+  document.getElementById('download').addEventListener('click', downloadMarkdown);
+  document.getElementById('print').addEventListener('click', () => window.print());
+  cards.forEach(card => { card.addEventListener('change', () => {refresh();save();}); card.querySelector('.memo').addEventListener('input', () => {refresh();save();}); });
+  let printDetails = [];
+  window.addEventListener('beforeprint', () => { printDetails = [...document.querySelectorAll('details')].map(el => [el,el.open]); printDetails.forEach(([el]) => el.open = true); });
+  window.addEventListener('afterprint', () => printDetails.forEach(([el,wasOpen]) => el.open = wasOpen));
+  // Named helpers are also useful to inspect the locally generated artifact.
+  window.generateSummary = generateSummary; window.generateMarkdown = generateMarkdown;
+  restore(); refresh(); document.querySelectorAll('button[data-js]').forEach(button => button.disabled = false);
+})();
+</script></body></html>

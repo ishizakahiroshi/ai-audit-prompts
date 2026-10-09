@@ -95,6 +95,15 @@ appはWeb/API、AI/agent/MCP/RAG、native、desktop、mobile、browser extension
 
 ## 引数
 
+### 3 family共通の出力引数
+
+| 引数 | 値 | 省略時 |
+|---|---|---|
+| HTML出力 | あり / なし | あり。なしならMarkdownのみ |
+| 点数評価 | 要求時 / あり / なし | 要求時。明示採点依頼時のみ。あり自体も明示要求、なしは採点依頼より優先 |
+
+HTMLと点数は独立する。共通契約・雛形・最小構成は [`README_html-report.md`](README_html-report.md)。安全境界と実行前gateは各familyのまま維持する。
+
 ### app
 
 | 引数 | 値 | 省略時 |
@@ -124,6 +133,7 @@ appはWeb/API、AI/agent/MCP/RAG、native、desktop、mobile、browser extension
 
 - plan: target/owner repoの `docs/local/plan_audit_<topic>.md`
 - report既定: `docs/ai-audit-prompts/report_audit_<topic>_<YYYY-MM-DD>.md`
+- HTML既定: 同じ保存先・basenameの `.html`。最終報告／途中終了の集計確定時に生成し、snapshotを揃える。HTMLなしなら生成しない。保存不可は未生成と理由を残し、許可外へfallbackしない
 - `<topic>` の定義は [`README_naming.md`](README_naming.md) の「成果物命名」に従う
 - server reportもpublic prompt repoではなくowner private repoへ保存する
 - `保存先=` があればreportだけ指定repo相対pathへ変更する

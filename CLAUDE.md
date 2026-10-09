@@ -4,7 +4,7 @@
 
 ## プロジェクト概要
 
-AIにapp/source code、管理下server、資料と実装の差異を監査させる、汎用paste-ready promptだけを収録するpublic repository。製品codeや実行環境は持たず、`docs/` の公開Markdownが成果物である。
+AIにapp/source code、管理下server、資料と実装の差異を監査させる、汎用paste-ready promptだけを収録するpublic repository。製品codeや生成CLIは持たず、`docs/` の公開Markdownと自己完結HTML雛形・合成デモが成果物である。
 
 保守対象の正典は3本だけ:
 
@@ -26,6 +26,7 @@ promptを編集するときは、先に該当する正本とroutingを読む。
 | server診断の完全read-only契約 | `docs/README_invariants_server.md` |
 | 対象選択、引数、capability routing | `docs/README_activation.md` |
 | filename、metadata、alias | `docs/README_naming.md` |
+| HTML出力、評価、保存、判断下書き | `docs/README_html-report.md` |
 | doc-vs-implの非変更契約 | `docs/audit_doc_vs_impl.md` 内で自己完結 |
 | 監査後のtriage / 修正フェーズ（3 family共通・監査を受け取った側） | `docs/audit_app.md` 末尾の2節（paste-ready本文の外） |
 
@@ -54,11 +55,14 @@ docs/
   README_naming.md             filename/metadata規約
   README_invariants.md         app監査の正本
   README_invariants_server.md  server診断の正本
+  README_html-report.md        HTML出力・評価・雛形の共通契約
   audit_app.md                 app監査の正典
   audit_server.md              server診断の正典
   audit_doc_vs_impl.md         資料と実装の差異監査の正典
   *_audit_*.md                 旧14pathのdeprecated alias
   local/                       private作業記録（gitignore対象）
+templates/audit-report.html     共通HTML雛形（CSS/JSインライン）
+examples/audit-report.example.html 全て合成のデモ
 assets/                        README用の既存asset
 scripts/                       secrets-scanとhook installer
 .githooks/pre-commit           commit前secrets scan
@@ -67,7 +71,7 @@ README.md / README.en.md       日本語 / 英語の公開入口
 CHANGELOG.md / LICENSE
 ```
 
-`docs/` 直下の公開Markdownは22本（正典3、alias 14、routing/invariants/index 5）。`docs/local/` とignoredなprivate entryは公開数、OKF公開bundle、indexへ含めない。
+`docs/` 直下の公開Markdownは23本（正典3、alias 14、routing/invariants/index 5、HTML契約1）。`docs/local/` とignoredなprivate entryは公開数、OKF公開bundle、indexへ含めない。
 
 ## このrepositoryに置かないもの
 

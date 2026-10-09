@@ -93,6 +93,8 @@ DB区分: 自動 / あり / なし（省略時は自動）
 除外: repo相対path（省略時はなし。finding対象・変更・検証から除く。経路追跡のread-only参照は既定で許し、「（読取り禁止）」を添えた場合だけ読取りも除く）
 保存先: reportのrepo相対path（省略時はdocs/ai-audit-prompts。planは常にdocs/local/）
 Git管理: ignore / track（plan / report双方に適用。ignore = 保存先pathをowner repositoryの.git/info/excludeへ追記しtracked fileを変更しない（共有したい場合の.gitignore反映は人間が行う） / track = 何もせずuntrackedのまま残し、add / commitは人間が行う。未存在の保存先を確認なしで作る場合は必須）
+HTML出力: あり / なし（省略時はあり。なしならMarkdownのみ）
+点数評価: 要求時 / あり / なし（省略時は要求時。ありは明示採点要求、なしは採点依頼より優先）
 確認: あり / なし（省略時はあり）
 ```
 
@@ -221,6 +223,10 @@ Web一次情報を利用できる場合は実行時に公式一次情報だけ�
 
 reportは監査事実・証拠・評価・実行記録の正本、related先の実行md（plan / bugfix / pending、issue tracker等、受け手の運用に従う）は未対応作業の実行正本とする。相互IDまたはlinkで対応させ、状態を二重管理しない。finding IDにはrun間で安定するfingerprintを添え、再監査では新規 / 継続 / 解消 / 再出現を集計する。report metadata（report冒頭）には使用promptとprompt版を含める。
 
+## HTML表示と点数評価の共通契約
+
+[`README_html-report.md`](README_html-report.md)を共通正本とする。省略時HTMLあり、点数評価は要求時（ありは明示要求、なしは採点依頼より優先）。最終／途中終了の確定snapshotから、Markdownと同じbasename・保存境界のHTMLを生成する。本文・内訳・分母・算出済み点数を両形式で一致させ、HTMLで再採点しない。未算定と未評価、暫定、未確認を隠さず、採点非要求時は点数パネルを省く。判断下書きは修正・承認・送信ではない。保存不可はMarkdownを残し未生成理由を明記し、許可外へfallbackしない。一方でも同名fileがあれば両形式に同じ連番を付ける。
+
 ## 既定summaryと任意の数値評価
 
 report冒頭は点数ではなく次を出す。
@@ -241,7 +247,7 @@ report冒頭は点数ではなく次を出す。
 
 判断待ち、未検証candidate、unknown profile、重要な未調査があっても台帳とcoverage分母を作れているなら結果を暫定にする。算定不能は、対象へ到達できない、inventoryを作れない等により台帳・coverage・主要riskの評価基盤が成立しない場合に限る。低い候補検証率だけで算定不能にせず、見かけ上の満点を出さない。対象全体へ到達できない場合は、監査実行状態=失敗、結果状態=算定不能とする。一部のpathだけ到達できない場合は、部分完了 + 暫定とし、到達できないpathを未調査へ列挙する。
 
-数値評価はuserが明示要求した場合だけ、対象、分母、重み、未調査の扱いを先に定義して算出し、`heuristic / provisional` と表示する。固定100点、固定カテゴリ配点、findingごとの `+N点` を既定にしない。
+数値評価は点数評価が有効な場合（要求時の明示採点依頼、またはあり指定）だけ、対象、分母、重み、未調査の扱いを先に定義して算出し、`heuristic / provisional` と表示する。固定100点、固定カテゴリ配点、findingごとの `+N点` を既定にしない。
 
 ## 完了rubric
 

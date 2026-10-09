@@ -16,7 +16,7 @@ audit:
 説明会資料、manual、仕様書、顧客向け文書等の主張と現行実装を突合するpaste-ready prompt。資料・source・設定・画面を変更せず、主張単位のevidence、視覚確認、確認不能を残す。
 
 ```text
-prompt版: 2026-09-29
+prompt版: 2026-10-09
 
 指定資料の記載と、このrepositoryの現行実装の差異を、資料・実装とも変更せず監査してください。
 
@@ -29,6 +29,8 @@ prompt版: 2026-09-29
 除外: ＿＿＿（省略時はなし）
 保存先: ＿＿＿（repo相対path、省略時はdocs/ai-audit-prompts）
 Git管理: ＿＿＿（ignore / track。plan / report双方に適用。ignore = 保存先pathをowner repositoryの `.git/info/exclude` へ追記しtracked fileを変更しない（共有したい場合の `.gitignore` 反映は人間が行う） / track = 何もせずuntrackedのまま残し、add / commitは人間が行う。確認なしで未存在保存先を作る場合は必須）
+HTML出力: ＿＿＿（あり / なし、省略時はあり。なしならMarkdownのみ）
+点数評価: ＿＿＿（要求時 / あり / なし、省略時は要求時。ありは採点の明示要求、なしは採点依頼より優先）
 確認: ＿＿＿（あり / なし、省略時はあり）
 
 ■ ゴールと最上位契約
@@ -108,7 +110,7 @@ profile表には状態、選択根拠、対象claim/surface、取得evidence、�
 
 - plan: docs/local/plan_audit_<topic>.md
 - report: 既定docs/ai-audit-prompts/report_audit_<topic>_<YYYY-MM-DD>.md、または明示されたrepo相対path
-- <topic> = doc_vs_impl_<slug>。slugは資料file名を表す短いkebab-case（例: user-manual。<topic>はdoc_vs_impl_user-manual等になる）。同日同targetで複数実行する場合はslugで区別する。既存fileがある場合は上書きせず `_2`、`_3` の連番を付け、前回reportをrelatedへ載せる。
+- <topic> = doc_vs_impl_<slug>。slugは資料file名を表す短いkebab-case（例: user-manual。<topic>はdoc_vs_impl_user-manual等になる）。同日同targetで複数実行する場合はslugで区別する。MarkdownまたはHTMLの一方でも同名fileがあれば両方に同じ `_2`、`_3` の連番を付け、既存runを上書きせず前回reportをrelatedへ載せる。当該runの逐次更新・再生成だけは同じ組を更新できる。
 - reportのmetadata: 監査report種別、状態（draft / stable）、tags、owner、related、最終確認日が分かる形にする。key名と形式は受け手の文書運用に合わせてよく、特定toolを前提にしない。監査reportは自動archive・自動期限の対象にしない（例: docsweepを使うなら type: audit-report、status: draft、docsweep_policy: never_archive を付け、docsweep_state / due は付けない）
 - 対象repoがpublic、または公開状態が不明なら、security / privacy claimのmismatch詳細は「取扱い: 非公開 / 公開可」の区分で扱い、Git管理が未指定ならignoreを提案する
 
@@ -220,6 +222,24 @@ report冒頭に固定点数ではなく次を出す。
 重要claim未検証、visual未確認、candidate未検証、正典矛盾が残れば暫定。資料を十分に読めない、または対象実装へ到達できない場合は算定不能。doc-vs-implへ安全性100点を導入しない。
 
 reportにはclaim台帳、優先順の差異一覧、要すり合わせ、unverifiable、資料内/正典間矛盾、未調査、推奨する次のowner/actionを含める。どちらを修正するかは人間の仕様判断とし、変更を適用しない。
+
+■ HTML出力・点数評価の共通契約
+
+- 監査を実行するAIが、この契約と参照可能なHTML雛形に従って監査結果のHTMLを直接書き出す。利用者に生成プログラムの実行を要求しない。
+- HTML出力は省略時あり、明示なしなら生成しない。点数評価は省略時要求時（明示採点依頼時だけ）、ありは採点の明示要求、なしは採点依頼があっても採点しない。HTMLありだけでは採点せず、HTMLなしでも有効な評価はMarkdownへ残す。
+- Markdown reportは監査事実・証拠・評価の正本で、骨格・逐次更新を維持する。HTMLは最終報告または途中終了の集計確定時に生成し、毎runで一意のrun ID、revision、dirty有無（serverは観測時間帯等）、集計日時・timezone、実行状態、結果状態を揃える。run後の完了・見送りに伴うreport更新時はHTMLも同期するか旧snapshot・未同期を明記する。
+- 保存先・Git管理・非公開扱い・公開時の未修正findingの詳細分離はMarkdownと同じ。HTMLは同じbasenameの.html。一方でも既存fileがあれば両方へ同じ_2、_3等を付け、前回reportをrelatedへ載せる。当該runの逐次更新・再生成以外は上書きしない。
+- 書込み不可・許可範囲外なら許可外へfallbackせず、Markdownを会話に残し、HTML未生成と理由を最終報告へ記す。HTMLなしは指定による生成なしと記す。雛形未取得でも下記構成を安全に再現できれば「最小構成仕様から生成（雛形未取得）」と記し、再現不能なら未生成と理由を残す。未取得の雛形を使ったと主張しない。
+- 雛形を読める場合はtemplates/audit-report.htmlのデザイン・順序・判断機能を維持して監査dataを差し替える（説明: docs/README_html-report.md、全て合成の見本: examples/audit-report.example.html）。個人用skill・private path・生成CLI・build・外部libraryは必須にしない。
+- 単独貼り付けでも、1ファイルにCSS/JS/インラインSVGを含め、背景#f7f3ea、文字#241f1a、オレンジ#ff7a3d、太い輪郭・丸いカード・余白を維持する。外部font/CDN/通信を使わない。静的HTMLに本文を持たせJS無効でも読め、1280px/768px/390pxと印刷に対応する。
+- 順序は (1)タイトル・範囲・snapshot・実行状態・結果状態・未修正/未確認、(2)candidate判定内訳の円グラフと確定findingの重大度別件数（doc-vs-implは利用者impact別。claim verdict内訳と主張検証率は別指標）、(3)採点した場合だけ評価パネル、(4)調査範囲・実行済み/失敗/未実行検証・未調査カード、(5)対応判断カード、(6)却下候補・残る懸念・証拠pointer、(7)選択一覧・コピー/Markdown保存・印刷・回答消去。詳細を折り畳んでも未確認は常に見えるようにし、印刷時は詳細を展開する。
+- 円の分母・単位はcandidate総数（重複含む）。確定/却下/判断待ち/重複を台帳から再集計し、検証済み分子は確定+却下。0件は0件と表示し率は—（未定義）。候補を脆弱性件数や安全性に読み替えず、品質問題とsecurity findingを区別する。
+- 評価はMarkdownで対象、基準と版、満点、重み、式、未調査の扱い、評価者、評価日時を定義して算出し、HTMLへ同じ値を転記する。根拠不足は未算定と理由を表示する。総合値が算出できた場合だけ総合点を出し、観点別値/満点と根拠pointerを並べる。暫定/参考評価（heuristic / provisional）は点数のすぐ横へ置き、未評価は空のバーと未評価表示。値は0以上満点以下、バー長は値/満点。不整合は勝手に補正せず正本へ戻って訂正する。異なる尺度の無断加算、finding件数による加減点、点数順の対応優先順位を使わない。
+- doc-vs-implの採点は資料の整合等の評価対象を明記し、安全性100点へ読み替えない。候補検証率・主張検証率・coverageと評価点を混ぜない。
+- 判断カードはfinding ID、監査判定/対応状況/検証状態、平易な説明・impact・図、選択肢ごとのメリット/デメリット、推奨理由、期日、改修の目安（不明なら未見積り）、暫定対策、メモを持つ。判断待ちは確定findingと区別し必要な検証を提案する。重大度・到達可能性・検証状態を判断材料に残す。
+- 初期選択は空。推奨一括は未選択だけを埋め個別回答を上書きしない。localStorageはrun IDとファイルpathnameごとのキーでfinding ID/選択肢key/文字列メモだけを保存・検証して復元し、消去はそのキーだけに限る。保存不可でも本文・その場の選択・出力は使える。コピー不可時は出力欄から手動コピーできる。出力にはfinding IDとsnapshotを付け、下書き・未承認と明記する。選択/読込/出力は修正・承認・送信・DB操作を実行しない。
+- 対象由来の本文・属性・メモ・SVGラベルは文脈に合わせてescapeし、innerHTML/document.write、script本文、style、イベントhandlerへ埋め込まない。証拠linkは正規化後の実在anchor、owner保存先内の安全な相対path、明示したhttps一次資料だけに限り、javascript:/data:/file:、protocol-relative、制御文字や保存先外へ抜けるpathはlink化しない。URLを自動fetchしない。
+- 最終報告にHTML path（または生成なし/未生成理由）、採点の有無、Markdownとの件数・分母・点数・snapshot突合結果を含める。HTMLも監査reportとして自動archive・自動期限の対象にしない。
 
 ■ 完了rubric
 

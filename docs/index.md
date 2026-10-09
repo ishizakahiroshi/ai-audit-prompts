@@ -14,6 +14,8 @@ okf_version: "0.2"
 - [docs命名・metadata規則](README_naming.md): 正典、deprecated alias、metadata値域を定義する。
 - [app監査の共通契約](README_invariants.md): scope、approval、profile、evidence、検証、summaryの正本。
 - [server診断の共通契約](README_invariants_server.md): 完全read-only、接続先照合、診断、evidence、summaryの正本。
+- [HTMLレポート・評価の共通契約](README_html-report.md): 既定HTML出力、明示要求時の点数表示、保存と判断下書き。
+- [共通HTML雛形](../templates/audit-report.html) / [全て合成の公開デモ](../examples/audit-report.example.html)。正典数には含めない。
 - doc-vs-implの非変更契約は、正典prompt内に自己完結している。
 - 監査を受け取った側のtriage / 修正フェーズ契約は、[`audit_app.md`](audit_app.md) 末尾の2節に3 family共通で置く。
 

@@ -5,6 +5,11 @@
 
 ## [Unreleased]
 
+### Added
+
+- 2026-10-09: 正典3本へ `HTML出力: あり / なし`（省略時あり）と `点数評価: 要求時 / あり / なし`（省略時要求時）を追加し、prompt版を `2026-10-09` へ更新した。Markdownを事実・評価の正本として保持し、HTMLへ同じsnapshotと算出済み点数を表示する。採点なし・未評価・暫定・算定不能、保存不可・同名回避を共通契約で定め、serverの完全read-onlyと資料突合の非変更を維持した。
+- 共通契約 `docs/README_html-report.md`、オフラインで読める `templates/audit-report.html`、全て合成の `examples/audit-report.example.html` を追加した。候補判定の円グラフ、重大度／impact別内訳、評価バー、判断カード・図・証拠を表示し、個別選択を保つ推奨一括、run／ファイル別の下書き保存、コピー・Markdown保存・印刷・回答消去を備える。選択は承認・修正・送信を実行しない。新しいアプリ・生成CLI・build・必須の個人用skillは追加していない。
+
 [Unreleased]: https://github.com/ishizakahiroshi/ai-audit-prompts/compare/v1.0.0...HEAD
 
 ## [1.0.0] - 2026-09-30

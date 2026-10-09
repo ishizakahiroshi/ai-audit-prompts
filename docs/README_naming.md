@@ -57,6 +57,7 @@ frontmatterは貼り付け対象外のため、promptの版は本文側に置く
 | `README_invariants*.md` | `Audit Invariant` |
 | `README_activation.md` | `Audit Routing Policy` |
 | `README_naming.md` | `Naming Convention` |
+| `README_html-report.md` | `Audit Report Contract` |
 | 旧path alias | `Deprecated Audit Alias` |
 
 ## deprecated alias
@@ -104,7 +105,9 @@ alias削除前に、repo外skill等のactive consumerが新3本へ移行済み�
 - plan: `<target-repo>/docs/local/plan_audit_<topic>.md`
 - report既定: `<target-repo>/docs/ai-audit-prompts/report_audit_<topic>_<YYYY-MM-DD>.md`
 - `<topic>` = `<target>_<slug>`（target = app / server / doc_vs_impl。slugは短いkebab-caseで、app: 対象path・profileまたはrepo名（例: src-api、whole-repo）、server: 接続先を識別する別名（owner側で決める。hostname・IPそのものは避ける）、doc_vs_impl: 資料file名（例: user-manual））。同日同targetで複数実行する場合はslugで区別する
-- 既存fileがある場合は上書きせず `_2`、`_3` の連番を付け、前回reportをrelatedへ載せる
+- HTML既定: Markdownと同じ保存先・basenameの `.html`。HTMLなしなら生成しない。共通契約は [`README_html-report.md`](README_html-report.md)
+- MarkdownまたはHTMLの一方でも同名fileがあれば両方に同じ `_2`、`_3` の連番を付け、既存runを上書きせず前回reportをrelatedへ載せる。当該runの逐次更新・再生成だけは同じ組を更新できる
+- HTMLから保存する回答は `<report-basename>_decisions.md`。下書き・未承認とfinding ID / snapshotを含め、監査reportの代わりにしない
 - server reportもowner private repoへ保存し、owner未確定のまま接続しない
 - userが `保存先=<repo-relative path>` を明示した場合だけreport先を変更する
 

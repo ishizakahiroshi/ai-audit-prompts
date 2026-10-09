@@ -31,6 +31,8 @@ status: "stable"
 除外: service/path（省略時はなし）
 保存先: owner repo相対path（省略時はdocs/ai-audit-prompts）
 Git管理: ignore / track（plan / report双方に適用。ignore = 保存先pathをowner repositoryの.git/info/excludeへ追記しtracked fileを変更しない（共有したい場合の.gitignore反映は人間が行う） / track = 何もせずuntrackedのまま残し、add / commitは人間が行う。未存在保存先を確認なしで作る場合は必須）
+HTML出力: あり / なし（省略時はあり。なしならMarkdownのみ）
+点数評価: 要求時 / あり / なし（省略時は要求時。ありは明示採点要求、なしは採点依頼より優先）
 確認: あり / なし（省略時はあり）
 ```
 
@@ -197,9 +199,11 @@ baseline適合だけでfindingを確定せず、対象role、exposure、実効�
 
 ## 成果物とsummary
 
+本節のplan/report書込み例外はHTML reportを含む。server上modeでowner repo working tree内に保存できない場合はHTML未生成と理由を残す。権限・書込み先は広げず、対策未適用をHTMLにも明記する。
+
 - plan: owner repoの `docs/local/plan_audit_<topic>.md`
 - report: owner repoの既定 `docs/ai-audit-prompts/report_audit_<topic>_<YYYY-MM-DD>.md` または明示されたrepo相対path
-- `<topic>` は `<target>_<slug>` とし、serverでは `server_<slug>` になる（定義は [`README_naming.md`](README_naming.md) の「成果物命名」。slugは接続先を識別する別名を表す短いkebab-caseで、owner側で決め、hostname・IPそのものは避ける（filenameにhostname / IPを入れない））。同日同targetで複数実行する場合（同日に別hostを診断する場合を含む）はslugで区別する。既存fileがある場合は上書きせず `_2`、`_3` の連番を付け、前回reportをrelatedへ載せる
+- `<topic>` は `<target>_<slug>` とし、serverでは `server_<slug>` になる（定義は [`README_naming.md`](README_naming.md) の「成果物命名」。slugは接続先を識別する別名を表す短いkebab-caseで、owner側で決め、hostname・IPそのものは避ける（filenameにhostname / IPを入れない））。同日同targetで複数実行する場合（同日に別hostを診断する場合を含む）はslugで区別する。MarkdownまたはHTMLの一方でも同名fileがあれば両方に同じ `_2`、`_3` の連番を付け、既存runを上書きせず前回reportをrelatedへ載せる。当該runの逐次更新・再生成だけは同じ組を更新できる
 - reportは初期準備で骨格を作り、candidate判定・各phase終端で逐次更新する
 - 接続方法がサーバー上の場合、書込はowner repoのworking tree（対象server上のclone、cwd）配下のplan/reportだけを（Git管理 = ignoreのときの同repoの `.git/info/exclude` への保存先path追記を含め）完全read-onlyの例外とし（ほかの例外は「完全read-only」節冒頭の不可避の記録だけ）、`/tmp`、`/root`、home直下、`/etc`・`/var`等のsystem directory、他userのhomeへ書かず、sudo/rootで書かない。cloneがserver上に無い、保存先がworking tree外、または書込権限が無い場合は、plan/report本文を会話出力へMarkdownとして逐次出力して保存は人間が行い、reportの成果物欄に「保存先: 未保存（サーバー上mode・owner repo不在）」と記す。どちらの場合もgit add/commitはしない
 - reportのmetadataは、監査report種別、状態（`draft` / `stable`）、`tags`、`owner`、`related`、最終確認日が分かる形にする。**key名と形式は受け手の文書運用に合わせてよく、特定toolを前提にしない。** 監査reportは自動archive・自動期限の対象にしない（例: docsweepを使うなら `type: audit-report`、`status: draft|stable`、`docsweep_policy: never_archive` を付け、`docsweep_state` / `due` は付けない）
@@ -218,9 +222,13 @@ report冒頭は固定点数でなく次を出す。
 - residual risk、判断待ち、結果 `確定 / 暫定 / 算定不能`
 - regulatory context（未検証）: ownerの資料や依頼が特定の法令・規格への適合に明示的に触れる場合だけ、その名称・版/施行日・適用状態（法令は改正法と適用段階。段階適用なら適用済み / 未適用の別）・URL・確認日を数行で残し、該当性・適合可否・重大度は判定せず、checklist化しない。言及がなければこの欄を省く。ただし、侵害・漏えいの決定的証拠を確定した場合に通知判断を促すことは、規制名を挙げない例外として「接続前確認」節末尾の即時escalation規則に従う
 
-接続後に台帳とcoverage分母を作れており、重要観点未調査や未検証candidateが残る場合は暫定とする。接続不能または最小inventoryさえ取得できず評価基盤を作れない場合は算定不能とする。数値評価は明示要求時だけ、対象・分母・重み・未調査の扱いを定義し `heuristic / provisional` と表示する。
+接続後に台帳とcoverage分母を作れており、重要観点未調査や未検証candidateが残る場合は暫定とする。接続不能または最小inventoryさえ取得できず評価基盤を作れない場合は算定不能とする。数値評価は点数評価が有効な場合（要求時の明示採点依頼、またはあり指定）だけ、対象・分母・重み・未調査の扱いを定義し `heuristic / provisional` と表示する。
 
 各findingにはID、観点、重大度、確信度、監査判定、対象、観測、risk path、既存防御、反証、根拠、推奨対策、適用時副作用/回避、適用後確認を含める。対策未適用を明記する。
+
+## HTML表示と点数評価の共通契約
+
+[`README_html-report.md`](README_html-report.md)を共通正本とする。省略時HTMLあり、点数評価は要求時（ありは明示要求、なしは採点依頼より優先）。最終／途中終了の確定snapshotから、Markdownと同じbasename・保存境界のHTMLを生成する。本文・内訳・分母・算出済み点数を両形式で一致させ、HTMLで再採点しない。未算定と未評価、暫定、未確認を隠さず、採点非要求時は点数パネルを省く。判断下書きは修正・承認・送信ではない。保存不可はMarkdownを残し未生成理由を明記し、許可外へfallbackしない。一方でも同名fileがあれば両形式に同じ連番を付ける。
 
 ## 完了rubric
 

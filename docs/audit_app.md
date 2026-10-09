@@ -16,7 +16,7 @@ audit:
 実行製品・provider・modelを問わず使える、アプリ／source code監査の正典prompt。DB区分と複数security profileを対象実装から選び、利用可能なcapabilityに応じて並列探索または直列二巡を行う。既定は調査のみで、修正は明示scope内の最小変更に限る。
 
 ```text
-prompt版: 2026-09-29
+prompt版: 2026-10-09
 
 このrepositoryのアプリ／source codeを、次の契約に従って監査してください。
 
@@ -29,6 +29,8 @@ DB区分: ＿＿＿（自動 / あり / なし、省略時は自動）
 除外: ＿＿＿（repo相対path、省略時はなし）
 保存先: ＿＿＿（reportのrepo相対path。省略時はdocs/ai-audit-prompts。planは常にdocs/local/へ置く）
 Git管理: ＿＿＿（ignore / track。plan / report双方に適用。ignore = 保存先pathをowner repositoryの `.git/info/exclude` へ追記しtracked fileを変更しない（共有したい場合の `.gitignore` 反映は人間が行う） / track = 何もせずuntrackedのまま残し、add / commitは人間が行う。確認なしで未存在保存先を作る場合は必須）
+HTML出力: ＿＿＿（あり / なし、省略時はあり。なしならMarkdownのみ）
+点数評価: ＿＿＿（要求時 / あり / なし、省略時は要求時。ありは採点の明示要求、なしは採点依頼より優先）
 確認: ＿＿＿（あり / なし、省略時はあり）
 
 ■ ゴール
@@ -91,7 +93,7 @@ Git管理: ＿＿＿（ignore / track。plan / report双方に適用。ignore = 
 6. planとreportの骨格を作る。
    - plan: docs/local/plan_audit_<topic>.md
    - report: 既定docs/ai-audit-prompts/report_audit_<topic>_<YYYY-MM-DD>.md、または明示保存先
-   - <topic> = app_<slug>。slugは対象path・profileまたはrepo名を表す短いkebab-case（例: src-api、whole-repo。<topic>はapp_src-api等になる）。同日同targetで複数実行する場合はslugで区別する。既存fileがある場合は上書きせず `_2`、`_3` の連番を付け、前回reportをrelatedへ載せる。
+   - <topic> = app_<slug>。slugは対象path・profileまたはrepo名を表す短いkebab-case（例: src-api、whole-repo。<topic>はapp_src-api等になる）。同日同targetで複数実行する場合はslugで区別する。MarkdownまたはHTMLの一方でも同名fileがあれば両方に同じ `_2`、`_3` の連番を付け、既存runを上書きせず前回reportをrelatedへ載せる。当該runの逐次更新・再生成だけは同じ組を更新できる。
    - reportのmetadata: 監査report種別、状態（draft / stable）、tags、owner、related、最終確認日が分かる形にする。key名と形式は受け手の文書運用に合わせてよく、特定toolを前提にしない。監査reportは自動archive・自動期限の対象にしない（例: docsweepを使うなら type: audit-report、status: draft、docsweep_policy: never_archive を付け、docsweep_state / due は付けない）。
    - reportはcandidate判定ごと、各phase終端で逐次更新し、完了時だけstableにする。
    - 保存先がsymlink / junction / mountの場合は実体pathと書込可否を確認し、無断で別pathへfallbackしない。
@@ -399,7 +401,7 @@ report冒頭に次を置く。固定100点を既定にしない。
 
 判断待ち、未検証candidate、unknown profile、重要な未調査があれば、検証率が低くても台帳とcoverage分母を作れている限り暫定とする。算定不能は、対象へ到達できない、inventory自体を作れない等により台帳・coverage・主要riskの評価基盤を成立させられない場合に限る。低い候補検証率だけを算定不能へ読み替えず、見かけ上の満点も出さない。対象全体へ到達できない場合は、監査実行状態=失敗、結果状態=算定不能とする。一部のpathだけ到達できない場合は、部分完了 + 暫定とし、到達できないpathを未調査へ列挙する。
 
-数値評価はuserが明示要求した場合だけ、対象、分母、重み、未調査の扱いを先に定義して計算し、heuristic / provisionalと表示する。固定カテゴリ配点、findingごとの+N点、点数順sortを使わない。
+数値評価は点数評価が有効な場合（要求時の明示採点依頼、またはあり指定）だけ、対象、分母、重み、未調査の扱いを先に定義して計算し、heuristic / provisionalと表示する。固定カテゴリ配点、findingごとの+N点、点数順sortを使わない。
 
 各findingには次を含める。
 
@@ -411,6 +413,24 @@ report冒頭に次を置く。固定100点を既定にしない。
 - 判断待ちの場合: 欠けている項目番号（1〜7）、解消に必要なcapability / command / 権限、次に試す具体手順
 
 優先順はseverity、exploitability、exposure、KEV/active exploitation、business impact、verification statusで決める。
+
+■ HTML出力・点数評価の共通契約
+
+- 監査を実行するAIが、この契約と参照可能なHTML雛形に従って監査結果のHTMLを直接書き出す。利用者に生成プログラムの実行を要求しない。
+- HTML出力は省略時あり、明示なしなら生成しない。点数評価は省略時要求時（明示採点依頼時だけ）、ありは採点の明示要求、なしは採点依頼があっても採点しない。HTMLありだけでは採点せず、HTMLなしでも有効な評価はMarkdownへ残す。
+- Markdown reportは監査事実・証拠・評価の正本で、骨格・逐次更新を維持する。HTMLは最終報告または途中終了の集計確定時に生成し、毎runで一意のrun ID、revision、dirty有無（serverは観測時間帯等）、集計日時・timezone、実行状態、結果状態を揃える。run後の完了・見送りに伴うreport更新時はHTMLも同期するか旧snapshot・未同期を明記する。
+- 保存先・Git管理・非公開扱い・公開時の未修正findingの詳細分離はMarkdownと同じ。HTMLは同じbasenameの.html。一方でも既存fileがあれば両方へ同じ_2、_3等を付け、前回reportをrelatedへ載せる。当該runの逐次更新・再生成以外は上書きしない。
+- 書込み不可・許可範囲外なら許可外へfallbackせず、Markdownを会話に残し、HTML未生成と理由を最終報告へ記す。HTMLなしは指定による生成なしと記す。雛形未取得でも下記構成を安全に再現できれば「最小構成仕様から生成（雛形未取得）」と記し、再現不能なら未生成と理由を残す。未取得の雛形を使ったと主張しない。
+- 雛形を読める場合はtemplates/audit-report.htmlのデザイン・順序・判断機能を維持して監査dataを差し替える（説明: docs/README_html-report.md、全て合成の見本: examples/audit-report.example.html）。個人用skill・private path・生成CLI・build・外部libraryは必須にしない。
+- 単独貼り付けでも、1ファイルにCSS/JS/インラインSVGを含め、背景#f7f3ea、文字#241f1a、オレンジ#ff7a3d、太い輪郭・丸いカード・余白を維持する。外部font/CDN/通信を使わない。静的HTMLに本文を持たせJS無効でも読め、1280px/768px/390pxと印刷に対応する。
+- 順序は (1)タイトル・範囲・snapshot・実行状態・結果状態・未修正/未確認、(2)candidate判定内訳の円グラフと確定findingの重大度別件数（doc-vs-implは利用者impact別。claim verdict内訳と主張検証率は別指標）、(3)採点した場合だけ評価パネル、(4)調査範囲・実行済み/失敗/未実行検証・未調査カード、(5)対応判断カード、(6)却下候補・残る懸念・証拠pointer、(7)選択一覧・コピー/Markdown保存・印刷・回答消去。詳細を折り畳んでも未確認は常に見えるようにし、印刷時は詳細を展開する。
+- 円の分母・単位はcandidate総数（重複含む）。確定/却下/判断待ち/重複を台帳から再集計し、検証済み分子は確定+却下。0件は0件と表示し率は—（未定義）。候補を脆弱性件数や安全性に読み替えず、品質問題とsecurity findingを区別する。
+- 評価はMarkdownで対象、基準と版、満点、重み、式、未調査の扱い、評価者、評価日時を定義して算出し、HTMLへ同じ値を転記する。根拠不足は未算定と理由を表示する。総合値が算出できた場合だけ総合点を出し、観点別値/満点と根拠pointerを並べる。暫定/参考評価（heuristic / provisional）は点数のすぐ横へ置き、未評価は空のバーと未評価表示。値は0以上満点以下、バー長は値/満点。不整合は勝手に補正せず正本へ戻って訂正する。異なる尺度の無断加算、finding件数による加減点、点数順の対応優先順位を使わない。
+- doc-vs-implの採点は資料の整合等の評価対象を明記し、安全性100点へ読み替えない。候補検証率・主張検証率・coverageと評価点を混ぜない。
+- 判断カードはfinding ID、監査判定/対応状況/検証状態、平易な説明・impact・図、選択肢ごとのメリット/デメリット、推奨理由、期日、改修の目安（不明なら未見積り）、暫定対策、メモを持つ。判断待ちは確定findingと区別し必要な検証を提案する。重大度・到達可能性・検証状態を判断材料に残す。
+- 初期選択は空。推奨一括は未選択だけを埋め個別回答を上書きしない。localStorageはrun IDとファイルpathnameごとのキーでfinding ID/選択肢key/文字列メモだけを保存・検証して復元し、消去はそのキーだけに限る。保存不可でも本文・その場の選択・出力は使える。コピー不可時は出力欄から手動コピーできる。出力にはfinding IDとsnapshotを付け、下書き・未承認と明記する。選択/読込/出力は修正・承認・送信・DB操作を実行しない。
+- 対象由来の本文・属性・メモ・SVGラベルは文脈に合わせてescapeし、innerHTML/document.write、script本文、style、イベントhandlerへ埋め込まない。証拠linkは正規化後の実在anchor、owner保存先内の安全な相対path、明示したhttps一次資料だけに限り、javascript:/data:/file:、protocol-relative、制御文字や保存先外へ抜けるpathはlink化しない。URLを自動fetchしない。
+- 最終報告にHTML path（または生成なし/未生成理由）、採点の有無、Markdownとの件数・分母・点数・snapshot突合結果を含める。HTMLも監査reportとして自動archive・自動期限の対象にしない。
 
 ■ 完了rubric
 

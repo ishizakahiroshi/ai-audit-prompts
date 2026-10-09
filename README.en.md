@@ -118,8 +118,11 @@ At execution time, security baselines are rechecked only against official source
 
 ### Outputs
 
+HTML is produced by default (`HTML出力: あり`; set `なし` for Markdown only). `点数評価: 要求時 / あり / なし` defaults to on explicit request; `あり` is itself a scoring request and `なし` overrides one. HTML output and scoring are independent. The Markdown report remains the source of truth; HTML displays the same snapshot, calculated ratings, unknown areas, and response choices. Choices are local drafts, not approval or execution. See the [shared contract](docs/README_html-report.md), [template](templates/audit-report.html), and [fully synthetic demo](examples/audit-report.example.html). No build, external dependency, or personal skill is required.
+
 - Plan: `docs/local/plan_audit_<topic>.md` in the target repository
 - Default report: `docs/ai-audit-prompts/report_audit_<topic>_<YYYY-MM-DD>.md`
+- Default HTML: the same destination and basename with `.html`, generated at final or partial closeout. If either file already exists, use the same sequence suffix for both. If HTML cannot be generated or saved, record the reason and retain Markdown; never use an unauthorized fallback.
 - `<topic>` is `<target>_<slug>`; see “成果物命名” (artifact naming) in `docs/README_naming.md`.
 - An alternate repository-relative path is used only when `Save destination=...` is explicit.
 - If the target repository is public or its visibility is unknown, the prompt proposes `ignore` for the report's Git handling; `track` is used only with explicit approval after the exposure of unfixed findings has been presented.
@@ -128,7 +131,7 @@ At execution time, security baselines are rechecked only against official source
 
 ## Repository layout
 
-There are 22 public Markdown files directly under `docs/`: 3 paste-ready canonicals, 14 migration aliases, and 5 routing/invariant/index documents.
+There are 23 public Markdown files directly under `docs/`: 3 paste-ready canonicals, 14 migration aliases, 5 routing/invariant/index documents, and 1 HTML report contract.
 
 ```text
 docs/
@@ -137,11 +140,14 @@ docs/
   README_naming.md            canonical and alias naming/metadata
   README_invariants.md        shared app-audit contract
   README_invariants_server.md completely read-only server contract
+  README_html-report.md       shared HTML output, rating, and template contract
   audit_app.md                canonical app/source audit
   audit_server.md             canonical managed-server diagnosis
   audit_doc_vs_impl.md        canonical doc-versus-implementation audit
   *_audit_*.md                deprecated aliases for 14 legacy paths
   local/                      private working records (gitignored)
+templates/audit-report.html   self-contained shared template
+examples/audit-report.example.html fully synthetic demo
 ```
 
 The 14 former tool-specific paths remain as navigation aliases for one migration release. They are not paste-ready prompts and are excluded from automatic selection, recommendations, and the canonical count. After in-repository and external consumers have migrated, a separate plan for the next breaking change will remove them.
@@ -156,4 +162,4 @@ This public repository contains only reusable methods. Do not commit:
 - Customer-specific server configurations, IP addresses, hostnames, or names
 - Investigation notes, logs, plans, or reports for a particular project
 
-Use `docsweep okf-check docs --json` to check public Markdown consistency and `node scripts/secrets-scan.mjs --all-tracked --block` to scan for secrets. This repository contains no executable product code or build artifacts.
+Use `docsweep okf-check docs --json` to check public Markdown consistency and `node scripts/secrets-scan.mjs --all-tracked --block` to scan for secrets. This repository contains no product application, generation CLI, or build artifacts. The HTML template includes inline JavaScript for response drafts.
