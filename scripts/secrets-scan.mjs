@@ -259,7 +259,7 @@ function getFilesByMode(mode) {
   try {
     switch (mode) {
       case 'staged':
-        return gitList(['diff', '--cached', '--name-only', '-z', '--diff-filter=ACM']);
+        return gitList(['diff', '--cached', '--name-only', '-z', '--diff-filter=ACMRT']);
       case 'files-from-diff':
         return gitList(['diff', '--name-only', '-z', '--diff-filter=ACM', 'HEAD']);
       case 'all-tracked':
