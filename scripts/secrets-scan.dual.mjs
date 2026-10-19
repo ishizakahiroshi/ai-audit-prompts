@@ -7,7 +7,7 @@ import { tmpdir } from 'node:os';
 import { createRequire } from 'node:module';
 import { resolve, join } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { stagedSnapshot, gitEnvironment } from './secrets-scan.staged.mjs';
+import { stagedSnapshot, gitEnvironment, gitContext } from './secrets-scan.staged.mjs';
 
 export const VERSION = '0.2.0';
 // Runtime verification adopted from docsweep pilot f760ae4; no local install.
@@ -152,7 +152,9 @@ function main(argv) {
   if (!(simple.includes(mode) && argv.length === 1) && !(list.includes(mode) && argv.length === 2)) throw new Error('mode');
   const env = scannerEnvironment(process.env, process.env.CI === 'true');
   const execute = ([command, ...args]) => spawnSync(command, args, { encoding: 'utf8', env, windowsHide: true, maxBuffer: 64 * 1024 * 1024, timeout: 300000 });
-  const git = args => execute(['git', ...args]);
+  // Git checks on the caller's repository must see the same (validated) index the snapshot uses.
+  const gitEnv = mode === '--staged' ? gitContext(process.cwd(), process.env).env : env;
+  const git = args => spawnSync('git', args, { encoding: 'utf8', env: gitEnv, windowsHide: true, maxBuffer: 64 * 1024 * 1024, timeout: 300000 });
   const actual = git(['rev-parse', 'HEAD']);
   const head = actual.stdout?.trim();
   const expected = process.env.EXPECTED_SOURCE_SHA;
@@ -214,7 +216,7 @@ function main(argv) {
   const native = launcher ? [process.execPath, launcher, 'scan', ...argv, '--block', '--strict', '--config', resolve('doxguard.ci.json'), '--format', 'json'] : [];
   let snapshot, output;
   try {
-    if (mode === '--staged') snapshot = stagedSnapshot(process.cwd(), env);
+    if (mode === '--staged') snapshot = stagedSnapshot(process.cwd(), process.env);
     const scanExecute = command => {
       if (command === native) verifyInvocation();
       return command.length ? spawnSync(command[0], command.slice(1), { cwd: snapshot?.cwd ?? process.cwd(), encoding: 'utf8', env, windowsHide: true, maxBuffer: 64 * 1024 * 1024, timeout: 300000 }) : { status: 2, error: true };
