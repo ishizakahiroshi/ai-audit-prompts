@@ -1,10 +1,11 @@
-import { statSync, symlinkSync, unlinkSync, mkdtempSync, mkdirSync, writeFileSync, chmodSync, rmSync } from 'node:fs';
+import { statSync, symlinkSync, unlinkSync, mkdtempSync, mkdirSync, writeFileSync, chmodSync, rmSync, copyFileSync } from 'node:fs';
+import { execFileSync, spawnSync } from 'node:child_process';
 import {tmpdir} from 'node:os';
 import {createHash} from 'node:crypto';
 import {join} from 'node:path';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { scannerEnvironment, redactMetadata, summarize, runBoth, verifyRuntime, canonicalRuntime } from './secrets-scan.dual.mjs';
+import { scannerEnvironment, redactMetadata, summarize, runBoth, runNative, verifyRuntime, canonicalRuntime } from './secrets-scan.dual.mjs';
 const clean = (extra = {}) => ({ status: 0, stdout: JSON.stringify({ total_files: 2, scanned: 2, kb_needles:0, family_needles:0, coverage_skips: 0, watchlist_needles: 0, structural_patterns:4, watchlist_statistics:{candidates:0,loaded:0}, baseline_applied:false,baseline_suppressed_hits:0, hits: [], ...extra }) });
 const value = ['192', '168', '67', '89'].join('.');
 const leak = () => ({ status: 1, stdout: JSON.stringify({ total_files: 2, scanned: 2, kb_needles:0, family_needles:0, hits: [{ file: `fixture-${value}.txt`, lineNumber: 3, matched: value, source: `structural fixture ${value}`, line: `never print ${value}` }] }) });
@@ -139,6 +140,87 @@ test('runtime rejects nested candidates added after successful cached resolution
 test('native baseline, candidate watchlists, structural weakening and invalid target count fail closed', () => {
   for (const change of [{baseline_applied:true},{baseline_suppressed_hits:1},{structural_patterns:3},{watchlist_statistics:{candidates:1,loaded:0}},{scanned:3}]) assert.equal(summarize(clean(change),'doxguard','--all-tracked').exit,2);
   assert.equal(summarize(clean({total_files:0,scanned:0}),'doxguard','--staged').exit,0);
+});
+
+// --native-only end-to-end: a synthetic repo that has NO scripts/secrets-scan.mjs, scanned through a
+// fake exact-version native package. CI is not 'true', so the Linux hash pin is not part of this test.
+const fakeLauncher = `
+import { execFileSync } from 'node:child_process';
+import { readFileSync } from 'node:fs';
+const args = process.argv.slice(2);
+if (args[0] === '--version') { console.log('doxguard 0.2.0'); process.exit(0); }
+const files = execFileSync('git', ['ls-files'], { encoding: 'utf8' }).split(/\\r?\\n/).filter(Boolean);
+const hits = [];
+for (const file of files) readFileSync(file, 'utf8').split(/\\r?\\n/).forEach((line, i) => {
+  const m = line.match(/\\b192\\.168\\.\\d+\\.\\d+\\b/);
+  if (m) hits.push({ file, lineNumber: i + 1, matched: m[0], source: 'structural private-ip' });
+});
+console.log(JSON.stringify({ total_files: files.length, scanned: files.length, coverage_skips: 0, watchlist_needles: 0, structural_patterns: 4,
+  watchlist_statistics: { candidates: 0, loaded: 0 }, baseline_applied: false, baseline_suppressed_hits: 0, hits }));
+process.exit(hits.length ? 1 : 0);
+`;
+function nativeOnlyFixture(content, withPackage = true) {
+  const root = mkdtempSync(join(tmpdir(), 'native-only-'));
+  mkdirSync(join(root, 'scripts'));
+  for (const name of ['secrets-scan.dual.mjs', 'secrets-scan.staged.mjs']) copyFileSync(join(import.meta.dirname, name), join(root, 'scripts', name));
+  copyFileSync(join(import.meta.dirname, '..', 'doxguard.ci.json'), join(root, 'doxguard.ci.json'));
+  writeFileSync(join(root, 'sample.txt'), content + '\n');
+  const pkg = join(root, 'fake-pkg');
+  mkdirSync(join(pkg, 'bin'), { recursive: true });
+  writeFileSync(join(pkg, 'package.json'), JSON.stringify({ name: 'doxguard', version: '0.2.0', type: 'module' }));
+  writeFileSync(join(pkg, 'bin', 'doxguard.js'), fakeLauncher);
+  const git = (...a) => execFileSync('git', ['-c', 'user.name=t', '-c', 'user.email=t@example.com', ...a], { cwd: root, stdio: 'ignore' });
+  git('init', '-q'); git('add', 'sample.txt', 'doxguard.ci.json', 'scripts'); git('commit', '-q', '-m', 'fixture');
+  const env = { ...process.env, DOXGUARD_PACKAGE_ROOT: withPackage ? pkg : join(root, 'no-such-package') };
+  delete env.CI; delete env.EXPECTED_SOURCE_SHA;
+  const run = (...args) => {
+    const r = spawnSync(process.execPath, [join(root, 'scripts', 'secrets-scan.dual.mjs'), ...args], { cwd: root, env, encoding: 'utf8', timeout: 120000 });
+    let report = null; try { report = JSON.parse(r.stdout.trim().split('\n').at(-1)); } catch {}
+    return { status: r.status, report };
+  };
+  return { root, run };
+}
+test('native-only: detection exits 1, runs only the native scanner, needs no legacy script', () => {
+  const f = nativeOnlyFixture(['192', '168', '66', '77'].join('.'));
+  try {
+    const r = f.run('--native-only', '--all-tracked');
+    assert.equal(r.status, 1);
+    assert.deepEqual(r.report?.results.map(x => x.scanner), ['doxguard']);
+    assert.equal(r.report.results[0].hits.length, 1);
+    assert.equal(r.report.nativeOnly, true);
+    assert.equal(JSON.stringify(r.report).includes(['192', '168', '66', '77'].join('.')), false);
+  } finally { rmSync(f.root, { recursive: true, force: true }); }
+});
+test('native-only: clean repo exits 0 (flag position is free)', () => {
+  const f = nativeOnlyFixture('ordinary portable text');
+  try {
+    for (const args of [['--native-only', '--all-tracked'], ['--all-tracked', '--native-only']]) {
+      const r = f.run(...args);
+      assert.equal(r.status, 0); assert.deepEqual(r.report?.results.map(x => x.scanner), ['doxguard']);
+    }
+  } finally { rmSync(f.root, { recursive: true, force: true }); }
+});
+test('native-only: missing native package fails closed without falling back', () => {
+  const f = nativeOnlyFixture('ordinary portable text', false);
+  try {
+    const r = f.run('--native-only', '--all-tracked');
+    assert.ok(r.status >= 1);
+    assert.deepEqual(r.report?.results.map(x => x.scanner), ['doxguard']);
+    assert.equal(r.report.results[0].exit, 2);
+  } finally { rmSync(f.root, { recursive: true, force: true }); }
+});
+test('native-only: duplicate flag and unknown mode are rejected', () => {
+  const f = nativeOnlyFixture('ordinary portable text');
+  try {
+    assert.equal(f.run('--native-only', '--native-only', '--all-tracked').status, 2);
+    assert.equal(f.run('--native-only').status, 2);
+  } finally { rmSync(f.root, { recursive: true, force: true }); }
+});
+test('runNative: failure, throw and coverage skip are failures', () => {
+  assert.equal(runNative({ execute: () => clean(), native: [], mode: '--all-tracked' }).exit, 0);
+  assert.equal(runNative({ execute: () => { throw new Error('hidden'); }, native: [], mode: '--all-tracked' }).exit, 1);
+  assert.equal(runNative({ execute: () => ({ status: 2, stdout: 'invalid' }), native: [], mode: '--all-tracked' }).exit, 1);
+  assert.equal(runNative({ execute: () => clean({ coverage_skips: 1 }), native: [], mode: '--all-tracked' }).exit, 1);
 });
 
 test('legacy unexpected stderr is redacted but fails coverage acceptance',()=>{

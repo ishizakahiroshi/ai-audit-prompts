@@ -145,7 +145,20 @@ export function runBoth({ execute, legacy, native, mode }) {
   return { results, exit: results.some(result => result.exit !== 0) ? 1 : 0 };
 }
 
-function main(argv) {
+// Native-only gate: the legacy scanner is never launched and no target-count comparison exists.
+// A missing, unverifiable or failing native scanner stays a failure (no fallback).
+export function runNative({ execute, native, mode }) {
+  let result;
+  try { result = execute(native); } catch { result = { status: 2, error: true }; }
+  const results = [summarize(result, 'doxguard', mode)];
+  return { results, exit: results.some(item => item.exit !== 0) ? 1 : 0 };
+}
+
+function main(rawArgv) {
+  // --native-only may appear once, anywhere; the remaining arguments keep the existing mode grammar.
+  const nativeOnly = rawArgv.includes('--native-only');
+  if (rawArgv.filter(arg => arg === '--native-only').length > 1) throw new Error('mode');
+  const argv = rawArgv.filter(arg => arg !== '--native-only');
   const mode = argv[0];
   const simple = ['--all-tracked', '--staged', '--history', '--controls'];
   const list = ['--files-from-list', '--path-from'];
@@ -180,7 +193,7 @@ function main(argv) {
     verifyInvocation();
     const version = execute([process.execPath, launcher, '--version']);
     if (version.status !== 0 || version.stdout.trim() !== `doxguard ${VERSION}`) launcher = null;
-  } catch { /* The legacy scan still runs if the exact native package is unavailable. */ }
+  } catch { /* launcher stays null: dual mode still runs legacy; native-only mode fails closed below. */ }
   if (mode === '--controls') {
     const directory = mkdtempSync(join(tmpdir(), 'dual-controls-'));
     const privateAddress = ['192', '168', '66', '77'].join('.');
@@ -221,10 +234,11 @@ function main(argv) {
       if (command === native) verifyInvocation();
       return command.length ? spawnSync(command[0], command.slice(1), { cwd: snapshot?.cwd ?? process.cwd(), encoding: 'utf8', env, windowsHide: true, maxBuffer: 64 * 1024 * 1024, timeout: 300000 }) : { status: 2, error: true };
     };
-    output = runBoth({ execute: scanExecute, legacy, native, mode });
+    output = nativeOnly ? runNative({ execute: scanExecute, native, mode }) : runBoth({ execute: scanExecute, legacy, native, mode });
+    if (nativeOnly) output.nativeOnly = true;
     if (snapshot) { snapshot.verify(); output.indexSnapshot = { head: snapshot.head, targets: snapshot.targets, bytes: snapshot.bytes }; }
   } finally { snapshot?.cleanup(); }
-  if (mode !== '--history' && output.results.every(result => integer(result.targets)) && output.results[0].targets !== output.results[1].targets) {
+  if (!nativeOnly && mode !== '--history' && output.results.every(result => integer(result.targets)) && output.results[0].targets !== output.results[1].targets) {
     output.exit = 1;
     output.inputMismatch = true;
   }
@@ -234,6 +248,7 @@ function main(argv) {
   process.stdout.write(JSON.stringify({ expectedSourceSha: expected ?? null, actualHead: head, ...output }) + '\n');
   process.exitCode = output.exit;
 }
-if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
+const isEntry = () => { try { return import.meta.url === pathToFileURL(realpathSync(resolve(process.argv[1]))).href; } catch { return false; } };
+if (process.argv[1] && isEntry()) {
   try { main(process.argv.slice(2)); } catch { process.stderr.write('dual-scan: invalid configuration, target mode, or checkout identity\n'); process.exitCode = 2; }
 }
