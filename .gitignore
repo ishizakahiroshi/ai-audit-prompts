@@ -18,7 +18,7 @@ secrets.*
 *secret*
 *credential*
 *token*
-!scripts/secrets-scan.mjs
+!scripts/secrets-scan.*.mjs
 !.github/workflows/secrets-scan.yml
 .netrc
 .npmrc

@@ -164,4 +164,4 @@ examples/audit-report.example.html 全て合成のデモ
 - server構成、IP、hostname、顧客名等の案件固有情報
 - 特定projectの調査memo、log、plan、report
 
-公開Markdownの整合確認には `docsweep okf-check docs --json`、秘密検査には `node scripts/secrets-scan.mjs --all-tracked --block` を使えます。このrepositoryには製品アプリ・生成CLI・build成果物はありません。HTML雛形には判断下書き用のインラインJSがあります。
+公開Markdownの整合確認には `docsweep okf-check docs --json`、秘密検査には `node scripts/secrets-scan.dual.mjs --native-only --all-tracked`（doxguard）を使えます。このrepositoryには製品アプリ・生成CLI・build成果物はありません。HTML雛形には判断下書き用のインラインJSがあります。

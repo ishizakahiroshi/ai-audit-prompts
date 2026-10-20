@@ -164,4 +164,4 @@ This public repository contains only reusable methods. Do not commit:
 - Customer-specific server configurations, IP addresses, hostnames, or names
 - Investigation notes, logs, plans, or reports for a particular project
 
-Use `docsweep okf-check docs --json` to check public Markdown consistency and `node scripts/secrets-scan.mjs --all-tracked --block` to scan for secrets. This repository contains no product application, generation CLI, or build artifacts. The HTML template includes inline JavaScript for response drafts.
+Use `docsweep okf-check docs --json` to check public Markdown consistency and `node scripts/secrets-scan.dual.mjs --native-only --all-tracked` (doxguard) to scan for secrets. This repository contains no product application, generation CLI, or build artifacts. The HTML template includes inline JavaScript for response drafts.

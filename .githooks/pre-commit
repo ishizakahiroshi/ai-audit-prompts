@@ -11,7 +11,6 @@ if [ "$(git config --local --get doxguard.prerelease.enabled)" = true ]; then
   "$dg_bin" scan --staged --block --strict --config "$dg_config" || exit $?
 fi
 # doxguard prerelease opt-in end
-# secrets-scan layer 2 (per-commit) — non-pnpm path via core.hooksPath = .githooks
-# 設計詳細: docs/local/secrets-scan-design/ (gitignored)
+# layer 2 (per-commit) — non-pnpm path via core.hooksPath = .githooks
+# The staged scan is run by doxguard (opt-in block above); the legacy scanner was removed.
 # Activate with: bash scripts/install-hooks.sh  or  pwsh scripts/install-hooks.ps1
-node scripts/secrets-scan.mjs --staged --block
