@@ -24,7 +24,7 @@
 - report冒頭は固定100点ではなく、coverage、evidence、候補検証率、未調査、residual riskを示します。数値評価は利用者が明示要求した場合だけ、分母と未調査の扱いを定義して参考値として出します。
 - 監査事実とevidenceの正本はreport、後続作業の実行正本はrelated先の実行md（plan / bugfix / pending、issue tracker等）です。監査後のtriageと修正フェーズの契約は `docs/audit_app.md` 末尾の2節（3 family共通）です。`確定 / 却下 / 判断待ち / 重複`、`plan / fix / pending / 見送り`、検証状態を別々に追跡します。
 - 法令・規格（EU CRA、EU AI Act、PCI DSS、ISO/IEC 42001、AI事業者ガイドライン等）への適合は判定しません。利用者が明示要求した場合、または対象・資料が適合を明示的に主張する場合だけ、その名称・版/施行日・適用状態（法令は改正法と適用段階）・URL・確認日をreportのregulatory context（未検証）へ記録し、適合主張と実装の突合は資料突合の正典だけが扱います。言及がなければこの欄自体を省き、該当し得る規制の推定・列挙はしません。例外として、侵害痕跡・active exploitation・個人data / credentialの漏えいの決定的証拠を確定した場合に限り、報告終端を待たずに直ちに示し、規制名を挙げず該当性も判定しない形で、期限付きの通知・報告義務の該当判断と初動をownerが直ちに行うよう、判断待ちの先頭へ1行置きます。
-- このprompt集は無保証です。AI監査には誤検出・検出漏れがあり得るため、確定findingや自動適用した修正も本番反映前に人間がreviewしてください。第三者projectへの報告は、人間が再現を確認した確定findingだけを対象の脆弱性受付窓口の条件に従って行ってください。
+- このprompt集は無保証です。AI監査には誤検出・検出漏れがあり得るため、確定findingや自動適用した修正も本番反映前に人間がreviewしてください。第三者projectへの報告は、人間が報告先のsupport中の版で再現を確認し、報告先のadvisory / issue / changelogで既報・修正済みでないことを照合した確定findingだけを、対象の脆弱性受付窓口の条件に従って行ってください。
 
 ## 使い方
 
@@ -33,6 +33,8 @@
 ```text
 git clone <このリポジトリのURL> ai-audit-prompts
 ```
+
+継続して使う場合は release tag か commit SHA を checkout して固定し、更新するときは CHANGELOG と正典3本の diff を読んでから切り替えてください。
 
 ### 2. 対象から正典を選ぶ
 
@@ -66,7 +68,7 @@ DB区分: 自動
 
 `DB区分` は `自動 / あり / なし`。自動時はmanifest、dependency、schema、migration、ORM/SQL、DB driver等から `あり / なし / unknown` を根拠付きで判定し、本番DB接続やmigration実行はしません。`除外` はfinding・変更・検証の対象から外す指定で、経路を追うための読取りは既定で許します（読取りも禁じる場合は「（読取り禁止）」を添える）。
 
-appは実装証拠に基づき、Web/API、AI/agent/MCP/RAG、native/desktop/mobile/browser extension、CLI/library、CI/CD/supply chain、cloud/IaC/Kubernetes、DB等のprofileを `selected / skipped / unknown + evidence` で複数選択します。repo内のAI coding agent / IDE設定（instruction file、hook、MCP server定義、permission / auto-approve設定、editor task、editor拡張の推奨、skill定義）の自動実行経路、それらの設定・workflow・同梱scriptの侵害痕跡（IoC）としての評価、tracked / history上のsecretやAI session artifactの混入は、AI profileの選択に関係なく全app共通で確認します。対象repoが自分の管理下でない場合は、対象repoのagent / IDE設定を読み込まない起動を選び、読み込んだかどうかをinventoryへ記録します（`docs/README_activation.md` の「起動側の前提」）。
+appは実装証拠に基づき、Web/API、AI/agent/MCP/RAG、native/desktop/mobile/browser extension、CLI/library、CI/CD/supply chain、cloud/IaC/Kubernetes、DB等のprofileを `selected / skipped / unknown + evidence` で複数選択します。repo内のAI coding agent / IDE設定（instruction file、hook、MCP server定義、permission / auto-approve設定、editor task、editor拡張の推奨、skill定義、subagent / custom agent定義）の自動実行経路、それらの設定・workflow・同梱scriptの侵害痕跡（IoC）としての評価、tracked / history上のsecretやAI session artifactの混入は、AI profileの選択に関係なく全app共通で確認します。対象repoが自分の管理下でない場合は、対象repoのagent / IDE設定を読み込まない起動を選び、読み込んだかどうかをinventoryへ記録します（`docs/README_activation.md` の「起動側の前提」）。
 
 ### server診断の例
 
@@ -127,7 +129,7 @@ HTMLは既定で出力します（`HTML出力: あり`。`なし`ならMarkdown�
 - HTML既定: 同じ保存先・basenameの `.html`。最終／途中終了時に生成し、一方でも既存fileがあれば両方に同じ連番を付けます。生成・保存できなければ理由とMarkdownを残し、許可外へfallbackしません。
 - `<topic>` は `<target>_<slug>` です（定義は `docs/README_naming.md` の「成果物命名」）。
 - `保存先=...` を明示した場合だけ別のrepo相対pathを使います。
-- 対象repoがpublicまたは公開状態が不明な場合、reportのGit管理はignoreを提案し、trackは未修正findingの公開を提示した明示承認時だけにします。
+- 対象repoがpublicまたは公開状態が不明な場合、reportのGit管理はignoreを提案し、trackは未修正findingの公開を提示した明示承認時だけにします。提案へ回答を得られず（`確認: なし`・非対話）、保存先がignore済みでもない場合は、既存folderでも暗黙に決めず、作成・調査の前に停止します。
 - 保存先がsymlink / junction / mountの場合は実体pathと書込可否を確認し、無断で別pathへfallbackしません。
 - server reportはこのpublic prompt repoではなく、利用者が指定したprivate owner repoへ保存します。
 

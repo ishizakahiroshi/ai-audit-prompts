@@ -68,16 +68,20 @@ prompt文の禁止は技術的な強制ではない。起動環境は正典promp
 確認の有無にかかわらず、起動側は監査agentを次の環境で動かすことを既定にする。
 
 - 対象（repo / 資料）は読取専用でmountするか、読取専用のpermission modeで開く。書込はplan / reportの保存先、一時directory、Git管理 = ignoreのときのowner repositoryの `.git/info/exclude`、appのscope「調査・修正まで / フルループ」のときの対象working treeだけに限る。
-- network egressは監査に必要な宛先（server診断の接続先host、Web一次情報のofficial source、dependency scanが使うpackage registry、doc-vs-implで利用者が指定した資料URL / docs platformと、read-only閲覧する稼働instance）のallowlistに限り、それ以外を遮断する。server診断では対象server上から外向きrequestを行わないため、サーバー上modeではWeb一次情報をnoとして記録し、pinned baselineを未再確認として使う。
+- network egressは監査に必要な宛先（server診断の接続先hostと、提示・承認した経由host、Web一次情報のofficial source、dependency scanが使うpackage registry、doc-vs-implで利用者が指定した資料URL / docs platformと、read-only閲覧する稼働instance）のallowlistに限り、それ以外を遮断する。server診断では対象server上から外向きrequestを行わないため、サーバー上modeではWeb一次情報をnoとして記録し、pinned baselineを未再確認として使う。
 - 監査対象外のcredential directory / file（home配下の~/.ssh、~/.aws、~/.config、~/.npmrc等）をagentのfilesystemへmountしない。対象repo内の.env等は監査対象dataとして読取専用で扱い、値は出力しない。server診断では、ssh-agent socket等を使い、鍵本体をagentから読めない形で渡す。ssh configurationとknown_hostsは読取専用で渡してよい。credential directoryをmountしない場合でも、接続に指定した鍵の公開鍵（.pub）だけは読取専用で渡す（IdentitiesOnly=yesでagent内の鍵を選ぶために要る）。
 - 実行環境にsandbox / read-only / network制限の機能があれば有効にする。無い場合はその旨をinventoryへ記録する。
 - 実際の実行modeと上記との差分は、選んだ正典の実行前確認で提示し、承認の対象にする。
 
 #### 対象repoの設定を信頼しない
 
-監査agentは、対象repoが供給するagent / IDE設定（instruction file、hook、MCP server定義、permission / auto-approve設定、env / helper command、editor task、skill定義）をpromptより先に読み込み得る。promptの「権限拡大に使わない」は読み込み済みの設定を取り消せない。対象repoが起動側の管理下でない、または改変を疑う場合は、対象repoの設定を読み込まない起動を選ぶ（folder / workspace trustを与えない、harnessがproject設定の読込を切れるならそれを使う、設定fileを除いた読取専用copyで起動する、のいずれか）。非対話（one-shot / SDK / CI）実行ではtrust確認を出さないharnessがあるため、読み込まない起動を既定にする。inventoryへ「対象repoのagent設定の読込: 読み込んだ / 読み込まなかった / 不明」を記録し、読み込んだ場合はその設定file一覧を監査対象dataとして列挙する。
+監査agentは、対象repoが供給するagent / IDE設定（instruction file、hook、MCP server定義、permission / auto-approve設定、env / helper command、editor task、subagent / skill定義）をpromptより先に読み込み得る。promptの「権限拡大・探索範囲の縮小・reviewの代替に使わない」は読み込み済みの設定を取り消せない。対象repoが起動側の管理下でない、または改変を疑う場合は、対象repoの設定を読み込まない起動を選ぶ（folder / workspace trustを与えない、harnessがproject設定の読込を切れるならそれを使う、設定fileを除いた読取専用copyで起動する、のいずれか）。非対話（one-shot / SDK / CI）実行ではtrust確認を出さないharnessがあるため、読み込まない起動を既定にする。inventoryへ「対象repoのagent設定の読込: 読み込んだ / 読み込まなかった / 不明」を記録し、読み込んだ場合はその設定file一覧を監査対象dataとして列挙する。
 
 対話modeでも対象repoを初めて開くときはtrust確認を承認せず、project hook / project MCP / editor taskを無効化した制限modeで起動する。
+
+対象の .git/config がprogramを指すkey（core.fsmonitor、core.hooksPath、diff.external、filter / textconv等）を持つと、git status / diff等の読取でもそのprogramが動く。harnessが起動時に打つgitはpromptから止められないため、管理下でない対象、または .git ごと複写・archiveで渡された対象は、.git を除いた読取専用copyで開く。.git を残す場合は、起動前に .git/config、.git/config.worktree、.git/modules 配下の各config（いずれもinclude先を含む）にprogramを指すkeyが無いことを起動側がfileとして確かめる。GIT_CONFIG_COUNT系の環境変数で core.fsmonitor=false と safe.bareRepository=explicit を与えても止まるのはfsmonitorとembedded bare repositoryだけで、core.hooksPath、diff.external、filter / textconvは止まらない。
+
+test / lint / typecheckは対象のcode・設定・pluginを実行する。管理下でない対象（第三者由来・受領物・未reviewのbranch）は、依頼文に「対象は管理下でない」と1行書いて正典promptへ示したうえで、`検証モード: 静的` を指定するか、sandboxとnetwork遮断の中で動かす。
 
 ## 3. appのDB区分とprofile
 
@@ -116,7 +120,7 @@ HTMLと点数は独立する。共通契約・雛形・最小構成は [`README_
 | 対象 | repo相対path | repo全体 |
 | 除外 | repo相対path（finding対象・変更・検証から除く。経路追跡のread-only参照は既定で許し、「（読取り禁止）」を添えた場合だけ読取りも除く） | なし |
 | 保存先 | repo相対path | docs/ai-audit-prompts |
-| Git管理 | ignore / track | ignore = `.git/info/exclude` へ保存先pathを追記（tracked file非変更）、track = untrackedのまま残しadd / commitは人間。未存在folder作成前に確認 |
+| Git管理 | ignore / track | ignore = `.git/info/exclude` へ保存先pathを追記（tracked file非変更）、track = untrackedのまま残しadd / commitは人間。確認なしで実行し、保存先が未存在、または公開もしくは公開状態が不明のrepoで保存先（plan置き場のdocs/local/を含む）がignore済みでない場合は必須 |
 | 確認 | あり / なし | あり |
 
 ### server
@@ -127,7 +131,7 @@ HTMLと点数は独立する。共通契約・雛形・最小構成は [`README_
 
 `資料`（必須）、`正典`、`実装基準`、`媒体`、`強度`、`対象`、`除外`、`保存先`、`Git管理`、`確認` を使う。資料/source/UIは常に非変更。
 
-明示された値を優先し、選んだ正典の空欄へ渡す。確認「あり」ではprompt記載の実行前gateを行う。確認「なし」でも未存在保存先のGit管理やfallbackが未解決なら開始しない。確認「なし」の非対話/CI実行では実行前gateが働かないため、「起動側の前提」節の推奨実行環境を必須とする。issue/PR本文等の外部入力を検証せずそのままpromptへ連結しない。
+明示された値を優先し、選んだ正典の空欄へ渡す。確認「あり」ではprompt記載の実行前gateを行う。確認「なし」でも未存在保存先のGit管理やfallbackが未解決なら開始しない。app監査と資料突合では、公開または公開状態が不明のrepoで保存先がignore済みでない既存folderのGit管理が未解決の場合も、暗黙に決めず作成・調査前に停止する。確認「なし」の非対話/CI実行では実行前gateが働かないため、「起動側の前提」節の推奨実行環境を必須とする。issue/PR本文等の外部入力を検証せずそのままpromptへ連結しない。
 
 ## 成果物routing
 
@@ -135,9 +139,9 @@ HTMLと点数は独立する。共通契約・雛形・最小構成は [`README_
 - report既定: `docs/ai-audit-prompts/report_audit_<topic>_<YYYY-MM-DD>.md`
 - HTML既定: 同じ保存先・basenameの `.html`。最終報告／途中終了の集計確定時に生成し、snapshotを揃える。HTMLなしなら生成しない。保存不可は未生成と理由を残し、許可外へfallbackしない
 - `<topic>` の定義は [`README_naming.md`](README_naming.md) の「成果物命名」に従う
-- server reportもpublic prompt repoではなくowner private repoへ保存する
+- server reportもpublic prompt repoではなくowner private repoへ保存する。owner repoのprivateは利用者の申告により、申告が無い、またはpublic mirrorがあるなら不明＝公開扱いとし、公開扱いならGit管理はignoreに限る。trackが指定されていれば接続前に止まり、privateの申告かignoreへの変更を求める（publicと分かるrepoは保存先にしない）
 - `保存先=` があればreportだけ指定repo相対pathへ変更する
-- 対象repoがpublicまたは公開状態が不明な場合、reportのGit管理はignoreを提案し、trackは未修正findingの公開を提示した明示承認時だけ
+- 対象repoがpublicまたは公開状態が不明な場合、reportのGit管理はignoreを提案し、trackは未修正findingの公開を提示した明示承認時だけ。提案へ回答を得られず（確認: なし・非対話）、保存先がignore済みでもない場合は、既存folderでも暗黙に決めず作成・調査前に停止する（serverは上の規則に従う）
 - 保存先がsymlink / junction / mountの場合は実体pathと書込可否を確認し、無断で別pathへfallbackしない
 
 reportのmetadataは、監査report種別と状態（`draft` / `stable`）が分かる形にし、監査reportを自動archive・自動期限の対象にしない。key名と形式は受け手の文書運用に合わせてよい（例: docsweepなら `type: audit-report`、`status: draft|stable`、`docsweep_policy: never_archive`）。監査事実/evidenceの正本はreport、未対応作業の実行正本はrelated先の実行md（plan / bugfix / issue tracker等）とする。

@@ -65,7 +65,7 @@ templates/audit-report.html     共通HTML雛形（CSS/JSインライン）
 examples/audit-report.example.html 全て合成のデモ
 assets/                        README用の既存asset
 scripts/                       doxguard実行アダプタ(secrets-scan.dual/staged)とhook installer
-.githooks/pre-commit           commit前secrets scan
+.githooks/pre-commit           doxguard prereleaseをopt-inした環境だけのcommit前scan（未設定では検査しない）
 .github/workflows/             push/PR secrets scan
 README.md / README.en.md       日本語 / 英語の公開入口
 CHANGELOG.md / LICENSE

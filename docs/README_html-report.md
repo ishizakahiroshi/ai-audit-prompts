@@ -76,10 +76,10 @@ app / serverの数値評価は参考値。doc-vs-implは資料の整合等の評
 - localStorageキーはrun IDと当該ファイルのpathnameの組。値はfinding IDと選択肢keyで対応させ、読込時は実在するID・keyと文字列メモだけを採用する。回答の消去は当該キーだけを削除し、localStorage全体を消さない。
 - localStorageが使えなくても本文・その場の選択・コピー・保存を使える。コピー不可時は出力欄から手動コピーできる。書き出した回答にfinding ID、run ID、revision、集計日時を付け、「下書き・未承認」と明記する。HTML共有ではブラウザ下書きは他人に渡らない。
 - JavaScript無効でも本文・点数・SVG・選択肢・証拠を静的HTMLとして読める。JSは下書き・選択出力の補助だけで、監査本文をJSで生成しない。
-- 対象由来の文字列はHTML text / attributeの文脈に合わせてescapeする（`& < > " '`）。本文・メモ・SVGラベルを `innerHTML` / `document.write` へ入れない。script本文へ対象dataを直書きせず、図・style・イベントhandlerを対象から取り込まない。JSONを使う場合もscript終端を含む文字を安全にencodeする。
+- 対象由来の文字列はHTML text / attributeの文脈に合わせてescapeする（`& < > " '`）。本文・メモ・SVGラベルを `innerHTML` / `document.write` へ入れない。script本文へ対象dataを直書きせず、図・style・イベントhandlerを対象から取り込まない。JSONを使う場合もscript終端を含む文字を安全にencodeする。headに雛形と同じCSP meta（default-src 'none'、base-uri 'none'、form-action 'none'、script / styleは当該fileのinlineだけ）とreferrerのno-referrerを置き、外さない・緩めない。
 - 証拠linkは生成時に正規化し、本文内の実在anchor、owner保存先内の安全な相対path、明示した `https://` の一次資料だけを許す。`javascript:`、`data:`、`file:`、protocol-relative、制御文字混入、保存先外へ抜けるpathはlink化せず文字として表示する。相対linkの未存在は未取得と明記する。URLを自動fetchしない。
 - JSに通信・修正・承認・送信・DB操作を含めない。HTMLの選択や選択の出力を実行指示・実行承認に読み替えない。
 
 ## 確認
 
-MarkdownとHTMLのrun / revision / 集計日時、candidate判定・分母、確定件数、点数・満点・未評価を突合する。初期未選択、個別選択、一括選択、保存／復元／消去、コピー／Markdown保存、保存不可、JS無効、0件・暫定・算定不能を合成データで確認する。危険な文字・URL・メモが実行されないことも確認する。描画と印刷を実物で見て、件数だけの静的検査を画面確認の代わりにしない。
+MarkdownとHTMLのrun / revision / 集計日時、candidate判定・分母、確定件数、点数・満点・未評価を突合する。初期未選択、個別選択、一括選択、保存／復元／消去、コピー／Markdown保存、保存不可、JS無効、0件・暫定・算定不能を合成データで確認する。危険な文字・URL・メモが実行されないことと、headのCSP metaとreferrer metaの存在も確認する。描画と印刷を実物で見て、件数だけの静的検査を画面確認の代わりにしない。
