@@ -5,6 +5,8 @@
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-11-11
+
 ### Changed
 
 - 2026-10-16: app正典 `docs/audit_app.md` と正本 `docs/README_invariants.md` の探索・検証の手順を補強し、app正典のprompt版を `2026-10-16` へ更新した。repo全体などを対象にするときは、探索の前にtop-level directoryごとの走査 / 除外を台帳へ記録し、除外したdirectoryを未調査として数える。探索は危険な操作（sink）を先に列挙し、攻撃者が制御する入力源まで別fileを含めて逆にたどる。確定・却下は、入力を作る主体をそのcodeが信頼してよいか、その立場が元々持つ権限を超える利得があるかで判定し、deploy時の前提条件は却下理由ではなく障壁として記録する。独立verifierが付けた重大度をlead側が引き上げない。
@@ -62,7 +64,8 @@
 
 - secrets-scanのGitファイル一覧をNUL区切りで取得し、日本語・空白・引用符を含むファイル名も検査できるようにした。
 
-[Unreleased]: https://github.com/ishizakahiroshi/ai-audit-prompts/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/ishizakahiroshi/ai-audit-prompts/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/ishizakahiroshi/ai-audit-prompts/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/ishizakahiroshi/ai-audit-prompts/compare/v1.0.0...v1.1.0
 
 ## [1.0.0] - 2026-09-30
