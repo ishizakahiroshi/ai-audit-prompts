@@ -11,8 +11,8 @@
 実行製品やモデル名に依存せず、AI にアプリ、管理下サーバー、資料と実装の差異を監査させるための貼り付け用プロンプト集です。監査対象から3本の正典を選び、DB区分、security profile、実行環境のcapabilityを順に解決します。
 
 <p align="center">
-  <a href="https://youtu.be/doIv1ItRb_w"><img src="portfolio/promo-cover-v1.0.0.jpg" alt="紹介動画（23秒）: AI 監査プロンプト集 v1.0.0" width="560"></a><br>
-  ▶ <a href="https://youtu.be/doIv1ItRb_w">v1.0.0の紹介動画（23秒・YouTube）</a>
+  <a href="https://youtu.be/OuxBLo3gKD4"><img src="portfolio/promo-cover-v1.2.0.jpg" alt="紹介動画（25秒）: AI 監査プロンプト集 v1.2.0" width="560"></a><br>
+  ▶ <a href="https://youtu.be/OuxBLo3gKD4">v1.2.0の紹介動画（25秒・YouTube）</a>
 </p>
 
 ## これは何か

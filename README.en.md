@@ -11,8 +11,8 @@ See the [CHANGELOG](CHANGELOG.md) for changes by version and [GitHub Releases](h
 A collection of paste-ready prompts for auditing applications, managed servers, and documentation-versus-implementation without routing by product or model name. Select one of three target-based canonical prompts, then resolve the DB category, security profiles, and the capabilities actually available in the execution environment.
 
 <p align="center">
-  <a href="https://youtu.be/doIv1ItRb_w"><img src="portfolio/promo-cover-v1.0.0.jpg" alt="Intro video (23 s): AI Audit Prompts v1.0.0" width="560"></a><br>
-  ▶ <a href="https://youtu.be/doIv1ItRb_w">v1.0.0 intro video (23 s, YouTube; on-screen text in Japanese)</a>
+  <a href="https://youtu.be/OuxBLo3gKD4"><img src="portfolio/promo-cover-v1.2.0.jpg" alt="Intro video (25 s): AI Audit Prompts v1.2.0" width="560"></a><br>
+  ▶ <a href="https://youtu.be/OuxBLo3gKD4">v1.2.0 intro video (25 s, YouTube; on-screen text in Japanese)</a>
 </p>
 
 ## What this is
