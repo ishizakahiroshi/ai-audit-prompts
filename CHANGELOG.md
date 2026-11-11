@@ -30,6 +30,8 @@
 - 2026-11-10: 3正典のHTML契約と共通契約 `docs/README_html-report.md` へ、headに雛形と同じCSP meta（default-src 'none'、base-uri 'none'、form-action 'none'、script / styleは当該fileのinlineだけ）とreferrerのno-referrerを置き、外さない・緩めないことを明記した。共通契約の確認項目へCSP metaとreferrer metaの存在を加えた。正典本文だけを貼り付けて雛形を読めない場合でも、同じmetaを持つHTMLになる。`templates/audit-report.html` と `examples/audit-report.example.html` は変更していない。
 - 2026-11-10: `docs/README_activation.md` の「起動側の前提」へ、対象の `.git/config` がprogramを指す場合の起動側の自衛（harnessが起動時に打つgitはpromptから止められないため、`.git` を除いた読取専用copyで開く。`.git` を残す場合は、起動前に `.git/config`、`.git/config.worktree`、`.git/modules` 配下の各configにprogramを指すkeyが無いことを起動側が確かめる。GIT_CONFIG_COUNT系の環境変数で `core.fsmonitor=false` と `safe.bareRepository=explicit` を与えても、core.hooksPath、diff.external、filter / textconvは止まらない）と、管理下でない対象は依頼文に「対象は管理下でない」と1行書いて正典promptへ示したうえで、`検証モード: 静的` を指定するかsandboxとnetwork遮断の中で動かすことを加えた。信頼しない設定の列挙へsubagent定義を加え、成果物routingへserverのowner repoの公開状態の扱い（公開扱いでtrackが指定されていれば接続前に止まる）と、Git管理のignore提案へ回答を得られない場合の停止を加えた。app引数表のGit管理の必須条件と、`確認: なし` でも開始しない条件を正典に合わせた。README日英には、継続して使う場合にrelease tagかcommit SHAで固定し、更新時はCHANGELOGと正典3本のdiffを読んでから切り替える案内を加え、第三者projectへの報告条件・repo内agent設定の列挙・Git管理の停止の記述を正典に合わせた。
 
+- 2026-10-20: このrepo自身の秘密検査を入れ替えた（正典promptの内容には関係しない）。CIのsecrets-scanはdoxguard 0.2.0を `scripts/secrets-scan.dual.mjs --native-only` 経由で実行し（設定は `doxguard.ci.json`。CI側は監視語リストを持たず、構造pattern〔絶対path、private IP、mail address〕だけを検査する）、gitleaksのworkflowを追加した。旧 `scripts/secrets-scan.mjs` は削除した。`.githooks/pre-commit` はdoxguard prereleaseをopt-inした環境でだけstaged検査を行い、未設定の環境では検査しない。
+
 ### Fixed
 
 - 2026-11-10: 3正典の「HTML出力は省略時あり、明示なしなら生成しない。」が「明示が無いなら生成しない」とも読めたため、「HTML出力は省略時あり。「なし」を指定した場合は生成しない（書込み不可等で未生成になる場合は後述）。」へ直した。既定（省略時あり）は変えていない。
